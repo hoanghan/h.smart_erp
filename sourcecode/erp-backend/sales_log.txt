@@ -1,0 +1,33 @@
+===== STOP OLD SERVER ===== 
+SUCCESS: The process "Erp.Api.exe" with PID 524 has been terminated.
+===== BUILD ===== 
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Erp.Api -> C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\bin\Debug\net9.0\Erp.Api.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.07
+===== START API ===== 
+===== CREATE PRODUCT ===== 
+{"id":2,"code":"BL23999","name":"Bu long M10","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+===== CREATE QUOTATION ===== 
+{"id":2,"docNo":"BG2606-0002","docDate":"2026-06-11","partnerId":1,"quoteType":"NORMAL","quoteForm":"NORMAL","requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"note":"BG test","status":"NEW","statusReason":null,"lines":[{"id":2,"productId":2,"projectHouse":null,"quantity":10,"vatPct":10,"calcPrice":null,"approvedPrice":15000,"priceWeight":null,"note":null}]} 
+===== QUOTATION REQUEST-APPROVAL ===== 
+BG2606-0002 -> APPROVAL_REQUESTED
+===== QUOTATION APPROVE ===== 
+BG2606-0002 -> APPROVED
+===== APPROVE LAN 2 (expect 409) ===== 
+HTTP 409 
+===== CANCEL KHONG LY DO (expect 409) ===== 
+HTTP 409 
+===== CONVERT TO ORDER ===== 
+{"quotationId":2,"quotationStatus":"ORDERED","orderId":1,"orderDocNo":"DH2606-0001"} 
+===== ORDER REQUEST-APPROVAL + APPROVE ===== 
+DH2606-0001 -> APPROVAL_REQUESTED
+DH2606-0001 -> APPROVED / total=150000.00
+===== GET ORDER (lines + amount computed) ===== 
+{"id":1,"docNo":"DH2606-0001","docDate":"2026-06-11","quotationId":2,"partnerId":1,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":null,"deliveryDatePlan":null,"salespersonId":null,"approverId":1,"approvedAt":"2026-06-11T05:42:55.7832+00:00","totalAmount":150000.00,"totalVat":15000.00,"note":"BG test","status":"APPROVED","lines":[{"id":1,"productId":2,"quantity":10.0000,"kitQty":null,"unitPrice":15000.00,"listPrice":null,"vatPct":10.00,"amount":150000.00,"isGift":false,"note":null}]} 
+===== DONE ===== 

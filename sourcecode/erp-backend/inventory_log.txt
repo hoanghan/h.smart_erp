@@ -1,0 +1,115 @@
+===== STOP OLD SERVER ===== 
+ERROR: The process "Erp.Api.exe" not found.
+===== BUILD ===== 
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Erp.Api -> C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\bin\Debug\net9.0\Erp.Api.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.69
+===== START API ===== 
+===== WAIT FOR API ===== 
+Login HTTP code = 200 
+{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidG9rZW5fdHlwZSI6ImFjY2VzcyIsImlzX2FkbWluIjoidHJ1ZSIsImV4cCI6MTc4MTE3NTEyNywiaXNzIjoiZXJwLWFwaSJ9.LIJ5_u128YMzd9325xIoiXluKWE-Q0pVFpDnC58kHtw","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidG9rZW5fdHlwZSI6InJlZnJlc2giLCJleHAiOjE3ODE3NzkwMjcsImlzcyI6ImVycC1hcGkifQ.n8xcy-JQ9Jjjpj2G4S1Axq5yrCGDs4gvW2M3Ee74Xqs","tokenType":"bearer"} 
+===== CREATE PRODUCT ===== 
+{"id":3,"code":"SP16185","name":"San pham ton kho","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+===== CREATE WAREHOUSE ===== 
+{"id":1,"code":"KHO13029","name":"Kho test ton kho","isOutsourcing":false,"isActive":true} 
+===== CREATE SUPPLIER PARTNER ===== 
+{"id":2,"code":"NCC32456","shortName":"NCC ton kho","fullName":null,"taxCode":null,"isCustomer":false,"isSupplier":true,"address":null,"phone":null,"email":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"creditLimit":null,"creditDays":null,"isActive":true} 
+===== CREATE CUSTOMER PARTNER ===== 
+{"id":3,"code":"KH26657","shortName":"KH ton kho","fullName":null,"taxCode":null,"isCustomer":true,"isSupplier":false,"address":null,"phone":null,"email":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"creditLimit":null,"creditDays":null,"isActive":true} 
+ 
+===== PHASE 2: NHAP KHO 100 ===== 
+--- Create Purchase Order (qty=100) --- 
+{"id":1,"docNo":"PO2606-0001","orderDate":"2026-06-11","requestId":null,"partnerId":2,"orderForm":"NORMAL","receiveDatePlan":null,"paymentMethodId":null,"deliveryMethodId":null,"receiveAddress":null,"vatIncluded":true,"note":null,"status":"DRAFT","statusReason":null,"creatorId":1,"approverId":null,"approvedAt":null,"totalAmount":500000,"totalVat":50000,"lines":[{"id":1,"productId":3,"quantity":100,"unitPrice":5000,"vatPct":10,"amount":500000.00,"note":null}]} 
+--- Approve PO --- 
+{"id":1,"docNo":"PO2606-0001","orderDate":"2026-06-11","requestId":null,"partnerId":2,"orderForm":"NORMAL","receiveDatePlan":null,"paymentMethodId":null,"deliveryMethodId":null,"receiveAddress":null,"vatIncluded":true,"note":null,"status":"APPROVED","statusReason":null,"creatorId":1,"approverId":1,"approvedAt":"2026-06-11T10:37:14.2390972+00:00","totalAmount":500000.00,"totalVat":50000.00,"lines":[{"id":1,"productId":3,"quantity":100.0000,"unitPrice":5000.00,"vatPct":10.00,"amount":500000.00,"note":null}]} 
+--- PO create-receipt-request --- 
+{"id":1,"docNo":"PN2606-0001","docType":"RECEIPT","subType":"PURCHASE","requestDate":"2026-06-11","actualDate":null,"salesOrderId":null,"purchaseOrderId":1,"supplierReturnId":null,"partnerId":2,"fromWarehouseId":null,"toWarehouseId":1,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"DRAFT","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:14.506814+00:00","completedBy":null,"completedAt":null,"lines":[]} 
+Receipt doc id=1 docNo=PN2606-0001 
+--- PO status after create-receipt-request (expect NOT_RECEIVED) --- 
+status = NOT_RECEIVED 
+--- fill-from-order --- 
+{"id":1,"docNo":"PN2606-0001","docType":"RECEIPT","subType":"PURCHASE","requestDate":"2026-06-11","actualDate":null,"salesOrderId":null,"purchaseOrderId":1,"supplierReturnId":null,"partnerId":2,"fromWarehouseId":null,"toWarehouseId":1,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"DRAFT","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:14.506814+00:00","completedBy":null,"completedAt":null,"lines":[{"id":1,"productId":3,"requestedQty":100.0000,"actualQty":null,"kitQty":null,"unitPrice":5000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- request (DRAFT to REQUESTED) --- 
+status = REQUESTED 
+--- confirm (REQUESTED to CONFIRMED) --- 
+status = CONFIRMED 
+--- set-actual-as-requested --- 
+{"id":1,"docNo":"PN2606-0001","docType":"RECEIPT","subType":"PURCHASE","requestDate":"2026-06-11","actualDate":null,"salesOrderId":null,"purchaseOrderId":1,"supplierReturnId":null,"partnerId":2,"fromWarehouseId":null,"toWarehouseId":1,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"CONFIRMED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:14.506814+00:00","completedBy":null,"completedAt":null,"lines":[{"id":1,"productId":3,"requestedQty":100.0000,"actualQty":100.0000,"kitQty":null,"unitPrice":5000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- complete (CONFIRMED to COMPLETED) --- 
+{"id":1,"docNo":"PN2606-0001","docType":"RECEIPT","subType":"PURCHASE","requestDate":"2026-06-11","actualDate":"2026-06-11","salesOrderId":null,"purchaseOrderId":1,"supplierReturnId":null,"partnerId":2,"fromWarehouseId":null,"toWarehouseId":1,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"COMPLETED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:14.506814+00:00","completedBy":1,"completedAt":"2026-06-11T10:37:19.217778+00:00","lines":[{"id":1,"productId":3,"requestedQty":100.0000,"actualQty":100.0000,"kitQty":null,"unitPrice":5000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+status = COMPLETED 
+--- PO status after complete receipt (expect RECEIVED) --- 
+status = RECEIVED 
+ 
+===== PHASE 3: XUAT 10 ===== 
+--- Create Sales Order (qty=10) --- 
+{"id":2,"docNo":"DH2606-0002","docDate":"2026-06-11","quotationId":null,"partnerId":3,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":1,"deliveryDatePlan":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":80000,"totalVat":8000,"note":null,"status":"DRAFT","lines":[{"id":2,"productId":3,"quantity":10,"kitQty":null,"unitPrice":8000,"listPrice":null,"vatPct":10,"amount":80000.00,"isGift":false,"note":null}]} 
+--- request-approval --- 
+{"id":2,"docNo":"DH2606-0002","docDate":"2026-06-11","quotationId":null,"partnerId":3,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":1,"deliveryDatePlan":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":80000.00,"totalVat":8000.00,"note":null,"status":"APPROVAL_REQUESTED","lines":[{"id":2,"productId":3,"quantity":10.0000,"kitQty":null,"unitPrice":8000.00,"listPrice":null,"vatPct":10.00,"amount":80000.00,"isGift":false,"note":null}]} 
+--- approve --- 
+{"id":2,"docNo":"DH2606-0002","docDate":"2026-06-11","quotationId":null,"partnerId":3,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":1,"deliveryDatePlan":null,"salespersonId":null,"approverId":1,"approvedAt":"2026-06-11T10:37:22.3107388+00:00","totalAmount":80000.00,"totalVat":8000.00,"note":null,"status":"APPROVED","lines":[{"id":2,"productId":3,"quantity":10.0000,"kitQty":null,"unitPrice":8000.00,"listPrice":null,"vatPct":10.00,"amount":80000.00,"isGift":false,"note":null}]} 
+--- SO create-delivery-request --- 
+{"id":2,"docNo":"PX2606-0001","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":2,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"DRAFT","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:22.553252+00:00","completedBy":null,"completedAt":null,"lines":[]} 
+Issue doc id=2 docNo=PX2606-0001 
+--- SO status after create-delivery-request (expect NOT_DELIVERED) --- 
+status = NOT_DELIVERED 
+--- fill-from-order --- 
+{"id":2,"docNo":"PX2606-0001","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":2,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"DRAFT","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:22.553252+00:00","completedBy":null,"completedAt":null,"lines":[{"id":2,"productId":3,"requestedQty":10.0000,"actualQty":null,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- request (DRAFT to REQUESTED) --- 
+status = REQUESTED 
+--- confirm (REQUESTED to CONFIRMED) --- 
+status = CONFIRMED 
+--- set-actual-as-requested --- 
+{"id":2,"docNo":"PX2606-0001","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":2,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"CONFIRMED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:22.553252+00:00","completedBy":null,"completedAt":null,"lines":[{"id":2,"productId":3,"requestedQty":10.0000,"actualQty":10.0000,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- complete (CONFIRMED to COMPLETED) --- 
+{"id":2,"docNo":"PX2606-0001","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":"2026-06-11","salesOrderId":2,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"COMPLETED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:22.553252+00:00","completedBy":1,"completedAt":"2026-06-11T10:37:27.1994366+00:00","lines":[{"id":2,"productId":3,"requestedQty":10.0000,"actualQty":10.0000,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+status = COMPLETED 
+--- SO status after complete issue (expect DELIVERED) --- 
+status = DELIVERED 
+ 
+===== PHASE 4: CHECK STOCK BALANCE (expect 90) ===== 
+[{"productId":3,"warehouseId":1,"lotId":null,"qtyOnHand":90.0000,"updatedAt":"2026-06-11T10:37:27.19943+00:00"}] 
+Stock balance = 90.0000 (expect 90) 
+ 
+===== PHASE 5: CHECK STOCK MOVES (expect 2) ===== 
+{"items":[{"id":2,"moveDate":"2026-06-11","docId":2,"docLineId":2,"productId":3,"warehouseId":1,"lotId":null,"locationId":null,"qty":-10.0000,"unitCost":8000.0000,"createdAt":"2026-06-11T10:37:27.355278+00:00"},{"id":1,"moveDate":"2026-06-11","docId":1,"docLineId":1,"productId":3,"warehouseId":1,"lotId":null,"locationId":null,"qty":100.0000,"unitCost":5000.0000,"createdAt":"2026-06-11T10:37:19.366334+00:00"}],"total":2,"page":1,"size":50} 
+Stock move count = 2 (expect 2) 
+ 
+===== PHASE 6: XUAT 1000 - EXPECT 409 STK_INSUFFICIENT ===== 
+--- Create Sales Order (qty=1000) --- 
+{"id":3,"docNo":"DH2606-0003","docDate":"2026-06-11","quotationId":null,"partnerId":3,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":1,"deliveryDatePlan":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":8000000,"totalVat":800000,"note":null,"status":"DRAFT","lines":[{"id":3,"productId":3,"quantity":1000,"kitQty":null,"unitPrice":8000,"listPrice":null,"vatPct":10,"amount":8000000.00,"isGift":false,"note":null}]} 
+--- request-approval --- 
+{"id":3,"docNo":"DH2606-0003","docDate":"2026-06-11","quotationId":null,"partnerId":3,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":1,"deliveryDatePlan":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":8000000.00,"totalVat":800000.00,"note":null,"status":"APPROVAL_REQUESTED","lines":[{"id":3,"productId":3,"quantity":1000.0000,"kitQty":null,"unitPrice":8000.00,"listPrice":null,"vatPct":10.00,"amount":8000000.00,"isGift":false,"note":null}]} 
+--- approve --- 
+{"id":3,"docNo":"DH2606-0003","docDate":"2026-06-11","quotationId":null,"partnerId":3,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":1,"deliveryDatePlan":null,"salespersonId":null,"approverId":1,"approvedAt":"2026-06-11T10:37:32.2928429+00:00","totalAmount":8000000.00,"totalVat":800000.00,"note":null,"status":"APPROVED","lines":[{"id":3,"productId":3,"quantity":1000.0000,"kitQty":null,"unitPrice":8000.00,"listPrice":null,"vatPct":10.00,"amount":8000000.00,"isGift":false,"note":null}]} 
+--- create-delivery-request --- 
+{"id":3,"docNo":"PX2606-0002","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":3,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"DRAFT","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:32.528267+00:00","completedBy":null,"completedAt":null,"lines":[]} 
+--- fill-from-order --- 
+{"id":3,"docNo":"PX2606-0002","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":3,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"DRAFT","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:32.528267+00:00","completedBy":null,"completedAt":null,"lines":[{"id":3,"productId":3,"requestedQty":1000.0000,"actualQty":null,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- request --- 
+{"id":3,"docNo":"PX2606-0002","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":3,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"REQUESTED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:32.528267+00:00","completedBy":null,"completedAt":null,"lines":[{"id":3,"productId":3,"requestedQty":1000.0000,"actualQty":null,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- confirm --- 
+{"id":3,"docNo":"PX2606-0002","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":3,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"CONFIRMED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:32.528267+00:00","completedBy":null,"completedAt":null,"lines":[{"id":3,"productId":3,"requestedQty":1000.0000,"actualQty":null,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- set-actual-as-requested --- 
+{"id":3,"docNo":"PX2606-0002","docType":"ISSUE","subType":"SALES","requestDate":"2026-06-11","actualDate":null,"salesOrderId":3,"purchaseOrderId":null,"supplierReturnId":null,"partnerId":3,"fromWarehouseId":1,"toWarehouseId":null,"orgUnit":null,"processId":null,"counterpartDocId":null,"refNo":null,"note":null,"status":"CONFIRMED","statusReason":null,"createdBy":1,"createdAt":"2026-06-11T10:37:32.528267+00:00","completedBy":null,"completedAt":null,"lines":[{"id":3,"productId":3,"requestedQty":1000.0000,"actualQty":1000.0000,"kitQty":null,"unitPrice":8000.00,"lotId":null,"expiryDate":null,"locationId":null,"note":null}]} 
+--- complete (expect HTTP 409 STK_INSUFFICIENT) --- 
+HTTP 409 
+{"code":"STK_INSUFFICIENT","message":"Không đủ tồn kho cho sản phẩm 3 (tồn 90.0000, cần 1000.0000)"} 
+error code = STK_INSUFFICIENT (expect STK_INSUFFICIENT) 
+--- Stock balance unchanged after failed complete (expect still 90) --- 
+[{"productId":3,"warehouseId":1,"lotId":null,"qtyOnHand":90.0000,"updatedAt":"2026-06-11T10:37:27.19943+00:00"}] 
+Stock balance after failed issue = 90.0000 (expect 90) 
+ 
+===== ALL TESTS COMPLETED ===== 
+===== Endpoints tested: ===== 
+  GET/POST /api/v1/inventory/docs, GET/PUT /{id} 
+  POST /{id}/actions/fill-from-order,set-actual-as-requested,request,confirm,complete 
+  GET /api/v1/inventory/stock-balance, GET /api/v1/inventory/stock-moves 
+  POST /api/v1/purchasing/orders/{id}/actions/create-receipt-request 
+  POST /api/v1/sales/orders/{id}/actions/create-delivery-request 

@@ -1,0 +1,111 @@
+===== STOP OLD SERVER ===== 
+SUCCESS: The process "Erp.Api.exe" with PID 10752 has been terminated.
+===== BUILD ===== 
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\MasterDataControllers.cs(48,77): warning CS9107: Parameter 'ErpDbContext db' is captured into the state of the enclosing type and its value is also passed to the base constructor. The value might be captured by the base class as well. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\MasterDataControllers.cs(48,81): warning CS9107: Parameter 'RbacService rbac' is captured into the state of the enclosing type and its value is also passed to the base constructor. The value might be captured by the base class as well. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\FinanceController.cs(365,48): warning CS8629: Nullable value type may be null. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\FinanceController.cs(381,50): warning CS8629: Nullable value type may be null. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Core\SchemaBootstrap.cs(463,27): warning EF1002: Method 'ExecuteSqlRawAsync' inserts interpolated strings directly into the SQL, without any protection against SQL injection. Consider using 'ExecuteSqlAsync' instead, which protects against SQL injection, or make sure that the value is sanitized and suppress the warning. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+  Erp.Api -> C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\bin\Debug\net9.0\Erp.Api.dll
+
+Build succeeded.
+
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\MasterDataControllers.cs(48,77): warning CS9107: Parameter 'ErpDbContext db' is captured into the state of the enclosing type and its value is also passed to the base constructor. The value might be captured by the base class as well. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\MasterDataControllers.cs(48,81): warning CS9107: Parameter 'RbacService rbac' is captured into the state of the enclosing type and its value is also passed to the base constructor. The value might be captured by the base class as well. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\FinanceController.cs(365,48): warning CS8629: Nullable value type may be null. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Controllers\FinanceController.cs(381,50): warning CS8629: Nullable value type may be null. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Core\SchemaBootstrap.cs(463,27): warning EF1002: Method 'ExecuteSqlRawAsync' inserts interpolated strings directly into the SQL, without any protection against SQL injection. Consider using 'ExecuteSqlAsync' instead, which protects against SQL injection, or make sure that the value is sanitized and suppress the warning. [C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj]
+    5 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:07.14
+===== START API ===== 
+--- Wait for API ready --- 
+===== PHASE 1: MASTER DATA ===== 
+--- Create main product --- 
+{"id":10,"code":"SPV3_14652","name":"San pham test v3","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+--- Create gift product --- 
+{"id":11,"code":"GIFTV3_19688","name":"Hang tang test v3","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+--- Create customer partner --- 
+{"id":5,"code":"KHV3_13884","shortName":"KH test v3","fullName":null,"taxCode":null,"isCustomer":true,"isSupplier":false,"address":null,"phone":null,"email":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"creditLimit":null,"creditDays":null,"isActive":true} 
+--- Create price list (gia goc 100000) --- 
+{"id":2,"code":"PLV3_22629","name":"Bang gia v3","validFrom":"2026-06-12","validTo":null,"isActive":true,"items":[{"id":2,"productId":10,"price":100000}]} 
+--- Create lost reason 1 --- 
+{"id":3,"code":"LR1_13805","name":"Gia cao hon doi thu","isActive":true} 
+--- Create lost reason 2 --- 
+{"id":4,"code":"LR2_30208","name":"Giao hang cham","isActive":true} 
+ 
+===== PHASE 2: PROMOTIONAL SCHEME + PRICING RESOLVE ===== 
+--- Create scheme: Mua 10 giam 5%, mua 50 giam 10%, mua 100 tang 5 --- 
+{"id":2,"code":"SCHV3_32181","name":"Mua 10 giam 5%, mua 50 giam 10%, mua 100 tang 5","applyOn":"ITEM","productGroupId":null,"partnerId":null,"validFrom":null,"validTo":null,"isActive":true,"items":[{"id":2,"productId":10}],"priceSlabs":[{"id":3,"productId":null,"minQty":10,"maxQty":null,"discountPct":5,"rate":null},{"id":4,"productId":null,"minQty":50,"maxQty":null,"discountPct":10,"rate":null}],"productSlabs":[{"id":2,"productId":null,"minQty":100,"maxQty":null,"freeProductId":11,"freeQty":5,"freeRate":0}]} 
+--- Resolve qty=10 (expect discountPct=5, freeItems=0) --- 
+{"rate":100000.00,"discountPct":5.0000,"freeItems":[],"appliedRules":[4]} 
+qty10: rate=100000.00 discountPct=5.0000 freeItems.Count=0
+--- Resolve qty=50 (expect discountPct=10, freeItems=0) --- 
+{"rate":100000.00,"discountPct":10.0000,"freeItems":[],"appliedRules":[5]} 
+qty50: rate=100000.00 discountPct=10.0000 freeItems.Count=0
+--- Resolve qty=100 (expect discountPct=10, freeItems=[GID qty=5]) --- 
+{"rate":100000.00,"discountPct":10.0000,"freeItems":[{"productId":11,"qty":5.0000}],"appliedRules":[5,6]} 
+qty100: rate=100000.00 discountPct=10.0000 freeItems.Count=1 free0.productId=11 free0.qty=5.0000
+ 
+===== PHASE 3: QUOTATION - -
+--- Create quotation (2 lines, gia/chiet khau tu dong ap theo scheme) --- 
+{"id":17,"docNo":"BG2606-0016","docDate":"2026-06-12","partnerId":5,"orderType":"SALES","validTill":"2026-06-14","priceListId":null,"taxTemplateId":null,"requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"competitor":null,"terms":null,"note":null,"status":"DRAFT","statusReason":null,"lostReasonIds":null,"lines":[{"id":17,"productId":10,"projectHouse":null,"quantity":10,"vatPct":10,"rate":100000.00,"discountPct":5.0000,"amount":950000.00,"orderedQty":0,"note":null},{"id":18,"productId":10,"projectHouse":null,"quantity":100,"vatPct":10,"rate":100000.00,"discountPct":10.0000,"amount":9000000.00,"orderedQty":0,"note":null}]} 
+--- Verify auto-priced lines (line1 discountPct=5, line2 discountPct=10) --- 
+line1: rate=100000.00 discountPct=5.0000 / line2: rate=100000.00 discountPct=10.0000
+--- Submit DRAFT - --- 
+BG2606-0016 -> OPEN
+--- Make-sales-order PARTIAL (line1 qty=10) --- 
+{"quotationId":17,"quotationStatus":"OPEN","orderId":9,"orderDocNo":"DH2606-0008"} 
+quotationStatus after partial make-sales-order = OPEN (expect OPEN) 
+--- Verify quotation van OPEN, line1.orderedQty=10, line2.orderedQty=0 --- 
+{"id":17,"docNo":"BG2606-0016","docDate":"2026-06-12","partnerId":5,"orderType":"SALES","validTill":"2026-06-14","priceListId":null,"taxTemplateId":null,"requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"competitor":null,"terms":null,"note":null,"status":"OPEN","statusReason":null,"lostReasonIds":null,"lines":[{"id":18,"productId":10,"projectHouse":null,"quantity":100.0000,"vatPct":10.00,"rate":100000.00,"discountPct":10.0000,"amount":9000000.00,"orderedQty":0.0000,"note":null},{"id":17,"productId":10,"projectHouse":null,"quantity":10.0000,"vatPct":10.00,"rate":100000.00,"discountPct":5.0000,"amount":950000.00,"orderedQty":10.0000,"note":null}]} 
+status=OPEN line1.orderedQty=0.0000 line2.orderedQty=10.0000
+--- Verify order1 line (gia ban = 100000 * (1-5%) = 95000, khong co hang tang) --- 
+{"id":9,"docNo":"DH2606-0008","docDate":"2026-06-12","quotationId":17,"partnerId":5,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":null,"deliveryDatePlan":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":950000.00,"totalVat":95000.00,"note":null,"status":"DRAFT","lines":[{"id":12,"productId":10,"quantity":10.0000,"kitQty":null,"unitPrice":95000.00,"listPrice":100000.00,"vatPct":10.00,"amount":950000.00,"isGift":false,"note":null}]} 
+order1: lineCount=1 productId=10 qty=10.0000 unitPrice=95000.00
+--- Make-sales-order PHAN CON LAI (line2 qty=100) --- 
+{"quotationId":17,"quotationStatus":"ORDERED","orderId":10,"orderDocNo":"DH2606-0009"} 
+quotationStatus after full make-sales-order = ORDERED (expect ORDERED) 
+--- Verify order2: dong chinh gia 90000 + dong hang tang (isGift=true, productId=GID, qty=5, unitPrice=0) --- 
+{"id":10,"docNo":"DH2606-0009","docDate":"2026-06-12","quotationId":17,"partnerId":5,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":null,"deliveryDatePlan":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":9000000.00,"totalVat":900000.00,"note":null,"status":"DRAFT","lines":[{"id":13,"productId":10,"quantity":100.0000,"kitQty":null,"unitPrice":90000.00,"listPrice":100000.00,"vatPct":10.00,"amount":9000000.00,"isGift":false,"note":null},{"id":14,"productId":11,"quantity":5.0000,"kitQty":null,"unitPrice":0.00,"listPrice":null,"vatPct":0.00,"amount":0.00,"isGift":true,"note":"Hàng tặng theo CTKM (báo giá BG2606-0016)"}]} 
+order2 main: productId=10 qty=100.0000 unitPrice=90000.00 lineCount=2
+GIFT OK: productId=11 qty=5.0000 price=0.00
+ 
+===== PHASE 4: SET-AS-LOST ===== 
+--- Create quotation 2 --- 
+{"id":18,"docNo":"BG2606-0017","docDate":"2026-06-12","partnerId":5,"orderType":"SALES","validTill":"2026-06-14","priceListId":null,"taxTemplateId":null,"requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"competitor":null,"terms":null,"note":null,"status":"DRAFT","statusReason":null,"lostReasonIds":null,"lines":[{"id":19,"productId":10,"projectHouse":null,"quantity":1,"vatPct":10,"rate":100000.00,"discountPct":0,"amount":100000.00,"orderedQty":0,"note":null}]} 
+--- Submit quotation 2 DRAFT - --- 
+BG2606-0017 -> OPEN
+--- Set-as-lost voi 2 ly do --- 
+{"id":18,"docNo":"BG2606-0017","docDate":"2026-06-12","partnerId":5,"orderType":"SALES","validTill":"2026-06-14","priceListId":null,"taxTemplateId":null,"requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"competitor":"Doi thu ABC","terms":null,"note":null,"status":"LOST","statusReason":"Gia cao hon doi thu","lostReasonIds":[3,4],"lines":[{"id":19,"productId":10,"projectHouse":null,"quantity":1.0000,"vatPct":10.00,"rate":100000.00,"discountPct":0.0000,"amount":100000.00,"orderedQty":0.0000,"note":null}]} 
+status=LOST lostReasonIds=3,4 competitor=Doi thu ABC
+ 
+===== PHASE 5: COUPON HET HAN -
+--- Lay pricing rule cua scheme --- 
+[{"id":4,"schemeId":2,"priority":10,"productId":10,"productGroupId":null,"partnerId":null,"minQty":10.0000,"maxQty":null,"discountPct":5.0000,"rate":null,"freeProductId":null,"freeQty":null,"freeRate":0.00,"validFrom":null,"validTo":null,"isActive":true},{"id":5,"schemeId":2,"priority":50,"productId":10,"productGroupId":null,"partnerId":null,"minQty":50.0000,"maxQty":null,"discountPct":10.0000,"rate":null,"freeProductId":null,"freeQty":null,"freeRate":0.00,"validFrom":null,"validTo":null,"isActive":true},{"id":6,"schemeId":2,"priority":100,"productId":10,"productGroupId":null,"partnerId":null,"minQty":100.0000,"maxQty":null,"discountPct":null,"rate":null,"freeProductId":11,"freeQty":5.0000,"freeRate":0.00,"validFrom":null,"validTo":null,"isActive":true}] 
+--- Tao coupon da het han (validTo nam 2020) --- 
+{"id":2,"code":"EXPV3_22783","pricingRuleId":4,"maxUse":null,"used":0,"validFrom":"2020-01-01","validTo":"2020-01-02","isActive":true} 
+--- Resolve voi coupon het han (expect HTTP 409 COUPON_INVALID) --- 
+HTTP 409
+{"code":"COUPON_INVALID","message":"Mã giảm giá không hợp lệ, đã hết hạn hoặc hết lượt sử dụng"} 
+ 
+===== PHASE 6: CANCEL + AMEND ===== 
+--- Create quotation 3 --- 
+{"id":19,"docNo":"BG2606-0018","docDate":"2026-06-12","partnerId":5,"orderType":"SALES","validTill":"2026-06-14","priceListId":null,"taxTemplateId":null,"requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"competitor":null,"terms":null,"note":null,"status":"DRAFT","statusReason":null,"lostReasonIds":null,"lines":[{"id":20,"productId":10,"projectHouse":null,"quantity":1,"vatPct":10,"rate":100000.00,"discountPct":0,"amount":100000.00,"orderedQty":0,"note":null}]} 
+--- Cancel khong ly do (expect HTTP 409, RequireReason) --- 
+HTTP 409 
+--- Cancel co ly do - --- 
+BG2606-0018 -> CANCELLED
+--- Amend CANCELLED - sao DRAFT moi (doc_no hau to -1) --- 
+{"id":20,"docNo":"BG2606-0018-1","docDate":"2026-06-12","partnerId":5,"orderType":"SALES","validTill":"2026-06-14","priceListId":null,"taxTemplateId":null,"requestDeliveryDate":null,"validityDays":2,"deliveryLead":null,"requesterId":null,"creatorId":1,"approverId":null,"approvedAt":null,"paymentMethodId":null,"deliveryMethodId":null,"competitor":null,"terms":null,"note":null,"status":"DRAFT","statusReason":null,"lostReasonIds":null,"lines":[{"id":21,"productId":10,"projectHouse":null,"quantity":1.0000,"vatPct":10.00,"rate":100000.00,"discountPct":0.0000,"amount":100000.00,"orderedQty":0,"note":null}]} 
+original=BG2606-0018  amended docNo=BG2606-0018-1 status=DRAFT
+ 
+===== ALL TESTS COMPLETED ===== 
+===== New endpoints tested: ===== 
+  GET/POST /api/v1/sales/promotional-schemes ; GET /api/v1/sales/pricing/resolve ; GET /api/v1/sales/pricing/rules 
+  GET/POST /api/v1/md/lost-reasons 
+  POST /api/v1/sales/quotations/{id}/actions/submit,make-sales-order,set-as-lost,cancel,amend 
+  POST /api/v1/sales/coupon-codes 

@@ -1,0 +1,15 @@
+===== DOTNET SDKS ===== 
+7.0.410 [C:\Program Files\dotnet\sdk]
+9.0.304 [C:\Program Files\dotnet\sdk]
+10.0.202 [C:\Program Files\dotnet\sdk]
+===== RESTORE + BUILD ===== 
+  Determining projects to restore...
+  Restored C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\Erp.Api.csproj (in 4.52 sec).
+  Erp.Api -> C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\bin\Debug\net9.0\Erp.Api.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:18.01
+===== EXITCODE=0 ===== 

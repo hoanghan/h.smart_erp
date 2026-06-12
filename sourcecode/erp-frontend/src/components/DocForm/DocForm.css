@@ -1,0 +1,192 @@
+/* ========== DocForm Layout — LeanSCRM style ========== */
+
+/* Ô bắt buộc nền vàng nhạt */
+.docform-field-required .ant-input,
+.docform-field-required .ant-select-selector,
+.docform-field-required .ant-select,
+.docform-field-required .ant-input-number,
+.docform-field-required .ant-picker {
+  background-color: #FFF9C4 !important;
+}
+
+/* Ô giá bán dưới giá tham chiếu — nền đỏ nhạt */
+.docform-cell-price-warning {
+  background-color: #FFCDD2 !important;
+}
+
+/* Header 2 khối */
+.docform-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.docform-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.docform-header-right {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+/* Compact grid form — label right-aligned, input nhỏ */
+.docform-grid-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 110px 1fr 110px 1fr;
+  gap: 0 8px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.docform-grid-row .docform-label {
+  text-align: right;
+  font-size: 12px;
+  color: #555;
+  padding-right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docform-grid-row .docform-field {
+  min-width: 0;
+}
+
+.docform-grid-row .docform-field .ant-input,
+.docform-grid-row .docform-field .ant-select,
+.docform-grid-row .docform-field .ant-input-number,
+.docform-grid-row .docform-field .ant-picker {
+  font-size: 12px;
+}
+
+/* Span 2 cột (label+field) */
+.docform-span-2 {
+  grid-column: span 2;
+}
+
+/* Span 4 cột */
+.docform-span-4 {
+  grid-column: span 4;
+}
+
+/* Span 6 cột = full row */
+.docform-span-6 {
+  grid-column: span 6;
+}
+
+/* Right block items */
+.docform-right-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.docform-right-row .docform-right-label {
+  flex: 1;
+  color: #555;
+  white-space: nowrap;
+}
+
+.docform-right-row .docform-right-value {
+  text-align: right;
+  min-width: 100px;
+}
+
+.docform-right-row .docform-right-value-bold {
+  text-align: right;
+  min-width: 100px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Bottom toolbar */
+.docform-bottom-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.docform-bottom-toolbar .docform-toolbar-right {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+/* Editable grid */
+.docform-editable-grid .ant-table-thead > tr > th {
+  padding: 4px 8px !important;
+  font-size: 12px;
+  background: #fafafa;
+}
+
+.docform-editable-grid .ant-table-tbody > tr > td {
+  padding: 2px 6px !important;
+  font-size: 12px;
+}
+
+.docform-editable-grid .ant-table-footer {
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #fafafa;
+}
+
+.docform-editable-grid .ant-table-cell-edit-input {
+  margin: -2px -6px;
+}
+
+/* Cell editing */
+.docform-cell-editing {
+  padding: 0 !important;
+}
+
+.docform-cell-editing .ant-input,
+.docform-cell-editing .ant-input-number,
+.docform-cell-editing .ant-select {
+  border-radius: 0;
+  border: 1px solid #1677ff;
+}
+
+/* Navigator */
+.docform-navigator {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: #888;
+}
+
+.docform-navigator .ant-btn {
+  font-size: 11px;
+}
+
+/* Banded columns header */
+.docform-banded-header .ant-table-thead > tr:first-child > th {
+  text-align: center;
+  background: #e6f4ff;
+  font-weight: 600;
+  border-bottom: 1px solid #91caff;
+}
+
+/* Print styles */
+@media print {
+  .docform-bottom-toolbar,
+  .docform-no-print {
+    display: none !important;
+  }
+  .docform-header {
+    break-inside: avoid;
+  }
+  .ant-layout-sider,
+  .ant-layout-header,
+  .ant-menu {
+    display: none !important;
+  }
+}

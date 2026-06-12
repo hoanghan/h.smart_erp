@@ -1,0 +1,1822 @@
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (26ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE core.doc_numbering
+          ADD COLUMN IF NOT EXISTS last_period TEXT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.purchase_request
+          ADD COLUMN IF NOT EXISTS status_reason TEXT,
+          ADD COLUMN IF NOT EXISTS creator_id BIGINT,
+          ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          ADD COLUMN IF NOT EXISTS request_type TEXT NOT NULL DEFAULT 'PURCHASE',
+          ADD COLUMN IF NOT EXISTS required_by DATE;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (30ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.purchase_order
+          ADD COLUMN IF NOT EXISTS status_reason TEXT,
+          ADD COLUMN IF NOT EXISTS creator_id BIGINT,
+          ADD COLUMN IF NOT EXISTS rfq_id BIGINT,
+          ADD COLUMN IF NOT EXISTS tax_template_id BIGINT,
+          ADD COLUMN IF NOT EXISTS payment_terms_template_id BIGINT,
+          ADD COLUMN IF NOT EXISTS tax_total NUMERIC(18,2),
+          ADD COLUMN IF NOT EXISTS grand_total NUMERIC(18,2);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.purchase_order_line
+          ADD COLUMN IF NOT EXISTS received_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS billed_qty NUMERIC(18,4) NOT NULL DEFAULT 0;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.po_cost
+          ADD COLUMN IF NOT EXISTS note TEXT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.po_payment_request
+          ADD COLUMN IF NOT EXISTS creator_id BIGINT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.supplier_return
+          ADD COLUMN IF NOT EXISTS creator_id BIGINT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE purchasing.supplier_return_line
+          ADD COLUMN IF NOT EXISTS note TEXT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE inventory.stock_doc
+          ADD COLUMN IF NOT EXISTS status_reason TEXT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE inventory.stock_doc_line
+          ADD COLUMN IF NOT EXISTS landed_cost NUMERIC(18,4) NOT NULL DEFAULT 0;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE inventory.stock_balance
+          ADD COLUMN IF NOT EXISTS id BIGINT GENERATED ALWAYS AS IDENTITY;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE core.warehouse ADD COLUMN IF NOT EXISTS parent_id BIGINT NULL;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE inventory.stock_doc ADD COLUMN IF NOT EXISTS purpose TEXT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE inventory.stock_move
+          ADD COLUMN IF NOT EXISTS qty_after_transaction NUMERIC(18,4),
+          ADD COLUMN IF NOT EXISTS valuation_rate NUMERIC(18,4),
+          ADD COLUMN IF NOT EXISTS stock_value NUMERIC(18,2),
+          ADD COLUMN IF NOT EXISTS stock_value_difference NUMERIC(18,2),
+          ADD COLUMN IF NOT EXISTS posting_datetime TIMESTAMPTZ;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE inventory.stock_balance
+          ADD COLUMN IF NOT EXISTS reserved_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS ordered_qty NUMERIC(18,4) NOT NULL DEFAULT 0;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS inventory.stock_reconciliation (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          doc_no TEXT NOT NULL,
+          warehouse_id BIGINT NOT NULL,
+          reconciliation_date DATE NOT NULL,
+          status TEXT NOT NULL DEFAULT 'DRAFT',
+          note TEXT,
+          created_by BIGINT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          posted_by BIGINT,
+          posted_at TIMESTAMPTZ
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS inventory.stock_reconciliation_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          reconciliation_id BIGINT NOT NULL REFERENCES inventory.stock_reconciliation(id),
+          product_id BIGINT NOT NULL,
+          lot_id BIGINT,
+          system_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          actual_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          difference NUMERIC(18,4) NOT NULL DEFAULT 0
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.process (code, name) VALUES ('XI', 'Gia công xi')
+      ON CONFLICT (code) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.process (code, name) VALUES ('NHUNG_NONG', 'Nhúng nóng')
+      ON CONFLICT (code) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.process (code, name) VALUES ('TARO_TAN', 'Taro tán')
+      ON CONFLICT (code) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE SCHEMA IF NOT EXISTS finance
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.object_category (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE, name TEXT NOT NULL, source_table TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.account (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
+          parent_id BIGINT, account_type TEXT NOT NULL DEFAULT 'NORMAL',
+          object_category_id BIGINT, balance_detail TEXT NOT NULL DEFAULT 'NONE',
+          balance_side TEXT NOT NULL DEFAULT 'GREATER', is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.fiscal_period (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          fiscal_year INT NOT NULL, period_no INT NOT NULL,
+          date_from DATE NOT NULL, date_to DATE NOT NULL,
+          status TEXT NOT NULL DEFAULT 'OPEN',
+          UNIQUE(fiscal_year, period_no)
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.accounting_policy (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          base_currency TEXT NOT NULL DEFAULT 'VND',
+          accounting_regime TEXT, fiscal_start_month INT NOT NULL DEFAULT 1,
+          inventory_costing TEXT NOT NULL DEFAULT 'AVG', first_period_id BIGINT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.opening_balance (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          period_id BIGINT NOT NULL, account_id BIGINT NOT NULL,
+          object_type TEXT, object_id BIGINT, currency_code TEXT,
+          warehouse_id BIGINT, product_id BIGINT,
+          debit_fc NUMERIC(18,2) DEFAULT 0, credit_fc NUMERIC(18,2) DEFAULT 0,
+          debit NUMERIC(18,2) DEFAULT 0, credit NUMERIC(18,2) DEFAULT 0,
+          quantity NUMERIC(18,4)
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.business_operation (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL, name TEXT NOT NULL,
+          voucher_type TEXT NOT NULL, template JSONB NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.cash_fund (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL, name TEXT NOT NULL,
+          fund_type TEXT NOT NULL DEFAULT 'CASH', account_id BIGINT NOT NULL,
+          bank_name TEXT, account_no TEXT, currency_code TEXT NOT NULL DEFAULT 'VND'
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.outbox_event (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          event_type TEXT NOT NULL, source_table TEXT NOT NULL,
+          source_id BIGINT NOT NULL, payload JSONB NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(), processed_at TIMESTAMPTZ
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.lerp_voucher (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          voucher_type TEXT NOT NULL, source_table TEXT NOT NULL,
+          source_id BIGINT NOT NULL, ref_no TEXT, partner_id BIGINT,
+          amount NUMERIC(18,2), status TEXT NOT NULL DEFAULT 'PENDING',
+          voucher_id BIGINT, created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          UNIQUE(source_table, source_id, voucher_type)
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.voucher (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          voucher_type TEXT NOT NULL, doc_no TEXT NOT NULL,
+          doc_date DATE NOT NULL, posting_date DATE,
+          period_id BIGINT, operation_id BIGINT,
+          partner_id BIGINT, employee_id BIGINT,
+          fund_id BIGINT, warehouse_id BIGINT,
+          ycc_type TEXT, invoice_no TEXT,
+          invoice_serial TEXT, invoice_form TEXT, invoice_date DATE,
+          currency_code TEXT NOT NULL DEFAULT 'VND',
+          exchange_rate NUMERIC(18,6) DEFAULT 1,
+          total_amount NUMERIC(18,2), total_vat NUMERIC(18,2),
+          description TEXT, lerp_voucher_id BIGINT,
+          status TEXT NOT NULL DEFAULT 'DRAFT',
+          posted_by BIGINT, posted_at TIMESTAMPTZ,
+          created_by BIGINT, created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          UNIQUE(voucher_type, doc_no)
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.voucher_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          voucher_id BIGINT NOT NULL REFERENCES finance.voucher(id),
+          product_id BIGINT, description TEXT,
+          quantity NUMERIC(18,4), unit_price NUMERIC(18,4),
+          amount NUMERIC(18,2) DEFAULT 0,
+          vat_pct NUMERIC(5,2), vat_amount NUMERIC(18,2),
+          dr_account_id BIGINT, cr_account_id BIGINT,
+          dr_object_id BIGINT, dr_object_type TEXT,
+          cr_object_id BIGINT, cr_object_type TEXT,
+          ref_voucher_id BIGINT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.gl_entry (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          voucher_id BIGINT NOT NULL, voucher_line_id BIGINT,
+          account_id BIGINT NOT NULL,
+          object_type TEXT, object_id BIGINT,
+          currency_code TEXT, exchange_rate NUMERIC(18,6),
+          fc_amount NUMERIC(18,2) DEFAULT 0, amount NUMERIC(18,2) DEFAULT 0,
+          side TEXT NOT NULL, description TEXT,
+          posting_date DATE, period_id BIGINT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE finance.gl_entry
+          ADD COLUMN IF NOT EXISTS currency_code TEXT,
+          ADD COLUMN IF NOT EXISTS exchange_rate NUMERIC(18,6);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS finance.bank_fee (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          transfer_voucher_id BIGINT NOT NULL,
+          amount NUMERIC(18,2) NOT NULL,
+          fee_account_id BIGINT NOT NULL,
+          paid_from_fund_id BIGINT, note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.rfq (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          doc_no TEXT NOT NULL, doc_date DATE NOT NULL,
+          request_id BIGINT, status TEXT NOT NULL DEFAULT 'DRAFT',
+          note TEXT, creator_id BIGINT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.rfq_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          rfq_id BIGINT NOT NULL REFERENCES purchasing.rfq(id),
+          product_id BIGINT NOT NULL, quantity NUMERIC(18,4) NOT NULL, note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.rfq_supplier (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          rfq_id BIGINT NOT NULL REFERENCES purchasing.rfq(id),
+          partner_id BIGINT NOT NULL, note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.supplier_quotation (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          doc_no TEXT NOT NULL, doc_date DATE NOT NULL,
+          rfq_id BIGINT NOT NULL, partner_id BIGINT NOT NULL,
+          valid_until DATE, lead_time_days INT,
+          note TEXT, status TEXT NOT NULL DEFAULT 'DRAFT',
+          creator_id BIGINT, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.supplier_quotation_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          quotation_id BIGINT NOT NULL REFERENCES purchasing.supplier_quotation(id),
+          product_id BIGINT NOT NULL, quantity NUMERIC(18,4) NOT NULL,
+          unit_price NUMERIC(18,4) NOT NULL DEFAULT 0,
+          lead_time_days NUMERIC(5), note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.landed_cost_voucher (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          doc_no TEXT NOT NULL, doc_date DATE NOT NULL,
+          allocation_method TEXT NOT NULL DEFAULT 'QTY',
+          status TEXT NOT NULL DEFAULT 'DRAFT',
+          note TEXT, creator_id BIGINT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.landed_cost_voucher_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          voucher_id BIGINT NOT NULL REFERENCES purchasing.landed_cost_voucher(id),
+          cost_type_id BIGINT NOT NULL, service_supplier_id BIGINT,
+          amount NUMERIC(18,2) NOT NULL DEFAULT 0, note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS purchasing.landed_cost_receipt (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          voucher_id BIGINT NOT NULL REFERENCES purchasing.landed_cost_voucher(id),
+          receipt_doc_id BIGINT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS core.payment_terms_template (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS core.payment_terms_template_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          template_id BIGINT NOT NULL REFERENCES core.payment_terms_template(id),
+          pct NUMERIC(5,2) NOT NULL, days_after INT NOT NULL, note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS core.tax_charge_template (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS core.tax_charge_template_line (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          template_id BIGINT NOT NULL REFERENCES core.tax_charge_template(id),
+          charge_type TEXT NOT NULL DEFAULT 'ON_NET_TOTAL',
+          rate_pct NUMERIC(5,2), fixed_amount NUMERIC(18,2),
+          account_code TEXT, note TEXT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.currency (code, name) VALUES
+          ('VND', 'Việt Nam Đồng'),
+          ('USD', 'Đô la Mỹ')
+      ON CONFLICT (code) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO finance.accounting_policy (id, base_currency, accounting_regime, fiscal_start_month, inventory_costing)
+      VALUES (1, 'VND', 'TT200', 1, 'AVG')
+      ON CONFLICT (id) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO finance.object_category (code, name, source_table) VALUES
+          ('KHACH_HANG', 'Khách hàng', 'core.partner'),
+          ('NHA_CUNG_CAP', 'Nhà cung cấp', 'core.partner'),
+          ('NHAN_VIEN', 'Nhân viên', 'core.employee'),
+          ('KHO', 'Kho', 'core.warehouse'),
+          ('SP', 'Sản phẩm', 'core.product')
+      ON CONFLICT (code) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO finance.account (code, name, account_type, balance_detail, balance_side) VALUES
+          ('111', 'Tiền mặt', 'ASSET', 'NONE', 'GREATER'),
+          ('112', 'Tiền gửi ngân hàng', 'ASSET', 'NONE', 'GREATER'),
+          ('113', 'Tiền đang chuyển', 'ASSET', 'NONE', 'GREATER'),
+          ('131', 'Phải thu của khách hàng', 'ASSET', 'OBJECT', 'GREATER'),
+          ('133', 'Thuế GTGT được khấu trừ', 'ASSET', 'NONE', 'GREATER'),
+          ('136', 'Phải thu nội bộ', 'ASSET', 'NONE', 'GREATER'),
+          ('138', 'Phải thu khác', 'ASSET', 'NONE', 'GREATER'),
+          ('141', 'Tạm ứng', 'ASSET', 'NONE', 'GREATER'),
+          ('151', 'Hàng mua đang đi đường', 'ASSET', 'NONE', 'GREATER'),
+          ('152', 'Nguyên liệu, vật liệu', 'ASSET', 'OBJECT_QTY', 'GREATER'),
+          ('153', 'Công cụ, dụng cụ', 'ASSET', 'OBJECT_QTY', 'GREATER'),
+          ('155', 'Thành phẩm', 'ASSET', 'OBJECT_QTY', 'GREATER'),
+          ('156', 'Hàng hóa', 'ASSET', 'OBJECT_QTY', 'GREATER'),
+          ('157', 'Hàng gửi đi bán', 'ASSET', 'OBJECT_QTY', 'GREATER'),
+          ('211', 'TSCĐ hữu hình', 'ASSET', 'NONE', 'GREATER'),
+          ('214', 'Hao mòn TSCĐ', 'ASSET', 'NONE', 'CREDIT'),
+          ('241', 'Chi phí SXKD dở dang', 'ASSET', 'NONE', 'GREATER'),
+          ('331', 'Phải trả người bán', 'LIABILITY', 'OBJECT', 'CREDIT'),
+          ('333', 'Thuế và các khoản phải nộp nhà nước', 'LIABILITY', 'NONE', 'CREDIT'),
+          ('334', 'Phải trả người lao động', 'LIABILITY', 'OBJECT', 'CREDIT'),
+          ('336', 'Phải trả nội bộ', 'LIABILITY', 'NONE', 'CREDIT'),
+          ('338', 'Phải trả, phải nộp khác', 'LIABILITY', 'NONE', 'CREDIT'),
+          ('341', 'Vay và nợ thuê TC', 'LIABILITY', 'NONE', 'CREDIT'),
+          ('411', 'Nguồn vốn kinh doanh', 'EQUITY', 'NONE', 'CREDIT'),
+          ('421', 'Lợi nhuận chưa phân phối', 'EQUITY', 'NONE', 'CREDIT'),
+          ('511', 'Doanh thu bán hàng', 'REVENUE', 'NONE', 'CREDIT'),
+          ('512', 'Doanh thu cung cấp DV', 'REVENUE', 'NONE', 'CREDIT'),
+          ('515', 'Doanh thu hoạt động tài chính', 'REVENUE', 'NONE', 'CREDIT'),
+          ('521', 'Các khoản giảm trừ doanh thu', 'REVENUE', 'NONE', 'GREATER'),
+          ('611', 'Xác định KQ kinh doanh', 'NORMAL', 'NONE', 'NONE'),
+          ('621', 'Giá vốn hàng bán', 'EXPENSE', 'NONE', 'GREATER'),
+          ('622', 'Chi phí bán hàng', 'EXPENSE', 'NONE', 'GREATER'),
+          ('627', 'Chi phí sản xuất chung', 'EXPENSE', 'NONE', 'GREATER'),
+          ('632', 'Giá vốn hàng bán', 'EXPENSE', 'NONE', 'GREATER'),
+          ('635', 'Chi phí tài chính', 'EXPENSE', 'NONE', 'GREATER'),
+          ('641', 'Chi phí bán hàng', 'EXPENSE', 'NONE', 'GREATER'),
+          ('642', 'Chi phí quản lý DN', 'EXPENSE', 'NONE', 'GREATER'),
+          ('711', 'Thu nhập khác', 'REVENUE', 'NONE', 'CREDIT'),
+          ('811', 'Chi phí khác', 'EXPENSE', 'NONE', 'GREATER'),
+          ('821', 'Chi phí thuế TNDN', 'EXPENSE', 'NONE', 'GREATER'),
+          ('911', 'Xác định kết quả kinh doanh', 'NORMAL', 'NONE', 'NONE')
+      ON CONFLICT (code) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO finance.fiscal_period (fiscal_year, period_no, date_from, date_to, status)
+      SELECT 2026, m,
+             MAKE_DATE(2026, m, 1),
+             (MAKE_DATE(2026, m, 1) + INTERVAL '1 month' - INTERVAL '1 day')::DATE,
+             'OPEN'
+      FROM generate_series(1, 12) AS m
+      ON CONFLICT (fiscal_year, period_no) DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO finance.cash_fund (code, name, fund_type, account_id)
+      SELECT 'TM01', 'Quỹ tiền mặt', 'CASH', a.id
+      FROM finance.account a
+      WHERE a.code = '111'
+        AND NOT EXISTS (SELECT 1 FROM finance.cash_fund WHERE code = 'TM01');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO finance.business_operation (code, name, voucher_type, template) VALUES
+          ('BH_GHINO', 'Bán hàng ghi nợ', 'PHIEU_GHI_NO', '{"dr":"131","cr":"511"}'),
+          ('BH_THANHTOAN', 'Bán hàng thanh toán', 'HOA_DON_BAN', '{"dr":"111","cr":"511"}'),
+          ('NHAP_MUA', 'Nhập kho mua hàng', 'PHIEU_NHAP_KT', '{"dr":"156","cr":"331"}'),
+          ('XUAT_BAN', 'Xuất kho bán hàng', 'PHIEU_XUAT_KT', '{"dr":"632","cr":"156"}'),
+          ('THU_NO', 'Thu tiền khách hàng', 'PHIEU_THU', '{"dr":"111","cr":"131"}'),
+          ('CHI_NCC', 'Chi tiền NCC', 'PHIEU_CHI', '{"dr":"331","cr":"111"}'),
+          ('YCC_THANHTOAN', 'Yêu cầu chi', 'YEU_CAU_CHI', '{"dr":"331","cr":"111"}'),
+          ('TRA_HANG', 'Trả hàng NCC', 'TRA_HANG_NCC', '{"dr":"331","cr":"156"}'),
+          ('GIA_CONG', 'Chi phí gia công', 'PHIEU_GHI_NO', '{"dr":"627","cr":"331"}'),
+          ('CHUYEN_KHO', 'Điều chuyển kho', 'DIEU_CHUYEN_KT', '{"dr":"156-w2","cr":"156-w1"}')
+      ON CONFLICT DO NOTHING;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE sales.quotation
+          ADD COLUMN IF NOT EXISTS valid_till DATE,
+          ADD COLUMN IF NOT EXISTS order_type TEXT NOT NULL DEFAULT 'SALES',
+          ADD COLUMN IF NOT EXISTS price_list_id BIGINT,
+          ADD COLUMN IF NOT EXISTS tax_template_id BIGINT,
+          ADD COLUMN IF NOT EXISTS lost_reason_ids BIGINT[],
+          ADD COLUMN IF NOT EXISTS competitor TEXT,
+          ADD COLUMN IF NOT EXISTS terms TEXT;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE sales.quotation_line
+          ADD COLUMN IF NOT EXISTS ordered_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS rate NUMERIC(18,2),
+          ADD COLUMN IF NOT EXISTS discount_pct NUMERIC(9,4);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE sales.quotation_line
+          ADD COLUMN IF NOT EXISTS amount NUMERIC(18,2)
+          GENERATED ALWAYS AS (quantity * COALESCE(rate, 0) * (1 - COALESCE(discount_pct, 0) / 100)) STORED;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (28ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE sales.sales_order DROP CONSTRAINT IF EXISTS sales_order_quotation_id_key;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE sales.quotation DROP CONSTRAINT IF EXISTS quotation_status_check;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation SET status = 'OPEN' WHERE status IN ('APPROVED','ORDER_PENDING');
+      UPDATE sales.quotation SET status = 'LOST' WHERE status = 'FAILED';
+      UPDATE sales.quotation SET status = 'CANCELLED' WHERE status = 'REJECTED';
+      UPDATE sales.quotation SET status = 'DRAFT' WHERE status IN ('NEW','PRICE_REQUESTED','PRICING','APPROVAL_REQUESTED');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE sales.quotation ADD CONSTRAINT quotation_status_check
+          CHECK (status IN ('DRAFT','OPEN','ORDERED','LOST','EXPIRED','CANCELLED'));
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.lost_reason (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.promotional_scheme (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
+          apply_on TEXT NOT NULL DEFAULT 'ITEM',
+          product_group_id BIGINT, partner_id BIGINT,
+          valid_from DATE, valid_to DATE,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE,
+          legacy_promotion_id BIGINT
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.scheme_item (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          scheme_id BIGINT NOT NULL REFERENCES sales.promotional_scheme(id) ON DELETE CASCADE,
+          product_id BIGINT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.scheme_price_slab (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          scheme_id BIGINT NOT NULL REFERENCES sales.promotional_scheme(id) ON DELETE CASCADE,
+          product_id BIGINT,
+          min_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          max_qty NUMERIC(18,4),
+          discount_pct NUMERIC(9,4),
+          rate NUMERIC(18,2)
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (54ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.scheme_product_slab (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          scheme_id BIGINT NOT NULL REFERENCES sales.promotional_scheme(id) ON DELETE CASCADE,
+          product_id BIGINT,
+          min_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          max_qty NUMERIC(18,4),
+          free_product_id BIGINT NOT NULL,
+          free_qty NUMERIC(18,4) NOT NULL,
+          free_rate NUMERIC(18,2) NOT NULL DEFAULT 0
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.pricing_rule (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          rule_source TEXT NOT NULL DEFAULT 'SCHEME',
+          scheme_id BIGINT REFERENCES sales.promotional_scheme(id) ON DELETE CASCADE,
+          priority INT NOT NULL DEFAULT 0,
+          product_id BIGINT,
+          product_group_id BIGINT,
+          partner_id BIGINT,
+          min_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+          max_qty NUMERIC(18,4),
+          discount_pct NUMERIC(9,4),
+          rate NUMERIC(18,2),
+          free_product_id BIGINT,
+          free_qty NUMERIC(18,4),
+          free_rate NUMERIC(18,2) NOT NULL DEFAULT 0,
+          valid_from DATE, valid_to DATE,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS sales.coupon_code (
+          id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          code TEXT NOT NULL UNIQUE,
+          pricing_rule_id BIGINT NOT NULL REFERENCES sales.pricing_rule(id),
+          max_use INT,
+          used INT NOT NULL DEFAULT 0,
+          valid_from DATE, valid_to DATE,
+          is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.promotional_scheme (code, name, apply_on, valid_from, valid_to, is_active, legacy_promotion_id)
+      SELECT 'PROMO-' || p.code, p.name, 'ITEM', p.date_from, p.date_to, TRUE, p.id
+      FROM sales.promotion p
+      WHERE NOT EXISTS (SELECT 1 FROM sales.promotional_scheme s WHERE s.legacy_promotion_id = p.id);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.scheme_item (scheme_id, product_id)
+      SELECT DISTINCT s.id, di.product_id
+      FROM sales.promotion_discount_item di
+      JOIN sales.promotional_scheme s ON s.legacy_promotion_id = di.promotion_id
+      WHERE NOT EXISTS (
+          SELECT 1 FROM sales.scheme_item si WHERE si.scheme_id = s.id AND si.product_id = di.product_id);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.scheme_item (scheme_id, product_id)
+      SELECT DISTINCT s.id, gi.buy_product_id
+      FROM sales.promotion_gift_item gi
+      JOIN sales.promotional_scheme s ON s.legacy_promotion_id = gi.promotion_id
+      WHERE NOT EXISTS (
+          SELECT 1 FROM sales.scheme_item si WHERE si.scheme_id = s.id AND si.product_id = gi.buy_product_id);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.scheme_price_slab (scheme_id, product_id, min_qty, max_qty, discount_pct)
+      SELECT s.id, di.product_id, 0, NULL, di.total_pct
+      FROM sales.promotion_discount_item di
+      JOIN sales.promotional_scheme s ON s.legacy_promotion_id = di.promotion_id
+      WHERE NOT EXISTS (
+          SELECT 1 FROM sales.scheme_price_slab sps
+          WHERE sps.scheme_id = s.id AND sps.product_id = di.product_id AND sps.min_qty = 0);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.scheme_product_slab (scheme_id, product_id, min_qty, max_qty, free_product_id, free_qty, free_rate)
+      SELECT s.id, gi.buy_product_id, gi.required_qty, NULL, gi.gift_product_id, gi.total_gift_qty, 0
+      FROM sales.promotion_gift_item gi
+      JOIN sales.promotional_scheme s ON s.legacy_promotion_id = gi.promotion_id
+      WHERE NOT EXISTS (
+          SELECT 1 FROM sales.scheme_product_slab sps
+          WHERE sps.scheme_id = s.id AND sps.product_id = gi.buy_product_id
+            AND sps.free_product_id = gi.gift_product_id AND sps.min_qty = gi.required_qty);
+info: Erp.Api.Core.LerpWorker[0]
+      LerpWorker started
+info: Erp.Api.Core.QuotationExpiryWorker[0]
+      QuotationExpiryWorker started
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (37ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@__today_0='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+      FROM sales.quotation AS q
+      WHERE q.status = 'OPEN' AND q.valid_till IS NOT NULL AND q.valid_till < @__today_0
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__body_Username_0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.username = @__body_Username_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@p0='?', @p1='?', @p2='?' (DbType = Int64), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = Decimal), @p6='?', @p7='?' (DbType = Decimal), @p8='?', @p9='?', @p10='?', @p11='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.product (barcode, code, group_id, is_active, is_kit, min_stock, name, price_weight, product_type, qr_code, spec, uom_id)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@p0='?', @p1='?', @p2='?' (DbType = Int64), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = Decimal), @p6='?', @p7='?' (DbType = Decimal), @p8='?', @p9='?', @p10='?', @p11='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.product (barcode, code, group_id, is_active, is_kit, min_stock, name, price_weight, product_type, qr_code, spec, uom_id)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@p0='?', @p1='?', @p2='?', @p3='?' (DbType = Int32), @p4='?' (DbType = Decimal), @p5='?', @p6='?' (DbType = Int64), @p7='?', @p8='?', @p9='?', @p10='?', @p11='?', @p12='?' (DbType = Boolean), @p13='?' (DbType = Boolean), @p14='?' (DbType = Boolean), @p15='?' (DbType = Int64), @p16='?', @p17='?', @p18='?', @p19='?' (DbType = Int64), @p20='?', @p21='?', @p22='?', @p23='?'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO core.partner (address, code, country, credit_days, credit_limit, customer_group, delivery_method_id, district, email, fax, full_name, hotline, is_active, is_customer, is_supplier, payment_method_id, phone, province, ranking, salesperson_id, short_name, source, tax_code, website)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@p0='?', @p1='?' (DbType = Boolean), @p2='?', @p3='?' (DbType = Date), @p4='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.price_list (code, is_active, name, valid_from, valid_to)
+      VALUES (@p0, @p1, @p2, @p3, @p4)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@p5='?' (DbType = Decimal), @p6='?' (DbType = Int64), @p7='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.price_list_item (price, price_list_id, product_id)
+      VALUES (@p5, @p6, @p7)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@p0='?', @p1='?' (DbType = Boolean), @p2='?'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.lost_reason (code, is_active, name)
+      VALUES (@p0, @p1, @p2)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@p0='?', @p1='?' (DbType = Boolean), @p2='?'], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.lost_reason (code, is_active, name)
+      VALUES (@p0, @p1, @p2)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@p0='?', @p1='?', @p2='?' (DbType = Boolean), @p3='?' (DbType = Int64), @p4='?', @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = Date), @p8='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.promotional_scheme (apply_on, code, is_active, legacy_promotion_id, name, partner_id, product_group_id, valid_from, valid_to)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[@p9='?' (DbType = Int64), @p10='?' (DbType = Int64), @p11='?' (DbType = Decimal), @p12='?' (DbType = Decimal), @p13='?' (DbType = Decimal), @p14='?' (DbType = Int64), @p15='?' (DbType = Decimal), @p16='?' (DbType = Int64), @p17='?' (DbType = Decimal), @p18='?' (DbType = Decimal), @p19='?' (DbType = Decimal), @p20='?' (DbType = Int64), @p21='?' (DbType = Decimal), @p22='?' (DbType = Int64), @p23='?' (DbType = Int64), @p24='?' (DbType = Decimal), @p25='?' (DbType = Decimal), @p26='?' (DbType = Decimal), @p27='?' (DbType = Decimal), @p28='?' (DbType = Int64), @p29='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.scheme_item (product_id, scheme_id)
+      VALUES (@p9, @p10)
+      RETURNING id;
+      INSERT INTO sales.scheme_price_slab (discount_pct, max_qty, min_qty, product_id, rate, scheme_id)
+      VALUES (@p11, @p12, @p13, @p14, @p15, @p16)
+      RETURNING id;
+      INSERT INTO sales.scheme_price_slab (discount_pct, max_qty, min_qty, product_id, rate, scheme_id)
+      VALUES (@p17, @p18, @p19, @p20, @p21, @p22)
+      RETURNING id;
+      INSERT INTO sales.scheme_product_slab (free_product_id, free_qty, free_rate, max_qty, min_qty, product_id, scheme_id)
+      VALUES (@p23, @p24, @p25, @p26, @p27, @p28, @p29)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@p0='?' (DbType = Decimal), @p1='?' (DbType = Int64), @p2='?' (DbType = Decimal), @p3='?' (DbType = Decimal), @p4='?' (DbType = Boolean), @p5='?' (DbType = Decimal), @p6='?' (DbType = Decimal), @p7='?' (DbType = Int64), @p8='?' (DbType = Int32), @p9='?' (DbType = Int64), @p10='?' (DbType = Int64), @p11='?' (DbType = Decimal), @p12='?', @p13='?' (DbType = Int64), @p14='?' (DbType = Date), @p15='?' (DbType = Date), @p16='?' (DbType = Decimal), @p17='?' (DbType = Int64), @p18='?' (DbType = Decimal), @p19='?' (DbType = Decimal), @p20='?' (DbType = Boolean), @p21='?' (DbType = Decimal), @p22='?' (DbType = Decimal), @p23='?' (DbType = Int64), @p24='?' (DbType = Int32), @p25='?' (DbType = Int64), @p26='?' (DbType = Int64), @p27='?' (DbType = Decimal), @p28='?', @p29='?' (DbType = Int64), @p30='?' (DbType = Date), @p31='?' (DbType = Date), @p32='?' (DbType = Decimal), @p33='?' (DbType = Int64), @p34='?' (DbType = Decimal), @p35='?' (DbType = Decimal), @p36='?' (DbType = Boolean), @p37='?' (DbType = Decimal), @p38='?' (DbType = Decimal), @p39='?' (DbType = Int64), @p40='?' (DbType = Int32), @p41='?' (DbType = Int64), @p42='?' (DbType = Int64), @p43='?' (DbType = Decimal), @p44='?', @p45='?' (DbType = Int64), @p46='?' (DbType = Date), @p47='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.pricing_rule (discount_pct, free_product_id, free_qty, free_rate, is_active, max_qty, min_qty, partner_id, priority, product_group_id, product_id, rate, rule_source, scheme_id, valid_from, valid_to)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15)
+      RETURNING id;
+      INSERT INTO sales.pricing_rule (discount_pct, free_product_id, free_qty, free_rate, is_active, max_qty, min_qty, partner_id, priority, product_group_id, product_id, rate, rule_source, scheme_id, valid_from, valid_to)
+      VALUES (@p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29, @p30, @p31)
+      RETURNING id;
+      INSERT INTO sales.pricing_rule (discount_pct, free_product_id, free_qty, free_rate, is_active, max_qty, min_qty, partner_id, priority, product_group_id, product_id, rate, rule_source, scheme_id, valid_from, valid_to)
+      VALUES (@p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40, @p41, @p42, @p43, @p44, @p45, @p46, @p47)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (28ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (22ms) [Parameters=[p0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT e.id, e.doc_type, e.last_period, e.last_seq, e.pattern, e.reset_by
+      FROM (
+          SELECT * FROM core.doc_numbering WHERE doc_type = @p0 FOR UPDATE
+      ) AS e
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.doc_numbering SET last_seq = @p0
+      WHERE id = @p1;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (41ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?', @p3='?', @p4='?', @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = Int64), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = Date), @p11='?', @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = Int64), @p17='?' (DbType = Int64), @p18='?', @p19='?', @p20='?' (DbType = Date), @p21='?' (DbType = Int64), @p22='?' (DbType = Int64), @p23='?', @p24='?', @p25='?' (DbType = Int64), @p26='?', @p27='?' (DbType = Date), @p28='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation (approved_at, approver_id, attached_service, bank_account, competitor, contact_id, creator_id, delivery_addr_id, delivery_lead, delivery_method_id, doc_date, doc_no, lost_reason_ids, note, order_type, partner_id, payment_method_id, price_list_id, quote_form, quote_type, request_delivery_date, requester_dept_id, requester_id, status, status_reason, tax_template_id, terms, valid_till, validity_days)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28)
+      RETURNING id, created_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@p29='?' (DbType = Decimal), @p30='?' (DbType = Decimal), @p31='?' (DbType = Decimal), @p32='?', @p33='?' (DbType = Decimal), @p34='?' (DbType = Decimal), @p35='?' (DbType = Int64), @p36='?', @p37='?' (DbType = Decimal), @p38='?' (DbType = Int64), @p39='?' (DbType = Decimal), @p40='?' (DbType = Decimal), @p41='?' (DbType = Decimal), @p42='?' (DbType = Decimal), @p43='?' (DbType = Decimal), @p44='?', @p45='?' (DbType = Decimal), @p46='?' (DbType = Decimal), @p47='?' (DbType = Int64), @p48='?', @p49='?' (DbType = Decimal), @p50='?' (DbType = Int64), @p51='?' (DbType = Decimal), @p52='?' (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation_line (approved_price, calc_price, discount_pct, note, ordered_qty, price_weight, product_id, project_house, quantity, quotation_id, rate, vat_pct)
+      VALUES (@p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40)
+      RETURNING id, amount;
+      INSERT INTO sales.quotation_line (approved_price, calc_price, discount_pct, note, ordered_qty, price_weight, product_id, project_house, quantity, quotation_id, rate, vat_pct)
+      VALUES (@p41, @p42, @p43, @p44, @p45, @p46, @p47, @p48, @p49, @p50, @p51, @p52)
+      RETURNING id, amount;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (26ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (45ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?', @p2='?' (DbType = Int64), @p3='?', @p4='?', @p5='?' (DbType = Int64), @p6='?', @p7='?'], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation SET status = @p0
+      WHERE id = @p1;
+      INSERT INTO core.wf_transition_log (acted_by, from_status, reason, ref_id, ref_table, to_status)
+      VALUES (@p2, @p3, @p4, @p5, @p6, @p7)
+      RETURNING id, acted_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[p0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT e.id, e.doc_type, e.last_period, e.last_seq, e.pattern, e.reset_by
+      FROM (
+          SELECT * FROM core.doc_numbering WHERE doc_type = @p0 FOR UPDATE
+      ) AS e
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.doc_numbering SET last_seq = @p0
+      WHERE id = @p1;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?' (DbType = Decimal), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int64), @p4='?' (DbType = Int64), @p5='?' (DbType = Date), @p6='?' (DbType = Int64), @p7='?' (DbType = Date), @p8='?', @p9='?', @p10='?', @p11='?' (DbType = Int64), @p12='?' (DbType = Int64), @p13='?' (DbType = Int64), @p14='?', @p15='?', @p16='?' (DbType = Int64), @p17='?', @p18='?' (DbType = Decimal), @p19='?' (DbType = Decimal), @p20='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation_line SET ordered_qty = @p0
+      WHERE id = @p1
+      RETURNING amount;
+      INSERT INTO sales.sales_order (approved_at, approver_id, delivery_addr_id, delivery_date_plan, delivery_method_id, doc_date, doc_no, note, order_form, partner_id, payment_method_id, quotation_id, sales_channel, sales_region, salesperson_id, status, total_amount, total_vat, warehouse_id)
+      VALUES (@p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20)
+      RETURNING id, created_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@p21='?' (DbType = Boolean), @p22='?' (DbType = Decimal), @p23='?' (DbType = Decimal), @p24='?', @p25='?' (DbType = Int64), @p26='?' (DbType = Int64), @p27='?' (DbType = Decimal), @p28='?' (DbType = Decimal), @p29='?' (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.sales_order_line (is_gift, kit_qty, list_price, note, order_id, product_id, quantity, unit_price, vat_pct)
+      VALUES (@p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28, @p29)
+      RETURNING id, amount;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT s1.id, s1.approved_at, s1.approver_id, s1.created_at, s1.delivery_addr_id, s1.delivery_date_plan, s1.delivery_method_id, s1.doc_date, s1.doc_no, s1.note, s1.order_form, s1.partner_id, s1.payment_method_id, s1.quotation_id, s1.sales_channel, s1.sales_region, s1.salesperson_id, s1.status, s1.total_amount, s1.total_vat, s1.warehouse_id, s0.id, s0.amount, s0.is_gift, s0.kit_qty, s0.list_price, s0.note, s0.order_id, s0.product_id, s0.quantity, s0.unit_price, s0.vat_pct
+      FROM (
+          SELECT s.id, s.approved_at, s.approver_id, s.created_at, s.delivery_addr_id, s.delivery_date_plan, s.delivery_method_id, s.doc_date, s.doc_no, s.note, s.order_form, s.partner_id, s.payment_method_id, s.quotation_id, s.sales_channel, s.sales_region, s.salesperson_id, s.status, s.total_amount, s.total_vat, s.warehouse_id
+          FROM sales.sales_order AS s
+          WHERE s.id = @__id_0
+          LIMIT 1
+      ) AS s1
+      LEFT JOIN sales.sales_order_line AS s0 ON s1.id = s0.order_id
+      ORDER BY s1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (32ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[p0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT e.id, e.doc_type, e.last_period, e.last_seq, e.pattern, e.reset_by
+      FROM (
+          SELECT * FROM core.doc_numbering WHERE doc_type = @p0 FOR UPDATE
+      ) AS e
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.doc_numbering SET last_seq = @p0
+      WHERE id = @p1;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?', @p3='?' (DbType = Int64), @p2='?' (DbType = Decimal), @p4='?' (DbType = DateTime), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = Date), @p8='?' (DbType = Int64), @p9='?' (DbType = Date), @p10='?', @p11='?', @p12='?', @p13='?' (DbType = Int64), @p14='?' (DbType = Int64), @p15='?' (DbType = Int64), @p16='?', @p17='?', @p18='?' (DbType = Int64), @p19='?', @p20='?' (DbType = Decimal), @p21='?' (DbType = Decimal), @p22='?' (DbType = Int64), @p23='?' (DbType = Int64), @p24='?', @p25='?', @p26='?' (DbType = Int64), @p27='?', @p28='?'], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation SET status = @p0
+      WHERE id = @p1;
+      UPDATE sales.quotation_line SET ordered_qty = @p2
+      WHERE id = @p3
+      RETURNING amount;
+      INSERT INTO sales.sales_order (approved_at, approver_id, delivery_addr_id, delivery_date_plan, delivery_method_id, doc_date, doc_no, note, order_form, partner_id, payment_method_id, quotation_id, sales_channel, sales_region, salesperson_id, status, total_amount, total_vat, warehouse_id)
+      VALUES (@p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22)
+      RETURNING id, created_at;
+      INSERT INTO core.wf_transition_log (acted_by, from_status, reason, ref_id, ref_table, to_status)
+      VALUES (@p23, @p24, @p25, @p26, @p27, @p28)
+      RETURNING id, acted_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@p29='?' (DbType = Boolean), @p30='?' (DbType = Decimal), @p31='?' (DbType = Decimal), @p32='?', @p33='?' (DbType = Int64), @p34='?' (DbType = Int64), @p35='?' (DbType = Decimal), @p36='?' (DbType = Decimal), @p37='?' (DbType = Decimal), @p38='?' (DbType = Boolean), @p39='?' (DbType = Decimal), @p40='?' (DbType = Decimal), @p41='?', @p42='?' (DbType = Int64), @p43='?' (DbType = Int64), @p44='?' (DbType = Decimal), @p45='?' (DbType = Decimal), @p46='?' (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.sales_order_line (is_gift, kit_qty, list_price, note, order_id, product_id, quantity, unit_price, vat_pct)
+      VALUES (@p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37)
+      RETURNING id, amount;
+      INSERT INTO sales.sales_order_line (is_gift, kit_qty, list_price, note, order_id, product_id, quantity, unit_price, vat_pct)
+      VALUES (@p38, @p39, @p40, @p41, @p42, @p43, @p44, @p45, @p46)
+      RETURNING id, amount;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (154ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT s1.id, s1.approved_at, s1.approver_id, s1.created_at, s1.delivery_addr_id, s1.delivery_date_plan, s1.delivery_method_id, s1.doc_date, s1.doc_no, s1.note, s1.order_form, s1.partner_id, s1.payment_method_id, s1.quotation_id, s1.sales_channel, s1.sales_region, s1.salesperson_id, s1.status, s1.total_amount, s1.total_vat, s1.warehouse_id, s0.id, s0.amount, s0.is_gift, s0.kit_qty, s0.list_price, s0.note, s0.order_id, s0.product_id, s0.quantity, s0.unit_price, s0.vat_pct
+      FROM (
+          SELECT s.id, s.approved_at, s.approver_id, s.created_at, s.delivery_addr_id, s.delivery_date_plan, s.delivery_method_id, s.doc_date, s.doc_no, s.note, s.order_form, s.partner_id, s.payment_method_id, s.quotation_id, s.sales_channel, s.sales_region, s.salesperson_id, s.status, s.total_amount, s.total_vat, s.warehouse_id
+          FROM sales.sales_order AS s
+          WHERE s.id = @__id_0
+          LIMIT 1
+      ) AS s1
+      LEFT JOIN sales.sales_order_line AS s0 ON s1.id = s0.order_id
+      ORDER BY s1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[p0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT e.id, e.doc_type, e.last_period, e.last_seq, e.pattern, e.reset_by
+      FROM (
+          SELECT * FROM core.doc_numbering WHERE doc_type = @p0 FOR UPDATE
+      ) AS e
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.doc_numbering SET last_seq = @p0
+      WHERE id = @p1;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?', @p3='?', @p4='?', @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = Int64), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = Date), @p11='?', @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = Int64), @p17='?' (DbType = Int64), @p18='?', @p19='?', @p20='?' (DbType = Date), @p21='?' (DbType = Int64), @p22='?' (DbType = Int64), @p23='?', @p24='?', @p25='?' (DbType = Int64), @p26='?', @p27='?' (DbType = Date), @p28='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation (approved_at, approver_id, attached_service, bank_account, competitor, contact_id, creator_id, delivery_addr_id, delivery_lead, delivery_method_id, doc_date, doc_no, lost_reason_ids, note, order_type, partner_id, payment_method_id, price_list_id, quote_form, quote_type, request_delivery_date, requester_dept_id, requester_id, status, status_reason, tax_template_id, terms, valid_till, validity_days)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28)
+      RETURNING id, created_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@p29='?' (DbType = Decimal), @p30='?' (DbType = Decimal), @p31='?' (DbType = Decimal), @p32='?', @p33='?' (DbType = Decimal), @p34='?' (DbType = Decimal), @p35='?' (DbType = Int64), @p36='?', @p37='?' (DbType = Decimal), @p38='?' (DbType = Int64), @p39='?' (DbType = Decimal), @p40='?' (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation_line (approved_price, calc_price, discount_pct, note, ordered_qty, price_weight, product_id, project_house, quantity, quotation_id, rate, vat_pct)
+      VALUES (@p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40)
+      RETURNING id, amount;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?', @p2='?' (DbType = Int64), @p3='?', @p4='?', @p5='?' (DbType = Int64), @p6='?', @p7='?'], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation SET status = @p0
+      WHERE id = @p1;
+      INSERT INTO core.wf_transition_log (acted_by, from_status, reason, ref_id, ref_table, to_status)
+      VALUES (@p2, @p3, @p4, @p5, @p6, @p7)
+      RETURNING id, acted_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (24ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@p4='?' (DbType = Int64), @p0='?', @p1='?' (DbType = Object), @p2='?', @p3='?', @p5='?' (DbType = Int64), @p6='?', @p7='?', @p8='?' (DbType = Int64), @p9='?', @p10='?'], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation SET competitor = @p0, lost_reason_ids = @p1, status = @p2, status_reason = @p3
+      WHERE id = @p4;
+      INSERT INTO core.wf_transition_log (acted_by, from_status, reason, ref_id, ref_table, to_status)
+      VALUES (@p5, @p6, @p7, @p8, @p9, @p10)
+      RETURNING id, acted_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (21ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__schemeId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND p.scheme_id = @__schemeId_0
+      ORDER BY p.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@p0='?', @p1='?' (DbType = Boolean), @p2='?' (DbType = Int32), @p3='?' (DbType = Int64), @p4='?' (DbType = Int32), @p5='?' (DbType = Date), @p6='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.coupon_code (code, is_active, max_use, pricing_rule_id, used, valid_from, valid_to)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+      RETURNING id;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__couponCode_0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT c.id, c.code, c.is_active, c.max_use, c.pricing_rule_id, c.used, c.valid_from, c.valid_to
+      FROM sales.coupon_code AS c
+      WHERE c.code = @__couponCode_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[p0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT e.id, e.doc_type, e.last_period, e.last_seq, e.pattern, e.reset_by
+      FROM (
+          SELECT * FROM core.doc_numbering WHERE doc_type = @p0 FOR UPDATE
+      ) AS e
+      LIMIT 2
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@p1='?' (DbType = Int64), @p0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      UPDATE core.doc_numbering SET last_seq = @p0
+      WHERE id = @p1;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      WHERE p.id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__productId_0='?' (DbType = Int64), @__partnerId_2='?' (DbType = Int64), @__qty_3='?' (DbType = Decimal), @__qty_4='?' (DbType = Decimal), @__date_5='?' (DbType = Date)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.discount_pct, p.free_product_id, p.free_qty, p.free_rate, p.is_active, p.max_qty, p.min_qty, p.partner_id, p.priority, p.product_group_id, p.product_id, p.rate, p.rule_source, p.scheme_id, p.valid_from, p.valid_to
+      FROM sales.pricing_rule AS p
+      WHERE p.is_active AND (p.product_id IS NULL OR p.product_id = @__productId_0) AND p.product_group_id IS NULL AND (p.partner_id IS NULL OR p.partner_id = @__partnerId_2) AND p.min_qty <= @__qty_3 AND (p.max_qty IS NULL OR @__qty_4 <= p.max_qty) AND (p.valid_from IS NULL OR p.valid_from <= @__date_5) AND (p.valid_to IS NULL OR p.valid_to >= @__date_5)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@__date_1='?' (DbType = Date), @__date_2='?' (DbType = Date), @__productId_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.price
+      FROM sales.price_list_item AS p
+      INNER JOIN (
+          SELECT p0.id
+          FROM sales.price_list AS p0
+          WHERE p0.is_active AND p0.valid_from <= @__date_1 AND (p0.valid_to IS NULL OR p0.valid_to >= @__date_2)
+      ) AS p1 ON p.price_list_id = p1.id
+      WHERE p.product_id = @__productId_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?', @p3='?', @p4='?', @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = Int64), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = Date), @p11='?', @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = Int64), @p17='?' (DbType = Int64), @p18='?', @p19='?', @p20='?' (DbType = Date), @p21='?' (DbType = Int64), @p22='?' (DbType = Int64), @p23='?', @p24='?', @p25='?' (DbType = Int64), @p26='?', @p27='?' (DbType = Date), @p28='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation (approved_at, approver_id, attached_service, bank_account, competitor, contact_id, creator_id, delivery_addr_id, delivery_lead, delivery_method_id, doc_date, doc_no, lost_reason_ids, note, order_type, partner_id, payment_method_id, price_list_id, quote_form, quote_type, request_delivery_date, requester_dept_id, requester_id, status, status_reason, tax_template_id, terms, valid_till, validity_days)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28)
+      RETURNING id, created_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@p29='?' (DbType = Decimal), @p30='?' (DbType = Decimal), @p31='?' (DbType = Decimal), @p32='?', @p33='?' (DbType = Decimal), @p34='?' (DbType = Decimal), @p35='?' (DbType = Int64), @p36='?', @p37='?' (DbType = Decimal), @p38='?' (DbType = Int64), @p39='?' (DbType = Decimal), @p40='?' (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation_line (approved_price, calc_price, discount_pct, note, ordered_qty, price_weight, product_id, project_house, quantity, quotation_id, rate, vat_pct)
+      VALUES (@p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40)
+      RETURNING id, amount;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (21ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (35ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@p2='?' (DbType = Int64), @p0='?', @p1='?', @p3='?' (DbType = Int64), @p4='?', @p5='?', @p6='?' (DbType = Int64), @p7='?', @p8='?'], CommandType='Text', CommandTimeout='30']
+      UPDATE sales.quotation SET status = @p0, status_reason = @p1
+      WHERE id = @p2;
+      INSERT INTO core.wf_transition_log (acted_by, from_status, reason, ref_id, ref_table, to_status)
+      VALUES (@p3, @p4, @p5, @p6, @p7, @p8)
+      RETURNING id, acted_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (23ms) [Parameters=[@__id_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          WHERE q.id = @__id_0
+          LIMIT 1
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__newDocNo_0='?'], CommandType='Text', CommandTimeout='30']
+      SELECT EXISTS (
+          SELECT 1
+          FROM sales.quotation AS q
+          WHERE q.doc_no = @__newDocNo_0)
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int64), @p2='?', @p3='?', @p4='?', @p5='?' (DbType = Int64), @p6='?' (DbType = Int64), @p7='?' (DbType = Int64), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = Date), @p11='?', @p12='?' (DbType = Object), @p13='?', @p14='?', @p15='?' (DbType = Int64), @p16='?' (DbType = Int64), @p17='?' (DbType = Int64), @p18='?', @p19='?', @p20='?' (DbType = Date), @p21='?' (DbType = Int64), @p22='?' (DbType = Int64), @p23='?', @p24='?', @p25='?' (DbType = Int64), @p26='?', @p27='?' (DbType = Date), @p28='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation (approved_at, approver_id, attached_service, bank_account, competitor, contact_id, creator_id, delivery_addr_id, delivery_lead, delivery_method_id, doc_date, doc_no, lost_reason_ids, note, order_type, partner_id, payment_method_id, price_list_id, quote_form, quote_type, request_delivery_date, requester_dept_id, requester_id, status, status_reason, tax_template_id, terms, valid_till, validity_days)
+      VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17, @p18, @p19, @p20, @p21, @p22, @p23, @p24, @p25, @p26, @p27, @p28)
+      RETURNING id, created_at;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@p29='?' (DbType = Decimal), @p30='?' (DbType = Decimal), @p31='?' (DbType = Decimal), @p32='?', @p33='?' (DbType = Decimal), @p34='?' (DbType = Decimal), @p35='?' (DbType = Int64), @p36='?', @p37='?' (DbType = Decimal), @p38='?' (DbType = Int64), @p39='?' (DbType = Decimal), @p40='?' (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+      INSERT INTO sales.quotation_line (approved_price, calc_price, discount_pct, note, ordered_qty, price_weight, product_id, project_house, quantity, quotation_id, rate, vat_pct)
+      VALUES (@p29, @p30, @p31, @p32, @p33, @p34, @p35, @p36, @p37, @p38, @p39, @p40)
+      RETURNING id, amount;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM sales.quotation AS q
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM sales.sales_order AS s
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s1.id, s1.approved_at, s1.approver_id, s1.created_at, s1.delivery_addr_id, s1.delivery_date_plan, s1.delivery_method_id, s1.doc_date, s1.doc_no, s1.note, s1.order_form, s1.partner_id, s1.payment_method_id, s1.quotation_id, s1.sales_channel, s1.sales_region, s1.salesperson_id, s1.status, s1.total_amount, s1.total_vat, s1.warehouse_id, s0.id, s0.amount, s0.is_gift, s0.kit_qty, s0.list_price, s0.note, s0.order_id, s0.product_id, s0.quantity, s0.unit_price, s0.vat_pct
+      FROM (
+          SELECT s.id, s.approved_at, s.approver_id, s.created_at, s.delivery_addr_id, s.delivery_date_plan, s.delivery_method_id, s.doc_date, s.doc_no, s.note, s.order_form, s.partner_id, s.payment_method_id, s.quotation_id, s.sales_channel, s.sales_region, s.salesperson_id, s.status, s.total_amount, s.total_vat, s.warehouse_id
+          FROM sales.sales_order AS s
+          ORDER BY s.id DESC
+          LIMIT @__p_1 OFFSET @__p_0
+      ) AS s1
+      LEFT JOIN sales.sales_order_line AS s0 ON s1.id = s0.order_id
+      ORDER BY s1.id DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          ORDER BY q.id DESC
+          LIMIT @__p_1 OFFSET @__p_0
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (22ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (31ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (235ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (29ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (18ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (21ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (19ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (21ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (230ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT a.id, a.created_at, a.employee_id, a.is_active, a.is_admin, a.password_hash, a.username
+      FROM core.app_user AS a
+      WHERE a.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (40ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM sales.quotation AS q
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (40ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM sales.sales_order AS s
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT s1.id, s1.approved_at, s1.approver_id, s1.created_at, s1.delivery_addr_id, s1.delivery_date_plan, s1.delivery_method_id, s1.doc_date, s1.doc_no, s1.note, s1.order_form, s1.partner_id, s1.payment_method_id, s1.quotation_id, s1.sales_channel, s1.sales_region, s1.salesperson_id, s1.status, s1.total_amount, s1.total_vat, s1.warehouse_id, s0.id, s0.amount, s0.is_gift, s0.kit_qty, s0.list_price, s0.note, s0.order_id, s0.product_id, s0.quantity, s0.unit_price, s0.vat_pct
+      FROM (
+          SELECT s.id, s.approved_at, s.approver_id, s.created_at, s.delivery_addr_id, s.delivery_date_plan, s.delivery_method_id, s.doc_date, s.doc_no, s.note, s.order_form, s.partner_id, s.payment_method_id, s.quotation_id, s.sales_channel, s.sales_region, s.salesperson_id, s.status, s.total_amount, s.total_vat, s.warehouse_id
+          FROM sales.sales_order AS s
+          ORDER BY s.id DESC
+          LIMIT @__p_1 OFFSET @__p_0
+      ) AS s1
+      LEFT JOIN sales.sales_order_line AS s0 ON s1.id = s0.order_id
+      ORDER BY s1.id DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          ORDER BY q.id DESC
+          LIMIT @__p_1 OFFSET @__p_0
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM sales.quotation AS q
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT q1.id, q1.approved_at, q1.approver_id, q1.attached_service, q1.bank_account, q1.competitor, q1.contact_id, q1.created_at, q1.creator_id, q1.delivery_addr_id, q1.delivery_lead, q1.delivery_method_id, q1.doc_date, q1.doc_no, q1.lost_reason_ids, q1.note, q1.order_type, q1.partner_id, q1.payment_method_id, q1.price_list_id, q1.quote_form, q1.quote_type, q1.request_delivery_date, q1.requester_dept_id, q1.requester_id, q1.status, q1.status_reason, q1.tax_template_id, q1.terms, q1.valid_till, q1.validity_days, q0.id, q0.amount, q0.approved_price, q0.calc_price, q0.discount_pct, q0.note, q0.ordered_qty, q0.price_weight, q0.product_id, q0.project_house, q0.quantity, q0.quotation_id, q0.rate, q0.vat_pct
+      FROM (
+          SELECT q.id, q.approved_at, q.approver_id, q.attached_service, q.bank_account, q.competitor, q.contact_id, q.created_at, q.creator_id, q.delivery_addr_id, q.delivery_lead, q.delivery_method_id, q.doc_date, q.doc_no, q.lost_reason_ids, q.note, q.order_type, q.partner_id, q.payment_method_id, q.price_list_id, q.quote_form, q.quote_type, q.request_delivery_date, q.requester_dept_id, q.requester_id, q.status, q.status_reason, q.tax_template_id, q.terms, q.valid_till, q.validity_days
+          FROM sales.quotation AS q
+          ORDER BY q.id DESC
+          LIMIT @__p_1 OFFSET @__p_0
+      ) AS q1
+      LEFT JOIN sales.quotation_line AS q0 ON q1.id = q0.quotation_id
+      ORDER BY q1.id DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.address, p.code, p.country, p.credit_days, p.credit_limit, p.customer_group, p.delivery_method_id, p.district, p.email, p.fax, p.full_name, p.hotline, p.is_active, p.is_customer, p.is_supplier, p.payment_method_id, p.phone, p.province, p.ranking, p.salesperson_id, p.short_name, p.source, p.tax_code, p.website
+      FROM core.partner AS p
+      WHERE p.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.address, p.code, p.country, p.credit_days, p.credit_limit, p.customer_group, p.delivery_method_id, p.district, p.email, p.fax, p.full_name, p.hotline, p.is_active, p.is_customer, p.is_supplier, p.payment_method_id, p.phone, p.province, p.ranking, p.salesperson_id, p.short_name, p.source, p.tax_code, p.website
+      FROM core.partner AS p
+      WHERE p.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (130ms) [Parameters=[@__p_0='?' (DbType = Int64)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.address, p.code, p.country, p.credit_days, p.credit_limit, p.customer_group, p.delivery_method_id, p.district, p.email, p.fax, p.full_name, p.hotline, p.is_active, p.is_customer, p.is_supplier, p.payment_method_id, p.phone, p.province, p.ranking, p.salesperson_id, p.short_name, p.source, p.tax_code, p.website
+      FROM core.partner AS p
+      WHERE p.id = @__p_0
+      LIMIT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM core.partner AS p
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.address, p.code, p.country, p.credit_days, p.credit_limit, p.customer_group, p.delivery_method_id, p.district, p.email, p.fax, p.full_name, p.hotline, p.is_active, p.is_customer, p.is_supplier, p.payment_method_id, p.phone, p.province, p.ranking, p.salesperson_id, p.short_name, p.source, p.tax_code, p.website
+      FROM core.partner AS p
+      ORDER BY p.id
+      LIMIT @__p_1 OFFSET @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM core.partner AS p
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM core.delivery_method AS d
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (15ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM core.payment_method AS p
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.address, p.code, p.country, p.credit_days, p.credit_limit, p.customer_group, p.delivery_method_id, p.district, p.email, p.fax, p.full_name, p.hotline, p.is_active, p.is_customer, p.is_supplier, p.payment_method_id, p.phone, p.province, p.ranking, p.salesperson_id, p.short_name, p.source, p.tax_code, p.website
+      FROM core.partner AS p
+      ORDER BY p.id
+      LIMIT @__p_1 OFFSET @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.code, p.due_days, p.name
+      FROM core.payment_method AS p
+      ORDER BY p.id
+      LIMIT @__p_1 OFFSET @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT d.id, d.code, d.name
+      FROM core.delivery_method AS d
+      ORDER BY d.id
+      LIMIT @__p_1 OFFSET @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT count(*)
+      FROM core.product AS p
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT p.id, p.barcode, p.code, p.group_id, p.is_active, p.is_kit, p.min_stock, p.name, p.price_weight, p.product_type, p.qr_code, p.spec, p.uom_id
+      FROM core.product AS p
+      ORDER BY p.id
+      LIMIT @__p_1 OFFSET @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (22ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (45ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (23ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+      SELECT o.id, o.created_at, o.event_type, o.payload, o.processed_at, o.source_id, o.source_table
+      FROM finance.outbox_event AS o
+      WHERE o.processed_at IS NULL
+      ORDER BY o.id
+      LIMIT @__p_0

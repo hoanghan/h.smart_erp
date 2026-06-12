@@ -1,0 +1,825 @@
+
+> erp-frontend@0.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v8.0.16[39m  [2mready in [0m[1m455[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m9:54:47 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m10:08:21 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m10:20:38 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m10:55:48 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m11:01:42 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m11:02:39 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m11:03:42 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m11:04:50 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m11:07:46 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m11:26:25 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/DataTable.tsx[22m
+[2m11:26:30 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/DataTable.tsx[22m
+[2m11:26:36 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/DataTable.tsx[22m
+[2m11:26:48 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/masterdata/Partners.tsx[22m
+[2m11:32:06 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/index.tsx[22m
+[2m11:32:16 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m11:32:20 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m11:39:09 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: Instance created by `useForm` is not connected to any Form element. Forget to pass `form` prop?
+[2m11:39:42 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/WorkflowBar.tsx[22m
+[2m11:43:17 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mUnknown Error[22m: Vui lòng nhập lý do
+[39m
+[2m11:43:58 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mUnknown Error[22m: Vui lòng nhập lý do
+[39m
+[2m11:44:19 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mUnknown Error[22m: Vui lòng nhập lý do
+[39m
+[2m11:45:34 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m5:48:35 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx[22m
+[2m5:48:48 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx[22m
+[2m5:59:15 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx[22m
+[2m5:59:34 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m5:59:40 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m6:06:01 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Button.Group] `Button.Group` is deprecated. Please use `Space.Compact` instead.
+[2m6:07:49 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Button.Group] `Button.Group` is deprecated. Please use `Space.Compact` instead.
+[2m6:17:10 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Button.Group] `Button.Group` is deprecated. Please use `Space.Compact` instead.
+[2m6:21:35 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/PurchaseOrderPaymentsTab.tsx[22m
+[2m6:21:44 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/PurchaseOrderPaymentsTab.tsx[22m
+[2m7:23:46 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m8:41:22 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/refresh[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m8:41:22 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/refresh[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m8:56:02 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m8:56:08 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m8:56:11 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m8:59:57 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m9:00:21 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m9:01:13 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m9:02:22 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationLinesTab.tsx[22m
+[2m9:03:44 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m9:03:54 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:03:58 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:05:12 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m9:05:42 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m9:07:02 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m9:07:50 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderLinesTab.tsx[22m
+[2m9:12:08 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m9:19:33 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:33:02 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:33:06 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:35:12 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:35:36 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:41:24 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m9:51:59 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m9:51:59 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:03:56 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m10:04:03 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m10:04:40 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m10:04:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationDetail.tsx[22m
+[2m10:05:28 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx, /src/pages/purchasing/PurchaseOrdersList.tsx, /src/pages/purchasing/SupplierReturnDetail.tsx, /src/pages/purchasing/SupplierReturnsList.tsx, /src/pages/purchasing/PurchaseRequestsList.tsx, /src/pages/purchasing/PurchaseRequestDetail.tsx, /src/pages/purchasing/PurchasingPaymentsList.tsx and 3 more[22m
+[2m10:05:28 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/purchasing/PurchaseOrdersList.tsx[22m Could not Fast Refresh ("ORDER_FORM_LABELS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m10:05:28 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx, /src/pages/purchasing/PurchaseOrderNew.tsx, /src/pages/purchasing/PurchaseOrderDetail.tsx[22m
+[2m10:05:41 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationLinesTab.tsx[22m
+[2m10:05:50 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/QuotationLinesTab.tsx[22m
+[2m10:06:07 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderLinesTab.tsx[22m
+[2m10:06:15 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderLinesTab.tsx[22m
+[2m10:06:24 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderLinesTab.tsx[22m
+[2m10:06:36 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/DocForm/HeaderGrid.tsx[22m
+[2m10:06:43 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/DocForm/HeaderGrid.tsx[22m
+[2m10:06:52 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:08:16 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:08:23 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:08:31 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:08:40 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:17:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:18:04 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:18:33 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:20:02 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:20:09 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:20:23 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:24:38 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:24:40 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:24:42 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderDetail.tsx[22m
+[2m10:25:38 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderPaymentsTab.tsx[22m
+[2m10:25:55 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrderPaymentsTab.tsx[22m
+[2m10:39:30 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:39:30 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:40:39 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:40:39 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:41:05 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:41:05 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:41:33 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/DocForm/DocForm.css[22m
+[2m10:42:01 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:42:01 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:43:31 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:43:31 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:46:12 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:46:12 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:47:13 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:47:13 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:48:14 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:48:14 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:49:58 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:49:58 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:50:27 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:50:27 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:50:35 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 404
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m10:53:50 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:53:50 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:58:12 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m10:58:12 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m10:58:20 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 404
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m11:22:12 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m11:22:12 AM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m12:25:30 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m12:42:53 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx, /src/pages/purchasing/PurchaseOrdersList.tsx, /src/pages/purchasing/SupplierReturnDetail.tsx, /src/pages/purchasing/SupplierReturnsList.tsx, /src/pages/purchasing/PurchaseRequestsList.tsx, /src/pages/purchasing/PurchaseRequestDetail.tsx, /src/pages/purchasing/PurchasingPaymentsList.tsx and 4 more[22m
+[2m12:42:54 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/purchasing/PurchaseOrdersList.tsx[22m Could not Fast Refresh ("ORDER_FORM_LABELS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m12:42:54 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx, /src/pages/purchasing/PurchaseOrderNew.tsx, /src/pages/purchasing/PurchaseOrderDetail.tsx[22m
+[2m12:43:08 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx, /src/pages/purchasing/PurchaseOrdersList.tsx, /src/pages/purchasing/SupplierReturnDetail.tsx, /src/pages/purchasing/SupplierReturnsList.tsx, /src/pages/purchasing/PurchaseRequestsList.tsx, /src/pages/purchasing/PurchaseRequestDetail.tsx, /src/pages/purchasing/PurchasingPaymentsList.tsx and 4 more[22m
+[2m12:43:08 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/purchasing/PurchaseOrdersList.tsx[22m Could not Fast Refresh ("ORDER_FORM_LABELS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m12:43:08 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx, /src/pages/purchasing/PurchaseOrderNew.tsx, /src/pages/purchasing/PurchaseOrderDetail.tsx[22m
+[2m12:43:28 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx, /src/pages/purchasing/PurchaseOrdersList.tsx, /src/pages/purchasing/SupplierReturnDetail.tsx, /src/pages/purchasing/SupplierReturnsList.tsx, /src/pages/purchasing/PurchaseRequestsList.tsx, /src/pages/purchasing/PurchaseRequestDetail.tsx, /src/pages/purchasing/PurchasingPaymentsList.tsx and 4 more[22m
+[2m12:43:28 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/purchasing/PurchaseOrdersList.tsx[22m Could not Fast Refresh ("ORDER_FORM_LABELS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m12:43:28 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx, /src/pages/purchasing/PurchaseOrderNew.tsx, /src/pages/purchasing/PurchaseOrderDetail.tsx[22m
+[2m12:43:47 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx, /src/pages/purchasing/PurchaseOrdersList.tsx, /src/pages/purchasing/SupplierReturnDetail.tsx, /src/pages/purchasing/SupplierReturnsList.tsx, /src/pages/purchasing/PurchaseRequestsList.tsx, /src/pages/purchasing/PurchaseRequestDetail.tsx, /src/pages/purchasing/PurchasingPaymentsList.tsx and 4 more[22m
+[2m12:43:47 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/purchasing/PurchaseOrdersList.tsx[22m Could not Fast Refresh ("ORDER_FORM_LABELS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m12:43:47 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx, /src/pages/purchasing/PurchaseOrderNew.tsx, /src/pages/purchasing/PurchaseOrderDetail.tsx[22m
+[2m12:44:04 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/sales/SalesOrdersList.tsx, /src/pages/sales/QuotationDetail.tsx, /src/pages/sales/SalesOrderDetail.tsx, /src/pages/sales/QuotationsList.tsx, /src/components/WorkflowBar.tsx, /src/pages/purchasing/PurchaseOrdersList.tsx, /src/pages/purchasing/SupplierReturnDetail.tsx, /src/pages/purchasing/SupplierReturnsList.tsx, /src/pages/purchasing/PurchaseRequestsList.tsx, /src/pages/purchasing/PurchaseRequestDetail.tsx, /src/pages/purchasing/PurchasingPaymentsList.tsx and 4 more[22m
+[2m12:44:05 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/purchasing/PurchaseOrdersList.tsx[22m Could not Fast Refresh ("ORDER_FORM_LABELS" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m12:44:05 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/purchasing/index.tsx, /src/pages/purchasing/PurchaseOrderNew.tsx, /src/pages/purchasing/PurchaseOrderDetail.tsx[22m
+[2m12:44:25 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m12:44:50 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/inventory/index.tsx[22m
+[2m12:44:50 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to resolve import "./IssuesList" from "src/pages/inventory/index.tsx". Does the file exist?
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mC:/Project/Personal/ERP/sourcecode/erp-frontend/src/pages/inventory/index.tsx[39m:3:27
+[33m  1  |  import { Navigate, Route, Routes } from "react-router-dom";
+  2  |  import ReceiptsListPage from "./ReceiptsList";
+  3  |  import IssuesListPage from "./IssuesList";
+     |                              ^
+  4  |  import TransfersListPage from "./TransfersList";
+  5  |  import StockDocDetailPage from "./StockDocDetail";[39m
+[2m12:44:50 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./IssuesList" from "src/pages/inventory/index.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mC:/Project/Personal/ERP/sourcecode/erp-frontend/src/pages/inventory/index.tsx[39m:3:27
+[33m  1  |  import { Navigate, Route, Routes } from "react-router-dom";
+  2  |  import ReceiptsListPage from "./ReceiptsList";
+  3  |  import IssuesListPage from "./IssuesList";
+     |                              ^
+  4  |  import TransfersListPage from "./TransfersList";
+  5  |  import StockDocDetailPage from "./StockDocDetail";[39m
+      at TransformPluginContext._formatLog (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:30602:39)
+      at TransformPluginContext.error (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:30599:14)
+      at normalizeUrl (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:27842:18)
+      at async file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:27905:30
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:27873:4)
+      at async EnvironmentPluginContainer.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:30387:14)
+      at async loadAndTransform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24646:26)
+[2m12:44:50 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[vite] Failed to reload /src/pages/inventory/index.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[2m12:45:01 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/router.tsx[22m
+[2m1:00:27 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mReact has detected a change in the order of Hooks called by StockDocDetailPage. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useContext                 useContext
+5. useContext                 useContext
+6. useContext                 useContext
+7. useContext                 useContext
+8. useContext                 useContext
+9. useRef                     useRef
+10. useContext                useContext
+11. useLayoutEffect           useLayoutEffect
+12. useCallback               useCallback
+13. useContext                useContext
+14. useContext                useContext
+15. useState                  useState
+16. useState                  useState
+17. useState                  useState
+18. useRef                    useRef
+19. useState                  useState
+20. useRef                    useRef
+21. useMemo                   useMemo
+22. useContext                useContext
+23. useContext                useContext
+24. useContext                useContext
+25. useEffect                 useEffect
+26. useState                  useState
+27. useCallback               useCallback
+28. useSyncExternalStore      useSyncExternalStore
+29. useEffect                 useEffect
+30. undefined                 useContext
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[2m1:00:27 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mError[22m: Rendered more hooks than during the previous render.
+[39m > updateWorkInProgressHook node_modules/react-dom/cjs/react-dom-client.development.js:7848:16
+ > updateReducer node_modules/react-dom/cjs/react-dom-client.development.js:7967:17
+ > Object.useState node_modules/react-dom/cjs/react-dom-client.development.js:26511:17
+ > exports.useState node_modules/react/cjs/react.development.js:1263:33
+ > useMutation node_modules/@tanstack/react-query/build/modern/useMutation.js:14:27
+ > StockDocDetailPage src/pages/inventory/StockDocDetail.tsx:70:23
+    68 |  
+    69 |    // --- Save header ---
+    70 |    const saveMutation = useMutation({
+       |                         ^
+    71 |      mutationFn: (body: StockDocUpdate) => apiClient.patch(`/inventory/docs/${docId}`, body),
+    72 |      onSuccess: () => {
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+
+[2m1:00:27 PM[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <StockDocDetailPage> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m1:00:38 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mReact has detected a change in the order of Hooks called by StockDocDetailPage. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useContext                 useContext
+5. useContext                 useContext
+6. useContext                 useContext
+7. useContext                 useContext
+8. useContext                 useContext
+9. useRef                     useRef
+10. useContext                useContext
+11. useLayoutEffect           useLayoutEffect
+12. useCallback               useCallback
+13. useContext                useContext
+14. useContext                useContext
+15. useState                  useState
+16. useState                  useState
+17. useState                  useState
+18. useRef                    useRef
+19. useState                  useState
+20. useRef                    useRef
+21. useMemo                   useMemo
+22. useContext                useContext
+23. useContext                useContext
+24. useContext                useContext
+25. useEffect                 useEffect
+26. useState                  useState
+27. useCallback               useCallback
+28. useSyncExternalStore      useSyncExternalStore
+29. useEffect                 useEffect
+30. undefined                 useContext
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[2m1:00:38 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mError[22m: Rendered more hooks than during the previous render.
+[39m > updateWorkInProgressHook node_modules/react-dom/cjs/react-dom-client.development.js:7848:16
+ > updateReducer node_modules/react-dom/cjs/react-dom-client.development.js:7967:17
+ > Object.useState node_modules/react-dom/cjs/react-dom-client.development.js:26511:17
+ > exports.useState node_modules/react/cjs/react.development.js:1263:33
+ > useMutation node_modules/@tanstack/react-query/build/modern/useMutation.js:14:27
+ > StockDocDetailPage src/pages/inventory/StockDocDetail.tsx:70:23
+    68 |  
+    69 |    // --- Save header ---
+    70 |    const saveMutation = useMutation({
+       |                         ^
+    71 |      mutationFn: (body: StockDocUpdate) => apiClient.patch(`/inventory/docs/${docId}`, body),
+    72 |      onSuccess: () => {
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+
+[2m1:00:38 PM[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <StockDocDetailPage> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m1:01:03 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/PlaceholderPage.tsx[22m
+[2m1:01:25 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/accounting/index.tsx[22m
+[2m1:01:43 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m1:01:49 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m1:16:52 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m1:19:11 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m1:23:49 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mReact has detected a change in the order of Hooks called by StockDocDetailPage. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useContext                 useContext
+5. useContext                 useContext
+6. useContext                 useContext
+7. useContext                 useContext
+8. useContext                 useContext
+9. useRef                     useRef
+10. useContext                useContext
+11. useLayoutEffect           useLayoutEffect
+12. useCallback               useCallback
+13. useContext                useContext
+14. useContext                useContext
+15. useState                  useState
+16. useState                  useState
+17. useState                  useState
+18. useRef                    useRef
+19. useState                  useState
+20. useRef                    useRef
+21. useMemo                   useMemo
+22. useContext                useContext
+23. useContext                useContext
+24. useContext                useContext
+25. useEffect                 useEffect
+26. useState                  useState
+27. useCallback               useCallback
+28. useSyncExternalStore      useSyncExternalStore
+29. useEffect                 useEffect
+30. undefined                 useContext
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[2m1:23:49 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mError[22m: Rendered more hooks than during the previous render.
+[39m > updateWorkInProgressHook node_modules/react-dom/cjs/react-dom-client.development.js:7848:16
+ > updateReducer node_modules/react-dom/cjs/react-dom-client.development.js:7967:17
+ > Object.useState node_modules/react-dom/cjs/react-dom-client.development.js:26511:17
+ > exports.useState node_modules/react/cjs/react.development.js:1263:33
+ > useMutation node_modules/@tanstack/react-query/build/modern/useMutation.js:14:27
+ > StockDocDetailPage src/pages/inventory/StockDocDetail.tsx:70:23
+    68 |  
+    69 |    // --- Save header ---
+    70 |    const saveMutation = useMutation({
+       |                         ^
+    71 |      mutationFn: (body: StockDocUpdate) => apiClient.patch(`/inventory/docs/${docId}`, body),
+    72 |      onSuccess: () => {
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+
+[2m1:23:49 PM[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <StockDocDetailPage> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m2:18:16 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/inventory/StockBalance.tsx[22m
+[2m2:18:39 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/inventory/StockBalance.tsx[22m
+[2m2:19:02 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/inventory/StockBalance.tsx[22m
+[2m2:19:27 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/inventory/StockMoves.tsx[22m
+[2m2:20:05 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/inventory/StockMoves.tsx[22m
+[2m2:46:09 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m3:12:30 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:30 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:31 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:31 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:38 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m3:12:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/products?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/products?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:52 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:52 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:53 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:12:53 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:01 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/warehouses?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:02 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/warehouses?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:11 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/products?size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:11 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/warehouses?size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:11 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 502
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m3:13:11 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 502
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m3:13:19 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=TRANSFER[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:20 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/warehouses/1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:20 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/partners/2[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:20 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=RECEIPT[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:21 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/warehouses/1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:21 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/partners/2[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:21 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=RECEIPT[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:33 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/accounts[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:33 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/object-categories[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:34 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/object-categories[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:34 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/accounts[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/fiscal-periods[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/object-categories[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/accounts[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/accounts[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/object-categories[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:40 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/lerp-vouchers?status=PENDING&size=200[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:41 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/lerp-vouchers?status=PENDING&size=200[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:42 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/vouchers?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:42 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/fiscal-periods[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:43 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/vouchers?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m3:13:43 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/finance/fiscal-periods[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:23:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/index.tsx[22m
+[2m5:23:24 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 2 errors:
+
+[31m[PARSE_ERROR] [0mInvalid Unicode escape sequence
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/index.tsx:15:17 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m15 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m<[0m[38;5;249mS[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249m=[0m[38;5;249m\[0m"[38;5;249ml[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m\[0m[38;5;249m"[0m[38;5;249m [0m[38;5;249m/[0m[38;5;249m>[0m
+ [38;5;240m   │[0m                 ┬  
+ [38;5;240m   │[0m                 ╰── 
+[38;5;246m────╯[0m
+
+[31m[PARSE_ERROR] [0mInvalid Unicode escape sequence
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/index.tsx:15:24 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m15 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m<[0m[38;5;249mS[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249m=[0m[38;5;249m\[0m[38;5;249m"[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m\[0m"[38;5;249m [0m[38;5;249m/[0m[38;5;249m>[0m
+ [38;5;240m   │[0m                        ┬  
+ [38;5;240m   │[0m                        ╰── 
+[38;5;246m────╯[0m
+[39m
+  Plugin: [35mvite:oxc[39m
+  File: [36mC:/Project/Personal/ERP/sourcecode/erp-frontend/src/pages/admin/index.tsx[39m
+      at transformWithOxc (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:3344:19)
+      at TransformPluginContext.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:3415:26)
+      at EnvironmentPluginContainer.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:30387:51)
+      at async loadAndTransform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24646:26)
+      at async viteTransformMiddleware (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24440:20)
+[2m5:23:24 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[vite] Failed to reload /src/pages/admin/index.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[2m5:28:27 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:27 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:28 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:28 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:30 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:30 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/partners?size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:30 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 502
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m5:28:31 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:31 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:31 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/partners?size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:31 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 502
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m5:28:32 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:33 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:33 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/md/partners?size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:33 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 502
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m5:28:34 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?page=1&size=20[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:34 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=RECEIPT[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:35 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=RECEIPT[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:36 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=ISSUE[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:37 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/inventory/docs?page=1&size=20&docType=ISSUE[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/quotations?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:28:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/sales/orders?size=1[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:29:24 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layout/AppLayout.tsx[22m
+[2m5:37:07 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/refresh[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:37:07 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/refresh[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:37:23 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:37:28 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:38:44 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:40:14 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:40:18 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:47:10 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:47:14 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:49:24 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:54:38 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:54:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:54:39 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:54:40 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:54:40 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m5:54:40 PM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/v1/auth/login[39m
+AggregateError [ECONNREFUSED]: 
+    at internalConnectMultiple (node:net:1193:18)
+    at afterConnectMultiple (node:net:1783:7)
+[2m8:42:59 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Dropdown] `overlayStyle` is deprecated. Please use `styles.root` instead.
+[2m8:42:59 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m8:42:59 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mAxiosError[22m: Request failed with status code 404
+[39m > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:63:8
+
+[2m8:43:16 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 2 errors:
+
+[31m[PARSE_ERROR] [0mInvalid Unicode escape sequence
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/index.tsx:15:17 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m15 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m<[0m[38;5;249mS[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249m=[0m[38;5;249m\[0m"[38;5;249ml[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m\[0m[38;5;249m"[0m[38;5;249m [0m[38;5;249m/[0m[38;5;249m>[0m
+ [38;5;240m   │[0m                 ┬  
+ [38;5;240m   │[0m                 ╰── 
+[38;5;246m────╯[0m
+
+[31m[PARSE_ERROR] [0mInvalid Unicode escape sequence
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/index.tsx:15:24 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m15 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m<[0m[38;5;249mS[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249m=[0m[38;5;249m\[0m[38;5;249m"[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m\[0m"[38;5;249m [0m[38;5;249m/[0m[38;5;249m>[0m
+ [38;5;240m   │[0m                        ┬  
+ [38;5;240m   │[0m                        ╰── 
+[38;5;246m────╯[0m
+[39m
+  Plugin: [35mvite:oxc[39m
+  File: [36mC:/Project/Personal/ERP/sourcecode/erp-frontend/src/pages/admin/index.tsx[39m
+      at transformWithOxc (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:3344:19)
+      at TransformPluginContext.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:3415:26)
+      at EnvironmentPluginContainer.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:30387:51)
+      at async loadAndTransform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24646:26)
+      at async viteTransformMiddleware (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24440:20)
+[2m8:43:16 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mTypeError[22m: Failed to fetch dynamically imported module: http://localhost:5173/src/pages/admin/index.tsx?t=1781259804085
+[39m
+[2m8:43:16 PM[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Offscreen> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+[2m8:59:07 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mWarning: [antd: Drawer] `width` is deprecated. Please use `size` instead.
+[2m8:59:13 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 2 errors:
+
+[31m[PARSE_ERROR] [0mInvalid Unicode escape sequence
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/index.tsx:15:17 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m15 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m<[0m[38;5;249mS[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249m=[0m[38;5;249m\[0m"[38;5;249ml[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m\[0m[38;5;249m"[0m[38;5;249m [0m[38;5;249m/[0m[38;5;249m>[0m
+ [38;5;240m   │[0m                 ┬  
+ [38;5;240m   │[0m                 ╰── 
+[38;5;246m────╯[0m
+
+[31m[PARSE_ERROR] [0mInvalid Unicode escape sequence
+    [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/admin/index.tsx:15:24 [38;5;246m][0m
+    [38;5;246m│[0m
+ [38;5;246m15 │[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m<[0m[38;5;249mS[0m[38;5;249mp[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mi[0m[38;5;249mz[0m[38;5;249me[0m[38;5;249m=[0m[38;5;249m\[0m[38;5;249m"[0m[38;5;249ml[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mg[0m[38;5;249me[0m[38;5;249m\[0m"[38;5;249m [0m[38;5;249m/[0m[38;5;249m>[0m
+ [38;5;240m   │[0m                        ┬  
+ [38;5;240m   │[0m                        ╰── 
+[38;5;246m────╯[0m
+[39m
+  Plugin: [35mvite:oxc[39m
+  File: [36mC:/Project/Personal/ERP/sourcecode/erp-frontend/src/pages/admin/index.tsx[39m
+      at transformWithOxc (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:3344:19)
+      at TransformPluginContext.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:3415:26)
+      at EnvironmentPluginContainer.transform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:30387:51)
+      at async loadAndTransform (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24646:26)
+      at async viteTransformMiddleware (file:///C:/Project/Personal/ERP/sourcecode/erp-frontend/node_modules/vite/dist/node/chunks/node.js:24440:20)
+[2m8:59:13 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled error] [1mTypeError[22m: Failed to fetch dynamically imported module: http://localhost:5173/src/pages/admin/index.tsx?t=1781259804085
+[39m
+[2m8:59:13 PM[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22mAn error occurred in the <Offscreen> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+

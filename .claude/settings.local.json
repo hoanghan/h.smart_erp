@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(cmd.exe /c test_inventory.bat)",
+      "PowerShell(cmd.exe /c \"cd /d C:\\\\Project\\\\Personal\\\\ERP\\\\sourcecode\\\\erp-backend && test_inventory.bat\")",
+      "PowerShell(cmd.exe /c \"cd /d C:\\\\Project\\\\Personal\\\\ERP\\\\sourcecode\\\\erp-backend && call test_inventory.bat\")",
+      "PowerShell(cmd.exe /c \"cd /d C:\\\\Project\\\\Personal\\\\ERP\\\\sourcecode\\\\erp-backend && hello.bat\")",
+      "PowerShell(& \"C:\\\\Project\\\\Personal\\\\ERP\\\\sourcecode\\\\erp-backend\\\\hello.bat\")",
+      "PowerShell(& \"C:\\\\Project\\\\Personal\\\\ERP\\\\sourcecode\\\\erp-backend\\\\test_inventory.bat\")",
+      "PowerShell(node -v)",
+      "PowerShell(npm -v)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); cd \"C:\\\\Project\\\\Personal\\\\ERP\\\\sourcecode\\\\erp-frontend\"; npm install)",
+      "Bash(which chromium-cli *)",
+      "Read(//tmp/**)",
+      "PowerShell(Get-Process -Name dotnet -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); cd C:\\\\temp\\\\pw-check; node task09-verify.mjs)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); cd C:\\\\temp\\\\pw-check; node task09-debug.mjs)"
+    ]
+  }
+}

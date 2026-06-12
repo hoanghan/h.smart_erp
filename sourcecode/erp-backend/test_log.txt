@@ -1,0 +1,15 @@
+===== HEALTH ===== 
+{"status":"ok"} 
+===== LOGIN ===== 
+{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidG9rZW5fdHlwZSI6ImFjY2VzcyIsImlzX2FkbWluIjoidHJ1ZSIsImV4cCI6MTc4MTE1NTM3MSwiaXNzIjoiZXJwLWFwaSJ9.54hNk1K8DDn2PHL4bR6KJWSF8hXMsinYoXcdPAkfOYM","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidG9rZW5fdHlwZSI6InJlZnJlc2giLCJleHAiOjE3ODE3NTkyNzEsImlzcyI6ImVycC1hcGkifQ.rHIg5EGWBjiYNOYYeOpdS4S_Cbfu9ExrSrIoYeYLE04","tokenType":"bearer"} 
+===== ME ===== 
+{"id":1,"username":"admin","isAdmin":true,"employeeId":null} 
+===== CREATE UOM ===== 
+{"id":1,"code":"CAI","name":"Cai"} 
+===== LIST UOMS ===== 
+{"items":[{"id":1,"code":"CAI","name":"Cai"}],"total":1,"page":1,"size":50} 
+===== CREATE PARTNER ===== 
+{"id":1,"code":"KH001","shortName":"Cty ABC","fullName":null,"taxCode":null,"isCustomer":true,"isSupplier":false,"address":null,"phone":null,"email":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"creditLimit":null,"creditDays":30,"isActive":true} 
+===== NO TOKEN (expect 401) ===== 
+HTTP 401 
+===== DONE ===== 
