@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import DataTable from '../../components/DataTable'
 import LookupSelect from '../../components/LookupSelect'
 import LookupLabel from '../../components/LookupLabel'
@@ -19,50 +18,34 @@ export default function SalesOrdersListPage() {
   const [status, setStatus] = useState<string | undefined>()
   const [partnerId, setPartnerId] = useState<number | null>(null)
 
-  const columns: ColumnsType<SalesOrderOut> = [
+  const columns = [
     {
-      title: 'Số đơn hàng',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 160,
-      render: (v: string, record) => <a onClick={() => navigate(`/sales/orders/${record.id}`)}>{v}</a>,
-    },
-    { title: 'Ngày', dataIndex: 'docDate', key: 'docDate', width: 110, render: formatDateVN },
-    {
-      title: 'Khách hàng',
-      dataIndex: 'partnerId',
-      key: 'partnerId',
-      render: (v: number) => <LookupLabel resource="partners" id={v} labelField="shortName" />,
+      field: 'docNo', headerText: 'Số đơn hàng', width: 160,
+      template: (r: SalesOrderOut) => <a onClick={() => navigate(`/sales/orders/${r.id}`)}>{r.docNo}</a>,
     },
     {
-      title: 'Hình thức',
-      dataIndex: 'orderForm',
-      key: 'orderForm',
-      width: 120,
-      render: (v: string) => ORDER_FORM_LABELS[v] ?? v,
+      field: 'docDate', headerText: 'Ngày', width: 110,
+      template: (r: SalesOrderOut) => formatDateVN(r.docDate),
     },
     {
-      title: 'Tổng tiền',
-      dataIndex: 'totalAmount',
-      key: 'totalAmount',
-      width: 130,
-      align: 'right',
-      render: formatNumberVN,
+      field: 'partnerId', headerText: 'Khách hàng',
+      template: (r: SalesOrderOut) => <LookupLabel resource="partners" id={r.partnerId} labelField="shortName" />,
     },
     {
-      title: 'VAT',
-      dataIndex: 'totalVat',
-      key: 'totalVat',
-      width: 110,
-      align: 'right',
-      render: formatNumberVN,
+      field: 'orderForm', headerText: 'Hình thức', width: 120,
+      template: (r: SalesOrderOut) => ORDER_FORM_LABELS[r.orderForm] ?? r.orderForm,
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 150,
-      render: (v: string) => <Tag color={statusColor(v)}>{SALES_ORDER_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'totalAmount', headerText: 'Tổng tiền', width: 130, textAlign: 'Right',
+      template: (r: SalesOrderOut) => formatNumberVN(r.totalAmount),
+    },
+    {
+      field: 'totalVat', headerText: 'VAT', width: 110, textAlign: 'Right',
+      template: (r: SalesOrderOut) => formatNumberVN(r.totalVat),
+    },
+    {
+      field: 'status', headerText: 'Trạng thái', width: 150,
+      template: (r: SalesOrderOut) => <Tag color={statusColor(r.status)}>{SALES_ORDER_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
   ]
 
@@ -73,7 +56,6 @@ export default function SalesOrdersListPage() {
         queryKey="sales-orders"
         endpoint="/sales/orders"
         columns={columns}
-        hideSearch
         extraParams={{ status, partnerId: partnerId ?? undefined }}
         toolbarExtra={
           <Space>

@@ -1,171 +1,192 @@
-﻿import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Layout, Menu, Space, Typography } from 'antd'
-import type { MenuProps } from 'antd'
+﻿import { Outlet, useNavigate } from 'react-router-dom'
 import {
-  AccountBookOutlined,
-  AppstoreOutlined,
-  HomeOutlined,
-  InboxOutlined,
-  LogoutOutlined,
-  SettingOutlined,
-  ShoppingCartOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
+  SidebarComponent,
+  MenuComponent,
+  MenuItemModel,
+  MenuEventArgs
+} from '@syncfusion/ej2-react-navigations'
+import { ButtonComponent } from '@syncfusion/ej2-react-buttons'
 import { useAuthStore } from '../stores/auth'
 
-const { Header, Sider, Content } = Layout
-
-const menuItems: MenuProps['items'] = [
-  { key: '/', icon: <HomeOutlined />, label: 'Trang chủ' },
+const menuItems: MenuItemModel[] = [
   {
-    key: '/sales',
-    icon: <ShoppingCartOutlined />,
-    label: 'Bán hàng',
-    children: [
-      { key: '/sales/quotations', label: 'Báo giá' },
-      { key: '/sales/orders', label: 'Đơn hàng bán' },
+    text: 'Trang chủ',
+    iconCss: 'e-icons e-home',
+    url: '/',
+  },
+  {
+    text: 'CRM',
+    iconCss: 'e-icons e-people',
+    items: [
+      { text: 'Leads', url: '/crm/leads' },
+      { text: 'Opportunities', url: '/crm/opportunities' },
+      { text: 'Báo cáo CRM', url: '/crm/reports' },
     ],
   },
   {
-    key: '/purchasing',
-    icon: <ShoppingOutlined />,
-    label: 'Mua hàng',
-    children: [
-      { key: '/purchasing/requests', label: 'Yêu cầu mua hàng' },
-      { key: '/purchasing/orders', label: 'Đơn hàng mua' },
-      { key: '/purchasing/payments', label: 'Thanh toán mua hàng' },
-      { key: '/purchasing/supplier-returns', label: 'Trả hàng NCC' },
+    text: 'Bán hàng',
+    iconCss: 'e-icons e-cart',
+    items: [
+      { text: 'Báo giá', url: '/sales/quotations' },
+      { text: 'Đơn hàng bán', url: '/sales/orders' },
     ],
   },
   {
-    key: '/inventory',
-    icon: <InboxOutlined />,
-    label: 'Kho hàng',
-    children: [
-      { key: '/inventory/receipts', label: 'Nhập kho' },
-      { key: '/inventory/issues', label: 'Xuất kho' },
-      { key: '/inventory/transfers', label: 'Chuyển kho' },
-      { key: '/inventory/stock', label: 'Tồn kho' },
-      { key: '/inventory/moves', label: 'Thẻ kho' },
+    text: 'Mua hàng',
+    iconCss: 'e-icons e-shopping-cart',
+    items: [
+      { text: 'Yêu cầu mua hàng', url: '/purchasing/requests' },
+      { text: 'Đơn hàng mua', url: '/purchasing/orders' },
+      { text: 'Thanh toán mua hàng', url: '/purchasing/payments' },
+      { text: 'Trả hàng NCC', url: '/purchasing/supplier-returns' },
     ],
   },
   {
-    key: '/accounting',
-    icon: <AccountBookOutlined />,
-    label: 'Kế toán',
-    children: [
-      { key: '/accounting/accounts', label: 'Hệ thống tài khoản' },
-      { key: '/accounting/periods', label: 'Kỳ kế toán' },
-      { key: '/accounting/opening-balances', label: 'Số dư đầu kỳ' },
-      { key: '/accounting/lerp', label: 'Phiếu chờ phát sinh (LERP)' },
-      { key: '/accounting/vouchers', label: 'Chứng từ kế toán' },
-      { key: '/accounting/assets', label: 'Tài sản cố định' },
-      { key: '/accounting/vat-invoices', label: 'Hóa đơn GTGT' },
-      { key: '/accounting/closing', label: 'Kết chuyển cuối kỳ' },
+    text: 'Kho hàng',
+    iconCss: 'e-icons e-box',
+    items: [
+      { text: 'Nhập kho', url: '/inventory/receipts' },
+      { text: 'Xuất kho', url: '/inventory/issues' },
+      { text: 'Chuyển kho', url: '/inventory/transfers' },
+      { text: 'Tồn kho', url: '/inventory/stock' },
+      { text: 'Thẻ kho', url: '/inventory/moves' },
     ],
   },
   {
-    key: '/master-data',
-    icon: <AppstoreOutlined />,
-    label: 'Danh mục',
-    children: [
-      { key: '/master-data/products', label: 'Sản phẩm' },
-      { key: '/master-data/product-groups', label: 'Nhóm hàng' },
-      { key: '/master-data/uoms', label: 'Đơn vị tính' },
-      { key: '/master-data/partners', label: 'Đối tác' },
-      { key: '/master-data/warehouses', label: 'Kho' },
-      { key: '/master-data/payment-methods', label: 'Phương thức thanh toán' },
-      { key: '/master-data/delivery-methods', label: 'Phương thức giao hàng' },
-      { key: '/master-data/departments', label: 'Phòng ban' },
-      { key: '/master-data/employees', label: 'Nhân viên' },
+    text: 'Sản xuất',
+    iconCss: 'e-icons e-gantt',
+    items: [
+      { text: 'BOM', url: '/mfg/boms' },
+      { text: 'Lệnh sản xuất', url: '/mfg/work-orders' },
+      { text: 'Kế hoạch sản xuất', url: '/mfg/production-plans' },
+      { text: 'Báo cáo SX', url: '/mfg/reports' },
+      { text: 'Trạm sản xuất', url: '/mfg/workstations' },
+      { text: 'Công đoạn', url: '/mfg/operations' },
     ],
   },
-  { key: '/admin', icon: <SettingOutlined />, label: 'Quản trị' },
+  {
+    text: 'Kế toán',
+    iconCss: 'e-icons e-calculator',
+    items: [
+      { text: 'Hệ thống tài khoản', url: '/accounting/accounts' },
+      { text: 'Kỳ kế toán', url: '/accounting/periods' },
+      { text: 'Số dư đầu kỳ', url: '/accounting/opening-balances' },
+      { text: 'Phiếu chờ phát sinh (LERP)', url: '/accounting/lerp' },
+      { text: 'Chứng từ kế toán', url: '/accounting/vouchers' },
+      { text: 'Tài sản cố định', url: '/accounting/assets' },
+      { text: 'Hóa đơn GTGT', url: '/accounting/vat-invoices' },
+      { text: 'Kết chuyển cuối kỳ', url: '/accounting/closing' },
+    ],
+  },
+  {
+    text: 'Danh mục',
+    iconCss: 'e-icons e-folder',
+    items: [
+      { text: 'Sản phẩm', url: '/master-data/products' },
+      { text: 'Nhóm hàng', url: '/master-data/product-groups' },
+      { text: 'Đơn vị tính', url: '/master-data/uoms' },
+      { text: 'Đối tác', url: '/master-data/partners' },
+      { text: 'Kho', url: '/master-data/warehouses' },
+      { text: 'Phương thức thanh toán', url: '/master-data/payment-methods' },
+      { text: 'Phương thức giao hàng', url: '/master-data/delivery-methods' },
+      { text: 'Phòng ban', url: '/master-data/departments' },
+      { text: 'Nhân viên', url: '/master-data/employees' },
+    ],
+  },
+  {
+    text: 'Quản trị',
+    iconCss: 'e-icons e-settings',
+    items: [
+      { text: 'Người dùng', url: '/admin/users' },
+      { text: 'Nhóm người dùng', url: '/admin/groups' },
+      { text: 'Phân quyền', url: '/admin/permissions' },
+      { text: 'Đánh số chứng từ', url: '/admin/doc-numbering' },
+      { text: 'Thông tin doanh nghiệp', url: '/admin/company-info' },
+      { text: 'Nhật ký hệ thống', url: '/admin/audit-log' },
+    ],
+  },
 ]
-
-/** Tìm key menu khớp dài nhất với pathname hiện tại để highlight đúng mục. */
-function selectedKeyFor(pathname: string): string {
-  const flat: string[] = []
-  for (const item of menuItems ?? []) {
-    if (!item) continue
-    flat.push(item.key as string)
-    if ('children' in item && item.children) {
-      for (const child of item.children) {
-        if (child) flat.push(child.key as string)
-      }
-    }
-  }
-  const matches = flat
-    .filter((key) => key === '/' ? pathname === '/' : pathname.startsWith(key))
-    .sort((a, b) => b.length - a.length)
-  return matches[0] ?? '/'
-}
 
 export default function AppLayout() {
   const navigate = useNavigate()
-  const location = useLocation()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
-
-  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
-    navigate(key)
-  }
 
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
   }
 
-  const selectedKey = selectedKeyFor(location.pathname)
+  const handleMenuSelect = (args: MenuEventArgs) => {
+    if (args.item.url) {
+      navigate(args.item.url)
+    }
+  }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider breakpoint="lg" collapsible>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {/* Sidebar */}
+      <SidebarComponent width="250px" style={{ backgroundColor: '#001529' }}>
         <div
           style={{
-            height: 48,
-            margin: 12,
+            height: '64px',
+            margin: '12px 16px',
             color: '#fff',
             fontWeight: 600,
-            fontSize: 18,
+            fontSize: '20px',
             textAlign: 'center',
-            lineHeight: '48px',
+            lineHeight: '64px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           }}
         >
           ERP
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          defaultOpenKeys={['/sales', '/purchasing', '/master-data', '/accounting', '/admin']}
-          items={menuItems}
-          onClick={handleMenuClick}
-        />
-      </Sider>
-      <Layout>
-        <Header
+        <div style={{ padding: '0 16px' }}>
+          <MenuComponent
+            items={menuItems}
+            select={handleMenuSelect}
+            orientation="Vertical"
+            cssClass="sidebar-menu"
+            fields={{ text: 'text', iconCss: 'iconCss', url: 'url' }}
+            style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+            }}
+          />
+        </div>
+      </SidebarComponent>
+
+      {/* Main Content */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Header */}
+        <div
           style={{
-            background: '#fff',
+            height: '64px',
+            backgroundColor: '#fff',
+            padding: '0 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
-            padding: '0 24px',
+            gap: '16px',
+            borderBottom: '1px solid #f0f0f0',
           }}
         >
-          <Space size="middle">
-            <Avatar icon={<UserOutlined />} />
-            <Typography.Text>{user?.username ?? '...'}</Typography.Text>
-            <a onClick={handleLogout}>
-              <LogoutOutlined /> Đăng xuất
-            </a>
-          </Space>
-        </Header>
-        <Content style={{ margin: 24 }}>
+          <span style={{ color: '#333', fontSize: '14px' }}>{user?.username ?? '...'}</span>
+          <ButtonComponent
+            cssClass="e-outline"
+            onClick={handleLogout}
+            iconCss="e-icons e-sign-out"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            Đăng xuất
+          </ButtonComponent>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, padding: '24px', overflow: 'auto', backgroundColor: '#f0f2f5' }}>
           <Outlet />
-        </Content>
-      </Layout>
-    </Layout>
+        </div>
+      </div>
+    </div>
   )
 }

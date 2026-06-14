@@ -10,7 +10,7 @@ Trước khi code: đăng ký **Syncfusion Community License** tại syncfusion.
 ```
 Tạo project mới tại C:\Project\Personal\ERP\sourcecode\erp-frontend.
 Đọc system_design/system_design.md mục 2.1 và api_design.md mục 1-2 trước.
-
+Sử dung key này và update env : Ngo9BigBOggjHTQxAR8/V1JHaF1cXmhPYVJ/WmFZfVhgdVVMYFpbR3NPMyBoS35RcEVlWH1fcHRTRWVfUkR+VEFe
 Yêu cầu:
 1. Vite + React 18 + TypeScript; cài @tanstack/react-query, zustand, react-router-dom, axios, dayjs và các gói Syncfusion: @syncfusion/ej2-react-grids, ej2-react-inputs, ej2-react-dropdowns, ej2-react-buttons, ej2-react-navigations (Sidebar, Tabs, Toolbar, Menu), ej2-react-popups (Dialog, Toast), ej2-react-calendars, ej2-react-layouts.
    - src/syncfusion.ts: registerLicense(import.meta.env.VITE_SYNCFUSION_LICENSE) — key đặt trong .env.local (tạo .env.example, KHÔNG commit key); import CSS theme (material3 hoặc bootstrap5) trong main.tsx; bật CLDR/locale vi cho L10n (loadCldr + L10n.load nhãn lưới tiếng Việt: phân trang, filter, group panel...).

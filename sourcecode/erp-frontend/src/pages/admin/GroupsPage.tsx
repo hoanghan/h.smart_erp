@@ -1,11 +1,10 @@
 ﻿import { useState } from 'react'
-import { App as AntApp, Button, Drawer, Form, Input, Popconfirm, Space, Transfer, Typography } from 'antd'
-import { ColumnsType } from 'antd/es/table'
-import { EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import { App as AntApp, Button, Drawer, Form, Input, Popconfirm, Space, Typography } from 'antd'
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
 import { apiClient } from '../../api/client'
-import type { ApiErrorBody, PageResult } from '../../api/types'
+import type { PageResult } from '../../api/types'
+import Transfer from 'antd/es/transfer'
 import DataTable from '../../components/DataTable'
 
 interface GroupRow {
@@ -21,20 +20,29 @@ export default function GroupsPage() {
   const [form] = Form.useForm()
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<GroupRow | null>(null)
-  const [groupMembers, setGroupMembers] = useState<number[]>([])
 
-  const { data: allUsers } = useQuery({
-    queryKey: ['admin-all-users'],
+  const { data: usersData } = useQuery({
+    queryKey: ['admin-users-simple'],
     queryFn: async () => {
-      const res = await apiClient.get<PageResult<{ id: number; username: string }>>('/admin/users', { params: { size: 500 } })
+      const res = await apiClient.get<PageResult<{ id: number; username: string; employeeName: string | null }>>('/admin/users', { params: { size: 500 } })
       return res.data.items
     },
+    enabled: open,
   })
+
+  const [targetKeys, setTargetKeys] = useState<number[]>([])
+
+  const showError = (err: unknown, fallback: string) => {
+    const body = err && typeof err === 'object' && 'response' in err
+      ? (err as any).response?.data?.message ?? fallback
+      : fallback
+    message.error(body)
+  }
 
   const openCreate = () => {
     setEditing(null)
     form.resetFields()
-    setGroupMembers([])
+    setTargetKeys([])
     setOpen(true)
   }
 
@@ -42,28 +50,21 @@ export default function GroupsPage() {
     setEditing(record)
     form.setFieldsValue(record)
     try {
-      const res = await apiClient.get<number[]>('/admin/groups/' + record.id + '/members')
-      setGroupMembers(res.data)
+      const res = await apiClient.get<number[]>(`/admin/groups/${record.id}/members`)
+      setTargetKeys(res.data)
     } catch {
-      setGroupMembers([])
+      setTargetKeys([])
     }
     setOpen(true)
   }
 
-  const showError = (err: unknown, fallback: string) => {
-    const body = axios.isAxiosError<ApiErrorBody>(err) ? err.response?.data : undefined
-    message.error(body?.message ?? fallback)
-  }
-
   const saveMutation = useMutation({
-    mutationFn: async (values: Record<string, unknown>) => {
+    mutationFn: async (values: { code: string; name: string }) => {
       if (editing) {
-        await apiClient.put('/admin/groups/' + editing.id, values)
-        await apiClient.put('/admin/groups/' + editing.id + '/members', groupMembers)
+        await apiClient.put(`/admin/groups/${editing.id}`, values)
+        await apiClient.put(`/admin/groups/${editing.id}/members`, targetKeys)
       } else {
-        const res = await apiClient.post('/admin/groups', values)
-        const newGroupId = (res.data as { id: number }).id
-        await apiClient.put('/admin/groups/' + newGroupId + '/members', groupMembers)
+        await apiClient.post('/admin/groups', values)
       }
     },
     onSuccess: () => {
@@ -75,12 +76,14 @@ export default function GroupsPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiClient.delete('/admin/groups/' + id),
+    mutationFn: async (id: number) => {
+      await apiClient.delete(`/admin/groups/${id}`)
+    },
     onSuccess: () => {
-      message.success('Đã xóa nhóm')
+      message.success('Đã xóa')
       queryClient.invalidateQueries({ queryKey: ['admin-groups'] })
     },
-    onError: (err) => showError(err, 'Không thể xóa'),
+    onError: (err) => showError(err, 'Lỗi xóa'),
   })
 
   const handleSubmit = async () => {
@@ -88,66 +91,72 @@ export default function GroupsPage() {
     saveMutation.mutate(values)
   }
 
-  const columns: ColumnsType<GroupRow> = [
-    { title: 'Mã nhóm', dataIndex: 'code', key: 'code' },
-    { title: 'Tên nhóm', dataIndex: 'name', key: 'name' },
-    { title: 'Số thành viên', dataIndex: 'memberCount', key: 'memberCount' },
+  const columns = [
+    { field: 'code', headerText: 'Mã', width: 120 },
+    { field: 'name', headerText: 'Tên' },
+    { field: 'memberCount', headerText: 'Số thành viên', width: 120 },
     {
-      title: '', key: 'actions', width: 96,
-      render: (_, record) => (
+      field: 'actions', headerText: '', width: 120,
+      template: (record: GroupRow) => (
         <Space>
-          <Button type=\"text\" icon={<EditOutlined />} onClick={() => openEdit(record)} />
-          <Popconfirm title=\"Xóa nhóm này?\" onConfirm={() => deleteMutation.mutate(record.id)}>
-            <Button type=\"text\" danger icon={<DeleteOutlined />} />
+          <Button type="text" icon={<EditOutlined />} onClick={() => openEdit(record)} />
+          <Popconfirm title="Xóa nhóm này?" onConfirm={() => deleteMutation.mutate(record.id)}>
+            <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
     },
   ]
 
+  const dataSource = usersData?.map((u) => ({
+    key: u.id,
+    title: `${u.username} ${u.employeeName ? `(${u.employeeName})` : ''}`,
+  })) ?? []
+
   return (
     <div>
       <Typography.Title level={3}>Nhóm người dùng</Typography.Title>
       <DataTable<GroupRow>
-        queryKey=\"admin-groups\"
-        endpoint=\"/admin/groups\"
+        queryKey="admin-groups"
+        endpoint="/admin/groups"
         columns={columns}
-        searchPlaceholder=\"Tìm kiếm nhóm...\"
+        searchPlaceholder="Tìm kiếm nhóm..."
         toolbarExtra={
-          <Button type=\"primary\" icon={<PlusOutlined />} onClick={openCreate}>Thêm nhóm</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm nhóm</Button>
         }
       />
       <Drawer
-        title={editing ? 'Sửa nhóm: ' + editing.name : 'Thêm nhóm'}
+        title={editing ? 'Sửa nhóm' : 'Thêm nhóm'}
         open={open}
         onClose={() => setOpen(false)}
-        width={520}
+        width={560}
         extra={
           <Space>
             <Button onClick={() => setOpen(false)}>Hủy</Button>
-            <Button type=\"primary\" loading={saveMutation.isPending} onClick={handleSubmit}>Lưu</Button>
+            <Button type="primary" loading={saveMutation.isPending} onClick={handleSubmit}>Lưu</Button>
           </Space>
         }
       >
-        <Form form={form} layout=\"vertical\">
-          <Form.Item name=\"code\" label=\"Mã nhóm\" rules={[{ required: true, message: 'Vui lòng nhập' }]}>
+        <Form form={form} layout="vertical">
+          <Form.Item name="code" label="Mã nhóm" rules={[{ required: true, message: 'Vui lòng nhập' }]}>
             <Input disabled={!!editing} />
           </Form.Item>
-          <Form.Item name=\"name\" label=\"Tên nhóm\" rules={[{ required: true, message: 'Vui lòng nhập' }]}>
+          <Form.Item name="name" label="Tên nhóm" rules={[{ required: true, message: 'Vui lòng nhập' }]}>
             <Input />
           </Form.Item>
+          {usersData && (
+            <Form.Item label="Thành viên">
+              <Transfer
+                dataSource={dataSource}
+                targetKeys={targetKeys}
+                onChange={(keys) => setTargetKeys(keys as number[])}
+                render={(item) => item.title}
+                titles={['Chưa chọn', 'Đã chọn']}
+                style={{ marginBottom: 16 }}
+              />
+            </Form.Item>
+          )}
         </Form>
-        <Typography.Text strong>Thành viên</Typography.Text>
-        <div style={{ marginTop: 8 }}>
-          <Transfer
-            dataSource={allUsers?.map((u) => ({ key: u.id, title: u.username })) || []}
-            targetKeys={groupMembers}
-            onChange={(keys) => setGroupMembers(keys as number[])}
-            render={(item) => item.title}
-            listStyle={{ width: 200, height: 300 }}
-            titles={['Người dùng', 'Thành viên']}
-          />
-        </div>
       </Drawer>
     </div>
   )

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { App as AntApp, Button, Popconfirm, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { apiClient } from '../../api/client'
@@ -31,31 +30,29 @@ export default function PurchasingPaymentsListPage() {
     onError: (err) => showError(err, 'Không thể duyệt thanh toán'),
   })
 
-  const columns: ColumnsType<PoPaymentRequestOut> = [
+  const columns = [
     {
-      title: 'Đơn mua',
-      dataIndex: 'orderId',
-      key: 'orderId',
-      width: 140,
-      render: (v: number) => <DocNoLabel endpoint="/purchasing/orders" id={v} />,
-    },
-    { title: 'Hạn thanh toán', dataIndex: 'dueDate', key: 'dueDate', width: 130, render: formatDateVN },
-    { title: 'Số tiền', dataIndex: 'amount', key: 'amount', align: 'right', width: 140, render: formatNumberVN },
-    { title: 'Ghi chú', dataIndex: 'note', key: 'note' },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 150,
-      render: (v: string) => <Tag color={statusColor(v)}>{PO_PAYMENT_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'orderId', headerText: 'Đơn mua', width: 140,
+      template: (r: PoPaymentRequestOut) => <DocNoLabel endpoint="/purchasing/orders" id={r.orderId} />,
     },
     {
-      title: '',
-      key: '__actions',
-      width: 100,
-      render: (_, record) =>
-        record.status === 'DRAFT' && (
-          <Popconfirm title="Duyệt thanh toán này?" okText="Duyệt" cancelText="Hủy" onConfirm={() => approveMutation.mutate(record.id)}>
+      field: 'dueDate', headerText: 'Hạn thanh toán', width: 130,
+      template: (r: PoPaymentRequestOut) => formatDateVN(r.dueDate),
+    },
+    {
+      field: 'amount', headerText: 'Số tiền', width: 140, textAlign: 'Right',
+      template: (r: PoPaymentRequestOut) => formatNumberVN(r.amount),
+    },
+    { field: 'note', headerText: 'Ghi chú' },
+    {
+      field: 'status', headerText: 'Trạng thái', width: 150,
+      template: (r: PoPaymentRequestOut) => <Tag color={statusColor(r.status)}>{PO_PAYMENT_STATUS_LABELS[r.status] ?? r.status}</Tag>,
+    },
+    {
+      field: '__actions', headerText: '', width: 100,
+      template: (r: PoPaymentRequestOut) =>
+        r.status === 'DRAFT' && (
+          <Popconfirm title="Duyệt thanh toán này?" okText="Duyệt" cancelText="Hủy" onConfirm={() => approveMutation.mutate(r.id)}>
             <Button size="small" type="primary" loading={approveMutation.isPending}>
               Duyệt
             </Button>
@@ -71,7 +68,6 @@ export default function PurchasingPaymentsListPage() {
         queryKey={QUERY_KEY}
         endpoint="/purchasing/payments"
         columns={columns}
-        hideSearch
         extraParams={{ status }}
         toolbarExtra={
           <Space>

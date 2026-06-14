@@ -1,0 +1,93 @@
+===== STOP OLD SERVER ===== 
+ERROR: The process "Erp.Api.exe" not found.
+===== BUILD ===== 
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Erp.Api -> C:\Project\Personal\ERP\sourcecode\erp-backend\src\Erp.Api\bin\Debug\net9.0\Erp.Api.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.38
+===== START API ===== 
+ 
+===== PHASE 1: MASTER DATA ===== 
+{"id":21,"code":"MRPA10641","name":"San pham A","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+{"id":22,"code":"MRPB17517","name":"Ban thanh pham B","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+{"id":23,"code":"MRPC26990","name":"NVL C","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+{"id":24,"code":"MRPD22424","name":"NVL D","productType":"GOODS","groupId":null,"uomId":1,"isKit":false,"priceWeight":null,"barcode":null,"spec":null,"minStock":null,"isActive":true} 
+{"id":4,"code":"WHMRP31689","name":"Kho MRP test","isOutsourcing":false,"isActive":true} 
+{"id":10,"code":"KHMRP28831","shortName":"KH MRP test","fullName":null,"taxCode":null,"isCustomer":true,"isSupplier":false,"address":null,"phone":null,"email":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"creditLimit":null,"creditDays":null,"isActive":true} 
+{"id":11,"code":"NCCMRP9612","shortName":"NCC MRP test","fullName":null,"taxCode":null,"isCustomer":false,"isSupplier":true,"address":null,"phone":null,"email":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"creditLimit":null,"creditDays":null,"isActive":true} 
+{"id":3,"name":"Gia cong chinh","hourly_cost":150000,"working_hours_per_day":8,"description":null,"is_active":true} 
+ 
+===== PHASE 2: OPERATIONS (seed tu core.process) ===== 
+{"items":[{"id":1,"name":"Gia công xi","default_workstation_id":null,"default_workstation_name":null,"standard_time_minutes":0.00,"description":null,"is_active":true},{"id":2,"name":"Nhúng nóng","default_workstation_id":null,"default_workstation_name":null,"standard_time_minutes":0.00,"description":null,"is_active":true},{"id":3,"name":"Taro tán","default_workstation_id":null,"default_workstation_name":null,"standard_time_minutes":0.00,"description":null,"is_active":true}],"total":3,"page":1,"size":50} 
+OP_ID = 1 
+ 
+===== PHASE 3: BOM 2 cap (A = 2xB + 1xC, B = 3xD) ===== 
+{"id":5,"doc_no":"BOM2606-0005","product_id":22,"product_name":"Ban thanh pham B","product_code":"MRPB17517","quantity":1,"is_default":true,"with_operations":true,"status":"DRAFT","items":[{"id":7,"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","quantity":3,"rate":10000,"amount":30000,"bom_id":null,"bom_name":null,"level":0,"parent_id":null}],"operations":[{"id":5,"operation_id":1,"operation_name":"Gia công xi","workstation_id":3,"workstation_name":"Gia cong chinh","time_minutes":30,"cost":75000.000}],"scraps":[]} 
+{"id":6,"doc_no":"BOM2606-0006","product_id":21,"product_name":"San pham A","product_code":"MRPA10641","quantity":1,"is_default":true,"with_operations":true,"status":"DRAFT","items":[{"id":8,"product_id":22,"product_code":"MRPB17517","product_name":"Ban thanh pham B","quantity":2,"rate":0,"amount":0,"bom_id":5,"bom_name":"BOM2606-0005","level":0,"parent_id":null},{"id":9,"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","quantity":1,"rate":20000,"amount":20000,"bom_id":null,"bom_name":null,"level":0,"parent_id":null}],"operations":[{"id":6,"operation_id":1,"operation_name":"Gia công xi","workstation_id":3,"workstation_name":"Gia cong chinh","time_minutes":45,"cost":112500.0000}],"scraps":[]} 
+ 
+===== PHASE 4: EXPLODE BOM A x10 (expect D=60, C=10) ===== 
+{"items":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","quantity":60.0000,"rate":10000.00,"amount":600000.000000},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","quantity":10.0000,"rate":20000.00,"amount":200000.000000}],"total_cost":3425000.000000,"unit_cost":342500.000000} 
+ 
+===== PHASE 5: SEED STOCK D=20, C=10 ===== 
+{"id":5,"docNo":"STOCK_RECONCILIATION-000005","warehouseId":4,"reconciliationDate":"2026-06-13","status":"DRAFT","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:45.301697+00:00","postedBy":null,"postedAt":null,"lines":[{"id":7,"productId":24,"lotId":null,"systemQty":0,"actualQty":20,"difference":0},{"id":8,"productId":23,"lotId":null,"systemQty":0,"actualQty":10,"difference":0}]} 
+{"id":5,"docNo":"STOCK_RECONCILIATION-000005","warehouseId":4,"reconciliationDate":"2026-06-13","status":"DRAFT","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:45.301697+00:00","postedBy":null,"postedAt":null,"lines":[{"id":7,"productId":24,"lotId":null,"systemQty":0,"actualQty":20.0000,"difference":20.0000},{"id":8,"productId":23,"lotId":null,"systemQty":0,"actualQty":10.0000,"difference":10.0000}]} 
+{"id":5,"docNo":"STOCK_RECONCILIATION-000005","warehouseId":4,"reconciliationDate":"2026-06-13","status":"APPROVED","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:45.301697+00:00","postedBy":null,"postedAt":null,"lines":[{"id":7,"productId":24,"lotId":null,"systemQty":0.0000,"actualQty":20.0000,"difference":20.0000},{"id":8,"productId":23,"lotId":null,"systemQty":0.0000,"actualQty":10.0000,"difference":10.0000}]} 
+{"id":5,"docNo":"STOCK_RECONCILIATION-000005","warehouseId":4,"reconciliationDate":"2026-06-13","status":"POSTED","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:45.301697+00:00","postedBy":1,"postedAt":"2026-06-13T15:06:45.8242111+00:00","lines":[{"id":7,"productId":24,"lotId":null,"systemQty":0.0000,"actualQty":20.0000,"difference":20.0000},{"id":8,"productId":23,"lotId":null,"systemQty":0.0000,"actualQty":10.0000,"difference":10.0000}]} 
+ 
+===== PHASE 6: SALES ORDER A x10 ===== 
+{"id":13,"docNo":"DH2606-0012","docDate":"2026-06-13","quotationId":null,"partnerId":10,"orderForm":"NORMAL","salesChannel":null,"salesRegion":null,"warehouseId":4,"deliveryDatePlan":null,"paymentMethodId":null,"deliveryMethodId":null,"salespersonId":null,"approverId":null,"approvedAt":null,"totalAmount":5000000,"totalVat":500000,"note":null,"status":"DRAFT","lines":[{"id":17,"productId":21,"quantity":10,"kitQty":null,"unitPrice":500000,"listPrice":null,"vatPct":10,"amount":5000000.00,"isGift":false,"note":null}]} 
+ 
+===== PHASE 7: PRODUCTION PLAN (expect D shortage = 40) ===== 
+{"id":3,"doc_no":"KHSX2606-0003","status":"DRAFT","sales_orders":[{"id":13,"doc_no":"DH2606-0012","customer_name":"KH MRP test","delivery_date":null,"status":"DRAFT"}],"products":[{"product_id":21,"product_code":"MRPA10641","product_name":"San pham A","bom_no":"BOM2606-0006","required_qty":10.0000,"from_so_ids":[13]}],"materials":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","required_qty":60.0000,"on_hand":20.0000,"ordered":0.0000,"reserved":0.0000,"projected_qty":20.0000,"shortage":40.0000,"is_shortage":true,"suggested_supplier_id":null,"suggested_supplier_name":null},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","required_qty":10.0000,"on_hand":10.0000,"ordered":0.0000,"reserved":0.0000,"projected_qty":10.0000,"shortage":0,"is_shortage":false,"suggested_supplier_id":null,"suggested_supplier_name":null}],"generated_work_orders":null,"generated_material_requests":null,"consolidated_pos":null} 
+D_SHORTAGE = 40.0000 (expect 40) 
+{"id":3,"status":"SUBMITTED"} 
+ 
+===== PHASE 8: GENERATE MATERIAL REQUESTS ===== 
+{"id":3,"doc_no":"KHSX2606-0003","status":"SUBMITTED","sales_orders":[{"id":13,"doc_no":"DH2606-0012","customer_name":"KH MRP test","delivery_date":null,"status":"DRAFT"}],"products":[{"product_id":21,"product_code":"MRPA10641","product_name":"San pham A","bom_no":"BOM2606-0006","required_qty":10.0000,"from_so_ids":[13]}],"materials":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","required_qty":60.0000,"on_hand":20.0000,"ordered":0.0000,"reserved":0.0000,"projected_qty":20.0000,"shortage":40.0000,"is_shortage":true,"suggested_supplier_id":null,"suggested_supplier_name":null},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","required_qty":10.0000,"on_hand":10.0000,"ordered":0.0000,"reserved":0.0000,"projected_qty":10.0000,"shortage":0.0000,"is_shortage":false,"suggested_supplier_id":null,"suggested_supplier_name":null}],"generated_work_orders":null,"generated_material_requests":[{"request_id":7,"doc_no":"YC2606-0007","product_name":"NVL D","qty":40.0000,"supplier_name":null}],"consolidated_pos":null} 
+ 
+===== PHASE 9: TOP UP STOCK D -
+{"id":6,"docNo":"STOCK_RECONCILIATION-000006","warehouseId":4,"reconciliationDate":"2026-06-13","status":"DRAFT","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:53.131441+00:00","postedBy":null,"postedAt":null,"lines":[{"id":9,"productId":24,"lotId":null,"systemQty":0,"actualQty":60,"difference":0}]} 
+{"id":6,"docNo":"STOCK_RECONCILIATION-000006","warehouseId":4,"reconciliationDate":"2026-06-13","status":"DRAFT","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:53.131441+00:00","postedBy":null,"postedAt":null,"lines":[{"id":9,"productId":24,"lotId":null,"systemQty":20.0000,"actualQty":60.0000,"difference":40.0000}]} 
+{"id":6,"docNo":"STOCK_RECONCILIATION-000006","warehouseId":4,"reconciliationDate":"2026-06-13","status":"APPROVED","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:53.131441+00:00","postedBy":null,"postedAt":null,"lines":[{"id":9,"productId":24,"lotId":null,"systemQty":20.0000,"actualQty":60.0000,"difference":40.0000}]} 
+{"id":6,"docNo":"STOCK_RECONCILIATION-000006","warehouseId":4,"reconciliationDate":"2026-06-13","status":"POSTED","note":null,"createdBy":1,"createdAt":"2026-06-13T15:06:53.131441+00:00","postedBy":1,"postedAt":"2026-06-13T15:06:53.4889486+00:00","lines":[{"id":9,"productId":24,"lotId":null,"systemQty":20.0000,"actualQty":60.0000,"difference":40.0000}]} 
+ 
+===== PHASE 10: GENERATE WORK ORDERS ===== 
+{"id":3,"doc_no":"KHSX2606-0003","status":"SUBMITTED","sales_orders":[{"id":13,"doc_no":"DH2606-0012","customer_name":"KH MRP test","delivery_date":null,"status":"DRAFT"}],"products":[{"product_id":21,"product_code":"MRPA10641","product_name":"San pham A","bom_no":"BOM2606-0006","required_qty":10.0000,"from_so_ids":[13]}],"materials":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","required_qty":60.0000,"on_hand":20.0000,"ordered":0.0000,"reserved":0.0000,"projected_qty":20.0000,"shortage":40.0000,"is_shortage":true,"suggested_supplier_id":null,"suggested_supplier_name":null},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","required_qty":10.0000,"on_hand":10.0000,"ordered":0.0000,"reserved":0.0000,"projected_qty":10.0000,"shortage":0.0000,"is_shortage":false,"suggested_supplier_id":null,"suggested_supplier_name":null}],"generated_work_orders":[{"work_order_id":3,"doc_no":"LSX2606-0003","product_name":"San pham A","qty":10.0000}],"generated_material_requests":[{"request_id":7,"doc_no":"YC2606-0007","product_name":"NVL D","qty":40.0000,"supplier_name":null}],"consolidated_pos":null} 
+WO_ID = 3 
+ 
+===== PHASE 11: SUBMIT + START WORK ORDER ===== 
+{"id":3,"status":"NOT_STARTED"} 
+{"stock_doc_id":12,"stock_doc_no":"PXSX2606-0002"} 
+ 
+===== PHASE 12: FINISH 6 A ===== 
+{"id":3,"doc_no":"LSX2606-0003","product_id":21,"product_name":"San pham A","product_code":"MRPA10641","bom_id":6,"bom_no":"BOM2606-0006","qty":10.0000,"produced_qty":6.0000,"progress":60.0,"wip_warehouse_id":4,"wip_warehouse_name":"Kho MRP test","fg_warehouse_id":4,"fg_warehouse_name":"Kho MRP test","planned_start_date":null,"planned_end_date":null,"status":"IN_PROCESS","items":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","quantity":60.0000,"transferred_qty":60.0000,"rate":10000.00,"amount":600000.000000},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","quantity":10.0000,"transferred_qty":10.0000,"rate":20000.00,"amount":200000.000000}],"operations":[{"id":3,"operation_name":"Gia công xi","workstation_name":"Gia cong chinh","total_minutes":0.00,"completed_qty":0.0000,"actual_cost":0.0000}],"finish_batches":[{"id":1,"qty":6,"completed_at":"2026-06-13T15:06:55.9534127+00:00","cost":1155000.00}],"stock_docs":[{"id":12,"doc_no":"PXSX2606-0002","purpose":"MATERIAL_TRANSFER_FOR_MANUFACTURE","created_at":"2026-06-13T15:06:56.74639+00:00"},{"id":13,"doc_no":"PNSX2606-0003","purpose":"MANUFACTURE","created_at":"2026-06-13T15:06:57.060148+00:00"}]} 
+ 
+===== PHASE 13: FINISH 4 A -
+{"id":3,"doc_no":"LSX2606-0003","product_id":21,"product_name":"San pham A","product_code":"MRPA10641","bom_id":6,"bom_no":"BOM2606-0006","qty":10.0000,"produced_qty":10.0000,"progress":100,"wip_warehouse_id":4,"wip_warehouse_name":"Kho MRP test","fg_warehouse_id":4,"fg_warehouse_name":"Kho MRP test","planned_start_date":null,"planned_end_date":null,"status":"COMPLETED","items":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","quantity":60.0000,"transferred_qty":60.0000,"rate":10000.00,"amount":600000.000000},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","quantity":10.0000,"transferred_qty":10.0000,"rate":20000.00,"amount":200000.000000}],"operations":[{"id":3,"operation_name":"Gia công xi","workstation_name":"Gia cong chinh","total_minutes":0.00,"completed_qty":0.0000,"actual_cost":0.0000}],"finish_batches":[{"id":1,"qty":6.0000,"completed_at":"2026-06-13T15:06:55.953412+00:00","cost":1155000.00},{"id":2,"qty":4,"completed_at":"2026-06-13T15:06:56.4782011+00:00","cost":770000.00}],"stock_docs":[{"id":12,"doc_no":"PXSX2606-0002","purpose":"MATERIAL_TRANSFER_FOR_MANUFACTURE","created_at":"2026-06-13T15:06:56.74639+00:00"},{"id":13,"doc_no":"PNSX2606-0003","purpose":"MANUFACTURE","created_at":"2026-06-13T15:06:57.060148+00:00"},{"id":14,"doc_no":"PNSX2606-0004","purpose":"MANUFACTURE","created_at":"2026-06-13T15:06:57.571061+00:00"}]} 
+ 
+===== PHASE 14: CHECK WO COMPLETED + STOCK A=10 ===== 
+{"id":3,"doc_no":"LSX2606-0003","product_id":21,"product_name":"San pham A","product_code":"MRPA10641","bom_id":6,"bom_no":"BOM2606-0006","qty":10.0000,"produced_qty":10.0000,"progress":100,"wip_warehouse_id":4,"wip_warehouse_name":"Kho MRP test","fg_warehouse_id":4,"fg_warehouse_name":"Kho MRP test","planned_start_date":null,"planned_end_date":null,"status":"COMPLETED","items":[{"product_id":24,"product_code":"MRPD22424","product_name":"NVL D","quantity":60.0000,"transferred_qty":60.0000,"rate":10000.00,"amount":600000.000000},{"product_id":23,"product_code":"MRPC26990","product_name":"NVL C","quantity":10.0000,"transferred_qty":10.0000,"rate":20000.00,"amount":200000.000000}],"operations":[{"id":3,"operation_name":"Gia công xi","workstation_name":"Gia cong chinh","total_minutes":0.00,"completed_qty":0.0000,"actual_cost":0.0000}],"finish_batches":[{"id":1,"qty":6.0000,"completed_at":"2026-06-13T15:06:55.953412+00:00","cost":1155000.00},{"id":2,"qty":4.0000,"completed_at":"2026-06-13T15:06:56.478201+00:00","cost":770000.00}],"stock_docs":[{"id":12,"doc_no":"PXSX2606-0002","purpose":"MATERIAL_TRANSFER_FOR_MANUFACTURE","created_at":"2026-06-13T15:06:56.74639+00:00"},{"id":13,"doc_no":"PNSX2606-0003","purpose":"MANUFACTURE","created_at":"2026-06-13T15:06:57.060148+00:00"},{"id":14,"doc_no":"PNSX2606-0004","purpose":"MANUFACTURE","created_at":"2026-06-13T15:06:57.571061+00:00"}]} 
+WO_STATUS = COMPLETED (expect COMPLETED) 
+[{"id":11,"productId":21,"warehouseId":4,"lotId":null,"qtyOnHand":10.0000,"reservedQty":0.0000,"orderedQty":0.0000,"projectedQty":10.0000,"updatedAt":"2026-06-13T15:06:56.637504+00:00"}] 
+A_QTY_ON_HAND = 10.0000 (expect 10) 
+ 
+===== PHASE 15: MANUFACTURING REPORTS ===== 
+[{"work_order_id":3,"doc_no":"LSX2606-0003","product_name":"San pham A","bom_qty":10.0000,"produced_qty":10.0000,"bom_cost":1925000.000000,"actual_cost":1925000.00,"variance":0.000000,"variance_percent":0}] 
+[{"work_order_id":2,"doc_no":"LSX2606-0002","product_name":"San pham A","wip_balance":10.0000,"wip_cost":800000.000000,"created_at":"2026-06-13T15:00:55.999768+00:00"}] 
+ 
+===== PHASE 16: CONSOLIDATE TO PO ===== 
+{"consolidated_pos":[{"supplier_id":11,"supplier_name":"NCC MRP test","total_amount":400000.000000,"items":[{"product_id":24,"product_name":"NVL D","qty":40.0000,"rate":10000.00,"amount":400000.000000}]}]} 
+ 
+===== SUMMARY ===== 
+PID_A=21 PID_B=22 PID_C=23 PID_D=24 WH_ID=4 
+BOM_A_ID=6 BOM_B_ID=5 PP_ID=3 WO_ID=3 
+D_SHORTAGE=40.0000 (expect 40) 
+WO_STATUS=COMPLETED (expect COMPLETED) 
+A_QTY_ON_HAND=10.0000 (expect 10) 
+ 
+===== MRP TEST COMPLETE ===== 

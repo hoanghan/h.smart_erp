@@ -1,20 +1,16 @@
-import type { ColumnsType } from 'antd/es/table'
 import ActiveTag from '../../components/ActiveTag'
 import CrudPage from '../../components/crud/CrudPage'
 import type { CrudFormField } from '../../components/crud/types'
 import type { EmployeeOut } from '../../api/types'
 
-const columns: ColumnsType<EmployeeOut> = [
-  { title: 'Mã NV', dataIndex: 'code', key: 'code', width: 120 },
-  { title: 'Họ tên', dataIndex: 'fullName', key: 'fullName' },
-  { title: 'Điện thoại', dataIndex: 'phone', key: 'phone', width: 130 },
-  { title: 'Email', dataIndex: 'email', key: 'email' },
+const columns = [
+  { field: 'code', headerText: 'Mã NV', width: 120 },
+  { field: 'fullName', headerText: 'Họ tên' },
+  { field: 'phone', headerText: 'Điện thoại', width: 130 },
+  { field: 'email', headerText: 'Email' },
   {
-    title: 'Hoạt động',
-    dataIndex: 'isActive',
-    key: 'isActive',
-    width: 110,
-    render: (active: boolean) => <ActiveTag active={active} />,
+    field: 'isActive', headerText: 'Hoạt động', width: 110,
+    template: (r: EmployeeOut) => <ActiveTag active={r.isActive} />,
   },
 ]
 

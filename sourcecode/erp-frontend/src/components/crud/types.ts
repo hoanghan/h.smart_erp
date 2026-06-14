@@ -1,4 +1,4 @@
-import type { ColumnsType } from 'antd/es/table'
+import type { ReactNode } from 'react'
 import type { Rule } from 'antd/es/form'
 
 export type CrudFieldType = 'text' | 'number' | 'switch' | 'select' | 'lookup' | 'textarea'
@@ -22,10 +22,18 @@ export interface CrudFormField {
   editOnly?: boolean
 }
 
+export interface CrudColumn<TOut> {
+  field: string
+  headerText: string
+  width?: number
+  textAlign?: string
+  template?: (record: TOut) => ReactNode
+}
+
 export interface CrudPageConfig<TOut extends { id: number }> {
   resource: string
   title: string
-  columns: ColumnsType<TOut>
+  columns: CrudColumn<TOut>[]
   formFields: CrudFormField[]
   searchPlaceholder?: string
   initialValues?: Record<string, unknown>

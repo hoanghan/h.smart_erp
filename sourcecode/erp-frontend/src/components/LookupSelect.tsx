@@ -7,6 +7,8 @@ import type { LookupItem, PageResult } from '../api/types'
 interface LookupSelectProps {
   /** Tên resource danh mục, vd "uoms" -> GET /md/uoms */
   resource: string
+  /** Ghi đè endpoint mặc định "/md/{resource}" (vd "/sales/price-lists") */
+  endpoint?: string
   value?: number | null
   onChange?: (value: number | null) => void
   placeholder?: string
@@ -26,6 +28,7 @@ function labelOf(item: LookupItem, labelField: 'name' | 'fullName' | 'shortName'
 /** Select AntD tìm kiếm từ xa theo ?q=, hiển thị "code — tên". */
 export default function LookupSelect({
   resource,
+  endpoint,
   value,
   onChange,
   placeholder = 'Tìm kiếm...',
@@ -34,6 +37,7 @@ export default function LookupSelect({
   excludeId,
   disabled,
 }: LookupSelectProps) {
+  const base = endpoint ?? `/md/${resource}`
   const [options, setOptions] = useState<{ value: number; label: string }[]>([])
   const [loading, setLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -43,7 +47,7 @@ export default function LookupSelect({
     if (value === null || value === undefined) return
     if (options.some((o) => o.value === value)) return
     let cancelled = false
-    apiClient.get<LookupItem>(`/md/${resource}/${value}`).then((res) => {
+    apiClient.get<LookupItem>(`${base}/${value}`).then((res) => {
       if (cancelled) return
       const item = res.data
       setOptions((prev) =>
@@ -56,14 +60,14 @@ export default function LookupSelect({
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource, value])
+  }, [base, value])
 
   const search = (q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
       setLoading(true)
       try {
-        const res = await apiClient.get<PageResult<LookupItem>>(`/md/${resource}`, {
+        const res = await apiClient.get<PageResult<LookupItem>>(base, {
           params: { q: q || undefined, size: 20 },
         })
         const items = res.data.items
@@ -79,7 +83,7 @@ export default function LookupSelect({
   useEffect(() => {
     search('')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resource])
+  }, [base])
 
   const handleChange: SelectProps['onChange'] = (val) => {
     onChange?.(val === undefined ? null : (val as number))

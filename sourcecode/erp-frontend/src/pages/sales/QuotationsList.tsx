@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { PlusOutlined } from '@ant-design/icons'
 import DataTable from '../../components/DataTable'
 import LookupSelect from '../../components/LookupSelect'
@@ -10,9 +9,10 @@ import type { QuotationOut } from '../../api/types'
 import { QUOTATION_STATUS_LABELS, statusColor } from '../../api/workflow'
 import { formatDateVN } from '../../utils/format'
 
-const QUOTE_TYPE_LABELS: Record<string, string> = {
-  NORMAL: 'Thông thường',
-  PROJECT: 'Dự án',
+const ORDER_TYPE_LABELS: Record<string, string> = {
+  SALES: 'Bán hàng',
+  MAINTENANCE: 'Bảo trì',
+  SHOPPING_CART: 'Đặt hàng online',
 }
 
 export default function QuotationsListPage() {
@@ -20,34 +20,30 @@ export default function QuotationsListPage() {
   const [status, setStatus] = useState<string | undefined>()
   const [partnerId, setPartnerId] = useState<number | null>(null)
 
-  const columns: ColumnsType<QuotationOut> = [
+  const columns = [
     {
-      title: 'Số báo giá',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 160,
-      render: (v: string, record) => <a onClick={() => navigate(`/sales/quotations/${record.id}`)}>{v}</a>,
-    },
-    { title: 'Ngày', dataIndex: 'docDate', key: 'docDate', width: 110, render: formatDateVN },
-    {
-      title: 'Khách hàng',
-      dataIndex: 'partnerId',
-      key: 'partnerId',
-      render: (v: number) => <LookupLabel resource="partners" id={v} labelField="shortName" />,
+      field: 'docNo', headerText: 'Số báo giá', width: 160,
+      template: (r: QuotationOut) => <a onClick={() => navigate(`/sales/quotations/${r.id}`)}>{r.docNo}</a>,
     },
     {
-      title: 'Loại BG',
-      dataIndex: 'quoteType',
-      key: 'quoteType',
-      width: 130,
-      render: (v: string) => QUOTE_TYPE_LABELS[v] ?? v,
+      field: 'docDate', headerText: 'Ngày', width: 110,
+      template: (r: QuotationOut) => formatDateVN(r.docDate),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 170,
-      render: (v: string) => <Tag color={statusColor(v)}>{QUOTATION_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'partnerId', headerText: 'Khách hàng',
+      template: (r: QuotationOut) => <LookupLabel resource="partners" id={r.partnerId} labelField="shortName" />,
+    },
+    {
+      field: 'orderType', headerText: 'Loại đơn', width: 130,
+      template: (r: QuotationOut) => ORDER_TYPE_LABELS[r.orderType] ?? r.orderType,
+    },
+    {
+      field: 'validTill', headerText: 'Hiệu lực đến', width: 110,
+      template: (r: QuotationOut) => formatDateVN(r.validTill),
+    },
+    {
+      field: 'status', headerText: 'Trạng thái', width: 150,
+      template: (r: QuotationOut) => <Tag color={statusColor(r.status)}>{QUOTATION_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
   ]
 
@@ -58,7 +54,6 @@ export default function QuotationsListPage() {
         queryKey="sales-quotations"
         endpoint="/sales/quotations"
         columns={columns}
-        hideSearch
         extraParams={{ status, partnerId: partnerId ?? undefined }}
         toolbarExtra={
           <Space>

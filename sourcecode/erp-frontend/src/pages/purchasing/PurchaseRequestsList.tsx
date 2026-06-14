@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { PlusOutlined } from '@ant-design/icons'
 import DataTable from '../../components/DataTable'
 import LookupLabel from '../../components/LookupLabel'
@@ -13,33 +12,26 @@ export default function PurchaseRequestsListPage() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<string | undefined>()
 
-  const columns: ColumnsType<PurchaseRequestOut> = [
+  const columns = [
     {
-      title: 'Số YC',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 160,
-      render: (v: string, record) => <a onClick={() => navigate(`/purchasing/requests/${record.id}`)}>{v}</a>,
-    },
-    { title: 'Ngày', dataIndex: 'docDate', key: 'docDate', width: 110, render: formatDateVN },
-    {
-      title: 'Người yêu cầu',
-      dataIndex: 'requesterId',
-      key: 'requesterId',
-      render: (v: number | null) => <LookupLabel resource="employees" id={v} labelField="fullName" />,
+      field: 'docNo', headerText: 'Số YC', width: 160,
+      template: (r: PurchaseRequestOut) => <a onClick={() => navigate(`/purchasing/requests/${r.id}`)}>{r.docNo}</a>,
     },
     {
-      title: 'Bộ phận',
-      dataIndex: 'departmentId',
-      key: 'departmentId',
-      render: (v: number | null) => <LookupLabel resource="departments" id={v} />,
+      field: 'docDate', headerText: 'Ngày', width: 110,
+      template: (r: PurchaseRequestOut) => formatDateVN(r.docDate),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 150,
-      render: (v: string) => <Tag color={statusColor(v)}>{PURCHASE_REQUEST_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'requesterId', headerText: 'Người yêu cầu',
+      template: (r: PurchaseRequestOut) => <LookupLabel resource="employees" id={r.requesterId} labelField="fullName" />,
+    },
+    {
+      field: 'departmentId', headerText: 'Bộ phận',
+      template: (r: PurchaseRequestOut) => <LookupLabel resource="departments" id={r.departmentId} />,
+    },
+    {
+      field: 'status', headerText: 'Trạng thái', width: 150,
+      template: (r: PurchaseRequestOut) => <Tag color={statusColor(r.status)}>{PURCHASE_REQUEST_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
   ]
 
@@ -50,7 +42,6 @@ export default function PurchaseRequestsListPage() {
         queryKey="purchase-requests"
         endpoint="/purchasing/requests"
         columns={columns}
-        hideSearch
         extraParams={{ status }}
         toolbarExtra={
           <Space>

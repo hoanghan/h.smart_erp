@@ -1,11 +1,10 @@
-import type { ColumnsType } from 'antd/es/table'
 import CrudPage from '../../components/crud/CrudPage'
 import type { CrudFormField } from '../../components/crud/types'
 import type { ProductGroupOut } from '../../api/types'
 
-const columns: ColumnsType<ProductGroupOut> = [
-  { title: 'Mã nhóm', dataIndex: 'code', key: 'code', width: 160 },
-  { title: 'Tên nhóm', dataIndex: 'name', key: 'name' },
+const columns = [
+  { field: 'code', headerText: 'Mã nhóm', width: 160 },
+  { field: 'name', headerText: 'Tên nhóm' },
 ]
 
 const formFields: CrudFormField[] = [

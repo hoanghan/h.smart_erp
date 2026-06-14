@@ -1,27 +1,25 @@
-﻿import { useEffect, useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { App as AntApp, Button, Card, Form, Input, Space, Typography, Upload } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { apiClient } from '../../api/client'
-import axios from 'axios'
-import type { ApiErrorBody } from '../../api/types'
 
 interface CompanyInfoData {
-  companyName: string | null
-  taxCode: string | null
-  address: string | null
-  representative: string | null
-  chiefAccountant: string | null
-  treasurer: string | null
-  logoBase64: string | null
+  companyName?: string
+  taxCode?: string
+  address?: string
+  representative?: string
+  chiefAccountant?: string
+  treasurer?: string
+  logoBase64?: string
 }
 
 export default function CompanyInfoPage() {
   const { message } = AntApp.useApp()
   const [form] = Form.useForm()
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string>('')
 
-  const { data, isLoading } = useQuery({
+  const { data: companyInfo, isLoading } = useQuery({
     queryKey: ['admin-company-info'],
     queryFn: async () => {
       const res = await apiClient.get<CompanyInfoData>('/admin/company-info')
@@ -30,87 +28,94 @@ export default function CompanyInfoPage() {
   })
 
   useEffect(() => {
-    if (data) {
-      form.setFieldsValue(data)
-      if (data.logoBase64) setLogoPreview(data.logoBase64)
+    if (companyInfo) {
+      form.setFieldsValue(companyInfo)
+      if (companyInfo.logoBase64) setLogoPreview(companyInfo.logoBase64)
     }
-  }, [data, form])
+  }, [companyInfo, form])
 
   const saveMutation = useMutation({
-    mutationFn: async (values: Record<string, unknown>) => {
+    mutationFn: async (values: CompanyInfoData) => {
       await apiClient.put('/admin/company-info', values)
     },
     onSuccess: () => {
-      message.success('Đã cập nhật thông tin doanh nghiệp')
+      message.success('Đã lưu thông tin')
     },
     onError: (err) => {
-      const body = axios.isAxiosError<ApiErrorBody>(err) ? err.response?.data : undefined
-      message.error(body?.message ?? 'Lỗi lưu')
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as any).response?.data?.message ?? 'Lỗi lưu'
+        : 'Lỗi lưu'
+      message.error(msg)
     },
   })
 
   const handleSubmit = async () => {
     const values = await form.validateFields()
-    if (logoPreview && !values.logoBase64) values.logoBase64 = logoPreview
+    values.logoBase64 = logoPreview
     saveMutation.mutate(values)
   }
 
   const handleLogoUpload = (file: File) => {
     const reader = new FileReader()
     reader.onload = (e) => {
-      const base64 = (e.target?.result as string)?.split(',')[1]
-      if (base64) {
-        const dataUrl = data:;base64,
-        setLogoPreview(dataUrl)
-        form.setFieldsValue({ logoBase64: dataUrl })
-      }
+      const result = e.target?.result as string
+      setLogoPreview(result)
     }
     reader.readAsDataURL(file)
     return false
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoPreview('')
   }
 
   return (
     <div>
       <Typography.Title level={3}>Thông tin doanh nghiệp</Typography.Title>
       <Card loading={isLoading} style={{ maxWidth: 600 }}>
-        <Form form={form} layout=\"vertical\">
-          <Form.Item name=\"companyName\" label=\"Tên doanh nghiệp\">
+        <Form form={form} layout="vertical">
+          <Form.Item name="companyName" label="Tên doanh nghiệp">
             <Input />
           </Form.Item>
-          <Form.Item name=\"taxCode\" label=\"Mã số thuế\">
+          <Form.Item name="taxCode" label="Mã số thuế">
             <Input />
           </Form.Item>
-          <Form.Item name=\"address\" label=\"Địa chỉ\">
+          <Form.Item name="address" label="Địa chỉ">
             <Input.TextArea rows={2} />
           </Form.Item>
-          <Form.Item name=\"representative\" label=\"Người đại diện\">
+          <Form.Item name="representative" label="Người đại diện">
             <Input />
           </Form.Item>
-          <Form.Item name=\"chiefAccountant\" label=\"Kế toán trưởng\">
+          <Form.Item name="chiefAccountant" label="Kế toán trưởng">
             <Input />
           </Form.Item>
-          <Form.Item name=\"treasurer\" label=\"Thủ quỹ\">
+          <Form.Item name="treasurer" label="Thủ quỹ">
             <Input />
           </Form.Item>
-          <Form.Item label=\"Logo\">
+          <Form.Item label="Logo">
             <Upload
-              accept=\"image/*\"
+              accept="image/*"
               showUploadList={false}
-              beforeUpload={handleLogoUpload as any}
+              beforeUpload={handleLogoUpload}
             >
-              <Button icon={<UploadOutlined />}>Chọn ảnh logo</Button>
+              <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
             </Upload>
             {logoPreview && (
               <div style={{ marginTop: 8 }}>
-                <img src={logoPreview} alt=\"Logo\" style={{ maxWidth: 200, maxHeight: 100 }} />
+                <img src={logoPreview} alt="Logo" style={{ maxWidth: 200, maxHeight: 100 }} />
+                <Button type="link" onClick={handleRemoveLogo} style={{ marginLeft: 8 }}>
+                  Xóa
+                </Button>
               </div>
             )}
           </Form.Item>
-          <Form.Item name=\"logoBase64\" hidden><Input /></Form.Item>
+          <Form.Item name="logoBase64" hidden><Input /></Form.Item>
           <Form.Item>
-            <Button type=\"primary\" loading={saveMutation.isPending} onClick={handleSubmit}>
-              Lưu thông tin
-            </Button>
+            <Space>
+              <Button type="primary" loading={saveMutation.isPending} onClick={handleSubmit}>
+                Lưu thông tin
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </Card>

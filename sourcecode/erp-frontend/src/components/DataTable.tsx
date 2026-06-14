@@ -1,96 +1,213 @@
-import { useEffect, useState } from 'react'
-import { Input, Table } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
+import {
+  ColumnChooser,
+  ExcelExport,
+  Filter,
+  FilterSettingsModel,
+  GridComponent,
+  Group,
+  GroupSettingsModel,
+  Inject,
+  Page,
+  PageSettingsModel,
+  PdfExport,
+  Search,
+  SearchSettingsModel,
+  Sort,
+  SortSettingsModel,
+  Toolbar,
+  ToolbarItems,
+} from '@syncfusion/ej2-react-grids'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { apiClient } from '../api/client'
-import type { PageResult } from '../api/types'
+
+interface PageResult<T> {
+  items: T[]
+  total: number
+  page: number
+  size: number
+}
 
 interface DataTableProps<T> {
-  /** Khóa cache cho TanStack Query — nên duy nhất theo resource */
   queryKey: string
-  /** Đường dẫn API trả về PageResult<T>, vd "/md/products" */
   endpoint: string
-  columns: ColumnsType<T>
-  rowKey?: string
+  columns: any[]
   /** Tham số lọc cố định gửi kèm mỗi request, vd { status: 'DRAFT' } */
   extraParams?: Record<string, string | number | boolean | undefined>
   searchPlaceholder?: string
+  allowGrouping?: boolean
+  allowPaging?: boolean
+  allowSorting?: boolean
+  allowFiltering?: boolean
   pageSize?: number
-  /** Nội dung hiển thị bên phải ô tìm kiếm, vd nút "Thêm mới" */
+  toolbar?: ToolbarItems[]
+  onRowDoubleClick?: (data: T) => void
   toolbarExtra?: React.ReactNode
-  /** Ẩn ô tìm kiếm — dùng khi API không hỗ trợ ?q= (chỉ lọc theo extraParams) */
-  hideSearch?: boolean
 }
 
-/** Bảng dữ liệu dùng chung: phân trang + tìm kiếm phía server theo PageResult{items,total,page,size}. */
-export default function DataTable<T extends object>({
+export default function DataTable<T extends Record<string, any>>({
   queryKey,
   endpoint,
   columns,
-  rowKey = 'id',
   extraParams,
   searchPlaceholder = 'Tìm kiếm...',
+  allowGrouping = false,
+  allowPaging = true,
+  allowSorting = true,
+  allowFiltering = true,
   pageSize = 20,
+  toolbar = ['Search', 'ColumnChooser'],
+  onRowDoubleClick,
   toolbarExtra,
-  hideSearch = false,
 }: DataTableProps<T>) {
   const [page, setPage] = useState(1)
-  const [size, setSize] = useState(pageSize)
+  const [pageSizeState, setPageSizeState] = useState(pageSize)
   const [search, setSearch] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [sortString, setSortString] = useState<string | null>(null)
+  const [data, setData] = useState<T[]>([])
+  const gridRef = useRef<GridComponent>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 400)
-    return () => clearTimeout(timer)
-  }, [search])
-
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedSearch])
-
-  const { data, isFetching } = useQuery({
-    queryKey: [queryKey, page, size, debouncedSearch, extraParams],
+  const { data: pageData, isFetching, refetch } = useQuery({
+    queryKey: [queryKey, page, pageSizeState, search, sortString, extraParams],
     queryFn: async () => {
-      const params: Record<string, unknown> = { page, size, ...extraParams }
-      if (debouncedSearch) params.q = debouncedSearch
-      const res = await apiClient.get<PageResult<T>>(endpoint, { params })
-      return res.data
+      const params = new URLSearchParams()
+      params.append('page', page.toString())
+      params.append('size', pageSizeState.toString())
+      if (search) params.append('q', search)
+      if (sortString) params.append('sort', sortString)
+      if (extraParams) {
+        for (const [key, value] of Object.entries(extraParams)) {
+          if (value !== undefined) params.append(key, String(value))
+        }
+      }
+
+      const response = await apiClient.get<PageResult<T>>(`${endpoint}?${params.toString()}`)
+      return response.data
     },
-    placeholderData: (prev) => prev,
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiClient.delete(`${endpoint}/${id}`),
+    onSuccess: () => {
+      refetch()
+    },
+  })
+
+  useEffect(() => {
+    if (pageData) {
+      setData(pageData.items)
+      if (gridRef.current) {
+        gridRef.current.dataSource = pageData.items
+        gridRef.current.refresh()
+      }
+    }
+  }, [pageData])
+
+  useEffect(() => {
+    if (!gridRef.current) return
+    if (isFetching) gridRef.current.showSpinner()
+    else gridRef.current.hideSpinner()
+  }, [isFetching])
+
+  const pageSettings: PageSettingsModel = {
+    pageSize: pageSizeState,
+    pageSizes: [10, 20, 50, 100],
+    pageCount: 5,
+  }
+
+  const filterSettings: FilterSettingsModel = {
+    type: 'Menu',
+  }
+
+  const sortSettings: SortSettingsModel = {
+    allowUnsort: true,
+  }
+
+  const groupSettings: GroupSettingsModel = {
+    showGroupedColumn: allowGrouping,
+    showDropArea: allowGrouping,
+  }
+
+  const searchSettings: SearchSettingsModel = {
+    fields: [],
+    operator: 'contains',
+    ignoreCase: true,
+  }
+
+  const handleActionBegin = (args: any) => {
+    if (args.requestType === 'delete') {
+      args.cancel = true
+      if (window.confirm('Bạn có chắc chắn muốn xóa?')) {
+        deleteMutation.mutate(args.data[0].id)
+      }
+    }
+  }
+
+  const handleActionComplete = (args: any) => {
+    if (args.requestType === 'paging') {
+      setPage(args.currentPage)
+      if (args.currentPageSize && args.currentPageSize !== pageSizeState) {
+        setPageSizeState(args.currentPageSize)
+      }
+    } else if (args.requestType === 'searching') {
+      setSearch(args.searchString)
+      setPage(1)
+    } else if (args.requestType === 'sorting') {
+      if (args.columns.length > 0) {
+        const column = args.columns[0]
+        setSortString(`${column.field},${column.direction}`)
+      } else {
+        setSortString(null)
+      }
+    }
+  }
+
+  const handleRowDataBound = (args: any) => {
+    if (onRowDoubleClick) {
+      args.row.addEventListener('dblclick', () => {
+        onRowDoubleClick(args.data)
+      })
+    }
+  }
+
+  const handleCreated = () => {
+    const input = gridRef.current?.element.querySelector<HTMLInputElement>('.e-toolbar .e-search input')
+    if (input) input.placeholder = searchPlaceholder
+  }
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, gap: 16 }}>
-        {hideSearch ? (
-          <div />
-        ) : (
-          <Input.Search
-            allowClear
-            placeholder={searchPlaceholder}
-            style={{ maxWidth: 320 }}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        )}
-        {toolbarExtra}
-      </div>
-      <Table<T>
-        rowKey={rowKey}
+    <div className="control-pane">
+      {toolbarExtra && (
+        <div style={{ marginBottom: 16 }}>
+          {toolbarExtra}
+        </div>
+      )}
+      <GridComponent
+        ref={gridRef}
+        dataSource={data}
         columns={columns}
-        dataSource={data?.items ?? []}
-        loading={isFetching}
-        pagination={{
-          current: data?.page ?? page,
-          pageSize: data?.size ?? size,
-          total: data?.total ?? 0,
-          showSizeChanger: true,
-          showTotal: (total) => `${total} bản ghi`,
-          onChange: (p, s) => {
-            setPage(p)
-            setSize(s)
-          },
-        }}
-      />
+        allowPaging={allowPaging}
+        allowSorting={allowSorting}
+        allowFiltering={allowFiltering}
+        allowGrouping={allowGrouping}
+        pageSettings={pageSettings}
+        filterSettings={filterSettings}
+        sortSettings={sortSettings}
+        groupSettings={groupSettings}
+        searchSettings={searchSettings}
+        toolbar={toolbar}
+        showColumnChooser={true}
+        allowExcelExport={true}
+        allowPdfExport={true}
+        actionBegin={handleActionBegin}
+        actionComplete={handleActionComplete}
+        rowDataBound={handleRowDataBound}
+        created={handleCreated}
+        loadingIndicator={{ indicatorType: 'Shimmer' }}
+        locale="vi-VN"
+      >
+        <Inject services={[Page, Sort, Filter, Toolbar, Search, ColumnChooser, ExcelExport, PdfExport, Group]} />
+      </GridComponent>
     </div>
   )
 }

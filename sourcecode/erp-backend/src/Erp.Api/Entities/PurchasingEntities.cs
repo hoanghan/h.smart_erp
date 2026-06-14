@@ -1,19 +1,23 @@
 namespace Erp.Api.Entities;
+using Erp.Api.Core;
 
 /// <summary>purchasing.purchase_request — Yêu cầu mua hàng nội bộ.</summary>
-public class PurchaseRequest
+public class PurchaseRequest : IHasAudit, IApprovable
 {
     public long Id { get; set; }
     public string DocNo { get; set; } = null!;
     public DateOnly DocDate { get; set; }
     public long? RequesterId { get; set; }
     public long? DepartmentId { get; set; }
+    public long? ProductionPlanId { get; set; }
     public string Status { get; set; } = "DRAFT";
     public string? StatusReason { get; set; }     // added column
     public string RequestType { get; set; } = "PURCHASE"; // PURCHASE/TRANSFER/ISSUE
     public DateOnly? RequiredBy { get; set; }
     public string? Note { get; set; }
     public long? CreatorId { get; set; }          // added column
+    public long? ApproverId { get; set; }
+    public DateTimeOffset? ApprovedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
     public List<PurchaseRequestLine> Lines { get; set; } = new();
@@ -30,7 +34,7 @@ public class PurchaseRequestLine
 }
 
 /// <summary>purchasing.purchase_order — Đơn hàng mua.</summary>
-public class PurchaseOrder
+public class PurchaseOrder : IHasAudit, IApprovable
 {
     public long Id { get; set; }
     public string DocNo { get; set; } = null!;

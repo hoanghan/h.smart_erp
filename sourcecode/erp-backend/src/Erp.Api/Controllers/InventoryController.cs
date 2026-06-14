@@ -830,7 +830,7 @@ public class InventoryController(
         ));
     }
 
-    /// <summary>POSTED: sinh stock_move điều chỉnh (+/- difference), cập nhật stock_balance.</summary>
+    /// <summary>POSTED: sinh stock_doc điều chỉnh (RECEIPT/ISSUE _CODE_ADJUST) + stock_move, cập nhật stock_balance.</summary>
     private async Task<IActionResult> PostReconciliation(StockReconciliation r)
     {
         if (await Denied("UPDATE")) return Forbidden("UPDATE");
@@ -840,25 +840,69 @@ public class InventoryController(
         await using var tx = await db.Database.BeginTransactionAsync();
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        foreach (var l in r.Lines)
-        {
-            if (l.Difference == 0) continue;
+        var now = DateTimeOffset.UtcNow;
+        var userId = RbacService.GetUserId(User);
+        var changedLines = r.Lines.Where(l => l.Difference != 0).ToList();
 
+        // Gắn move điều chỉnh tăng vào 1 stock_doc RECEIPT_CODE_ADJUST, giảm vào 1 stock_doc ISSUE_CODE_ADJUST
+        StockDoc? receiptDoc = changedLines.Any(l => l.Difference > 0)
+            ? new StockDoc
+            {
+                DocNo = await numbering.NextAsync("STOCK_RECEIPT"),
+                DocType = "RECEIPT", SubType = "RECEIPT_CODE_ADJUST", Purpose = "MATERIAL_RECEIPT",
+                RequestDate = today, ActualDate = today, ToWarehouseId = r.WarehouseId,
+                Status = "COMPLETED", CreatedBy = userId, CompletedBy = userId, CompletedAt = now,
+                Note = $"Điều chỉnh tăng theo kiểm kê {r.DocNo}",
+                Lines = changedLines.Where(l => l.Difference > 0).Select(l => new StockDocLine
+                {
+                    ProductId = l.ProductId, LotId = l.LotId, RequestedQty = l.Difference, ActualQty = l.Difference,
+                }).ToList(),
+            }
+            : null;
+        if (receiptDoc is not null) db.StockDocs.Add(receiptDoc);
+
+        StockDoc? issueDoc = changedLines.Any(l => l.Difference < 0)
+            ? new StockDoc
+            {
+                DocNo = await numbering.NextAsync("STOCK_ISSUE"),
+                DocType = "ISSUE", SubType = "ISSUE_CODE_ADJUST", Purpose = "MATERIAL_ISSUE",
+                RequestDate = today, ActualDate = today, FromWarehouseId = r.WarehouseId,
+                Status = "COMPLETED", CreatedBy = userId, CompletedBy = userId, CompletedAt = now,
+                Note = $"Điều chỉnh giảm theo kiểm kê {r.DocNo}",
+                Lines = changedLines.Where(l => l.Difference < 0).Select(l => new StockDocLine
+                {
+                    ProductId = l.ProductId, LotId = l.LotId, RequestedQty = -l.Difference, ActualQty = -l.Difference,
+                }).ToList(),
+            }
+            : null;
+        if (issueDoc is not null) db.StockDocs.Add(issueDoc);
+
+        if (receiptDoc is not null || issueDoc is not null)
+            await db.SaveChangesAsync(); // sinh id cho stock_doc/stock_doc_line trước khi gắn vào stock_move
+
+        var receiptIdx = 0;
+        var issueIdx = 0;
+        foreach (var l in changedLines)
+        {
             // Sinh stock_move điều chỉnh
             var incomingRate = l.Difference > 0 ? (decimal?)0 : null; // điều chỉnh tăng thì dùng rate 0 (hoặc lấy rate hiện tại)
             var (valuationRate, stockValueDiff, qtyAfter, stockValue) =
                 await valuation.CalcMovingAverage(l.ProductId, r.WarehouseId, l.Difference, incomingRate);
 
+            var (doc, line) = l.Difference > 0
+                ? (receiptDoc!, receiptDoc!.Lines[receiptIdx++])
+                : (issueDoc!, issueDoc!.Lines[issueIdx++]);
+
             db.StockMoves.Add(new StockMove
             {
-                MoveDate = today, DocId = 0, DocLineId = 0, // reconciliation moves không gắn doc
+                MoveDate = today, DocId = doc.Id, DocLineId = line.Id,
                 ProductId = l.ProductId, WarehouseId = r.WarehouseId, LotId = l.LotId,
                 Qty = l.Difference, UnitCost = 0,
                 QtyAfterTransaction = qtyAfter,
                 ValuationRate = valuationRate,
                 StockValue = stockValue,
                 StockValueDifference = stockValueDiff,
-                PostingDatetime = DateTimeOffset.UtcNow,
+                PostingDatetime = now,
             });
 
             // Cập nhật stock_balance
@@ -881,8 +925,8 @@ public class InventoryController(
         }
 
         r.Status = "POSTED";
-        r.PostedBy = RbacService.GetUserId(User);
-        r.PostedAt = DateTimeOffset.UtcNow;
+        r.PostedBy = userId;
+        r.PostedAt = now;
         await db.SaveChangesAsync();
         await tx.CommitAsync();
 

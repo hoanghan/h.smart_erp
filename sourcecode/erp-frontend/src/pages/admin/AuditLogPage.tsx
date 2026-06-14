@@ -2,7 +2,6 @@
 import { Button, Card, Col, Input, InputNumber, Row, Space, Tag, Table, Tabs, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { SearchOutlined } from '@ant-design/icons'
-import { useMutation } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
 import type { PageResult } from '../../api/types'
@@ -36,17 +35,17 @@ export default function AuditLogPage() {
   const [wfData, setWfData] = useState<WfTransitionLogRow[] | null>(null)
   const [wfLoading, setWfLoading] = useState(false)
 
-  const auditColumns: ColumnsType<AuditLogRow> = [
-    { title: 'Thời gian', dataIndex: 'createdAt', key: 'createdAt', render: (v) => dayjs(v).format('DD/MM/YYYY HH:mm:ss'), width: 170 },
-    { title: 'Người dùng', dataIndex: 'username', key: 'username', width: 120 },
-    { title: 'Hành động', dataIndex: 'action', key: 'action', width: 120 },
-    { title: 'Bảng', dataIndex: 'refTable', key: 'refTable', render: (v) => v ? <Tag color="blue">{v}</Tag> : '-', width: 150 },
-    { title: 'ID', dataIndex: 'refId', key: 'refId', render: (v) => v ?? '-', width: 80 },
+  const auditColumns = [
+    { field: 'createdAt', headerText: 'Thời gian', width: 170, template: (r: AuditLogRow) => dayjs(r.createdAt).format('DD/MM/YYYY HH:mm:ss') },
+    { field: 'username', headerText: 'Người dùng', width: 120 },
+    { field: 'action', headerText: 'Hành động', width: 120 },
+    { field: 'refTable', headerText: 'Bảng', width: 150, template: (r: AuditLogRow) => r.refTable ? <Tag color="blue">{r.refTable}</Tag> : '-' },
+    { field: 'refId', headerText: 'ID', width: 80, template: (r: AuditLogRow) => r.refId ?? '-' },
     {
-      title: 'Chi tiết', key: 'detail',
-      render: (_, record) => {
-        if (!record.detail) return '-'
-        const json = JSON.stringify(record.detail, null, 2)
+      field: 'detail', headerText: 'Chi tiết',
+      template: (r: AuditLogRow) => {
+        if (!r.detail) return '-'
+        const json = JSON.stringify(r.detail, null, 2)
         return (
           <details>
             <summary style={{ cursor: 'pointer', color: '#1890ff' }}>Xem</summary>

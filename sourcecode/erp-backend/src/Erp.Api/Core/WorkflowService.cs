@@ -90,6 +90,21 @@ public class WorkflowService(ErpDbContext db, RbacService rbac)
             new WfTransition("complete", new[] { "CONFIRMED" }, "COMPLETED", "UPDATE"),
             new WfTransition("cancel",   new[] { "DRAFT", "REQUESTED", "CONFIRMED" }, "CANCELLED", "UPDATE", RequireReason: true),
         },
+        ["boms"] = new[]
+        {
+            new WfTransition("submit", new[] { "DRAFT" }, "SUBMITTED", "APPROVE"),
+            new WfTransition("cancel", new[] { "SUBMITTED" }, "CANCELLED", "UPDATE"),
+        },
+        ["work-orders"] = new[]
+        {
+            new WfTransition("submit", new[] { "DRAFT" }, "NOT_STARTED", "APPROVE"),
+            new WfTransition("start",  new[] { "NOT_STARTED" }, "IN_PROCESS", "UPDATE"),
+            new WfTransition("stop",   new[] { "IN_PROCESS" }, "STOPPED", "UPDATE", RequireReason: true),
+        },
+        ["production-plans"] = new[]
+        {
+            new WfTransition("submit", new[] { "DRAFT" }, "SUBMITTED", "APPROVE"),
+        },
     };
 
     /// <summary>

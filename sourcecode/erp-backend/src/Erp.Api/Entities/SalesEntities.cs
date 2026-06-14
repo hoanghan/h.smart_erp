@@ -1,7 +1,8 @@
 namespace Erp.Api.Entities;
+using Erp.Api.Core;
 
 /// <summary>sales.quotation — Báo giá (ERPNext Selling: Draft → Open → Ordered/Lost/Expired/Cancelled).</summary>
-public class Quotation
+public class Quotation : IHasAudit, IApprovable
 {
     public long Id { get; set; }
     public string DocNo { get; set; } = null!;
@@ -64,7 +65,7 @@ public class QuotationLine
 }
 
 /// <summary>sales.sales_order — Đơn hàng bán.</summary>
-public class SalesOrder
+public class SalesOrder : IHasAudit, IApprovable
 {
     public long Id { get; set; }
     public string DocNo { get; set; } = null!;
@@ -80,6 +81,7 @@ public class SalesOrder
     public long? DeliveryMethodId { get; set; }
     public long? DeliveryAddrId { get; set; }
     public long? SalespersonId { get; set; }
+    public long? CreatorId { get; set; }
     public long? ApproverId { get; set; }
     public DateTimeOffset? ApprovedAt { get; set; }
     public decimal? TotalAmount { get; set; }
@@ -314,7 +316,7 @@ public class SoCost
 }
 
 /// <summary>sales.sales_allowance — Giảm giá hàng bán.</summary>
-public class SalesAllowance
+public class SalesAllowance : IHasAudit, IApprovable
 {
     public long Id { get; set; }
     public string DocNo { get; set; } = null!;
@@ -323,6 +325,9 @@ public class SalesAllowance
     public string AllowForm { get; set; } = null!;   // CREDIT_NOTE | CASH_REFUND
     public string Status { get; set; } = "DRAFT";    // DRAFT | APPROVED | POSTED | CANCELLED
     public string? Note { get; set; }
+    public long? CreatorId { get; set; }
+    public long? ApproverId { get; set; }
+    public DateTimeOffset? ApprovedAt { get; set; }
 
     public List<SalesAllowanceLine> Lines { get; set; } = new();
 }

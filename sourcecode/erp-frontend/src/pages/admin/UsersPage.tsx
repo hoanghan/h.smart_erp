@@ -1,12 +1,13 @@
 ﻿import { useState } from 'react'
-import { App as AntApp, Button, Drawer, Form, Input, Popconfirm, Space, Switch, Table, Tabs, Tag, Typography, Tree } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import { EditOutlined, LockOutlined, UnlockOutlined, KeyOutlined, PlusOutlined } from '@ant-design/icons'
+import { DialogComponent } from '@syncfusion/ej2-react-popups'
+import { ButtonComponent, CheckBoxComponent } from '@syncfusion/ej2-react-buttons'
+import { TabComponent, TabItemDirective, TabItemsDirective } from '@syncfusion/ej2-react-navigations'
+import { TextBoxComponent } from '@syncfusion/ej2-react-inputs'
+import { TreeViewComponent } from '@syncfusion/ej2-react-navigations'
+import { DialogUtility } from '@syncfusion/ej2-react-popups'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
-import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
-import type { ApiErrorBody, PageResult } from '../../api/types'
+import type { PageResult } from '../../api/types'
 import DataTable from '../../components/DataTable'
 import LookupSelect from '../../components/LookupSelect'
 
@@ -26,11 +27,7 @@ interface DepartmentNode {
   name: string
   parentId: number | null
   children?: DepartmentNode[]
-}
-
-interface GroupMembership {
-  groupId: number
-  memberIds: number[]
+  [key: string]: any
 }
 
 const DOC_TYPES = [
@@ -39,12 +36,16 @@ const DOC_TYPES = [
 ]
 
 export default function UsersPage() {
-  const { message } = AntApp.useApp()
   const queryClient = useQueryClient()
-  const [form] = Form.useForm()
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<UserRow | null>(null)
-  const [activeTab, setActiveTab] = useState('info')
+  const [activeTab, setActiveTab] = useState(0)
+
+  // Form fields
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [employeeId, setEmployeeId] = useState<number | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   // Groups
   const [selectedGroups, setSelectedGroups] = useState<number[]>([])
@@ -71,34 +72,41 @@ export default function UsersPage() {
   const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([])
 
   const showError = (err: unknown, fallback: string) => {
-    const body = axios.isAxiosError<ApiErrorBody>(err) ? err.response?.data : undefined
-    message.error(body?.message ?? fallback)
+    const body = err && typeof err === 'object' && 'response' in err 
+      ? (err as any).response?.data 
+      : undefined
+    DialogUtility.alert({ content: body?.message ?? fallback, width: 300 })
   }
 
   const openCreate = () => {
     setEditing(null)
-    form.resetFields()
+    setUsername('')
+    setPassword('')
+    setEmployeeId(null)
+    setIsAdmin(false)
     setSelectedGroups([])
     setSelectedDepts([])
     setSelectedDocTypes([])
+    setActiveTab(0)
     setOpen(true)
-    setActiveTab('info')
   }
 
   const openEdit = async (record: UserRow) => {
     setEditing(record)
-    form.setFieldsValue(record)
+    setUsername(record.username)
+    setPassword('')
+    setEmployeeId(record.employeeId)
+    setIsAdmin(record.isAdmin)
     setSelectedGroups([])
     setSelectedDepts([])
     setSelectedDocTypes([])
+    setActiveTab(0)
     setOpen(true)
-    setActiveTab('info')
 
     // Load groups
     try {
       const res = await apiClient.get<PageResult<{ id: number; code: string; name: string; memberCount: number }>>('/admin/groups', { params: { size: 500 } })
       const allGroups = res.data.items
-      // Find which groups this user belongs to
       const memberships = await Promise.all(
         allGroups.map(async (g) => {
           const r = await apiClient.get<number[]>(`/admin/groups/${g.id}/members`)
@@ -122,10 +130,17 @@ export default function UsersPage() {
   }
 
   const saveMutation = useMutation({
-    mutationFn: async (values: Record<string, unknown>) => {
+    mutationFn: async () => {
+      const values: Record<string, unknown> = {
+        username,
+        password: password || undefined,
+        employeeId,
+        isAdmin,
+      }
+
       if (editing) {
         await apiClient.put(`/admin/users/${editing.id}`, values)
-        // Save groups - need to preserve other members
+        // Save groups
         const res = await apiClient.get<PageResult<{ id: number }>>('/admin/groups', { params: { size: 500 } })
         const allGroups = res.data.items
         const groupUpdates = allGroups.map(async (g) => {
@@ -147,7 +162,7 @@ export default function UsersPage() {
       }
     },
     onSuccess: () => {
-      message.success(editing ? 'Cập nhật thành công' : 'Thêm mới thành công')
+      DialogUtility.alert({ content: editing ? 'Cập nhật thành công' : 'Thêm mới thành công', width: 300 })
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
       setOpen(false)
     },
@@ -159,7 +174,7 @@ export default function UsersPage() {
       await apiClient.put(`/admin/users/${id}`, { isActive })
     },
     onSuccess: () => {
-      message.success('Đã cập nhật trạng thái')
+      DialogUtility.alert({ content: 'Đã cập nhật trạng thái', width: 300 })
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
     },
     onError: (err) => showError(err, 'Lỗi cập nhật trạng thái'),
@@ -169,13 +184,20 @@ export default function UsersPage() {
     mutationFn: async ({ id, password }: { id: number; password: string }) => {
       await apiClient.put(`/admin/users/${id}`, { password })
     },
-    onSuccess: () => message.success('Đã đặt lại mật khẩu'),
+    onSuccess: () => DialogUtility.alert({ content: 'Đã đặt lại mật khẩu', width: 300 }),
     onError: (err) => showError(err, 'Lỗi đặt lại mật khẩu'),
   })
 
-  const handleSubmit = async () => {
-    const values = await form.validateFields()
-    saveMutation.mutate(values)
+  const handleSubmit = () => {
+    if (!username) {
+      DialogUtility.alert({ content: 'Vui lòng nhập tên đăng nhập', width: 300 })
+      return
+    }
+    if (!editing && !password) {
+      DialogUtility.alert({ content: 'Vui lòng nhập mật khẩu', width: 300 })
+      return
+    }
+    saveMutation.mutate()
   }
 
   const buildTree = (items: DepartmentNode[]): DepartmentNode[] => {
@@ -186,7 +208,8 @@ export default function UsersPage() {
     }
     for (const item of items) {
       if (item.parentId && map.has(item.parentId)) {
-        map.get(item.parentId)!.children!.push(map.get(item.id)!)
+        const node = map.get(item.parentId)!
+        node.children!.push(map.get(item.id)!)
       } else {
         roots.push(map.get(item.id)!)
       }
@@ -194,109 +217,173 @@ export default function UsersPage() {
     return roots
   }
 
-  const columns: ColumnsType<UserRow> = [
-    { title: 'Tên đăng nhập', dataIndex: 'username', key: 'username' },
-    { title: 'Nhân viên', dataIndex: 'employeeName', key: 'employeeName', render: (v) => v || '-' },
-    { title: 'Quản trị', dataIndex: 'isAdmin', key: 'isAdmin', render: (v) => v ? <Tag color="red">Admin</Tag> : <Tag>User</Tag> },
-    { title: 'Trạng thái', dataIndex: 'isActive', key: 'isActive', render: (v) => v ? <Tag color="green">Hoạt động</Tag> : <Tag color="red">Khóa</Tag> },
-    { title: 'Ngày tạo', dataIndex: 'createdAt', key: 'createdAt', render: (v) => dayjs(v).format('DD/MM/YYYY HH:mm') },
-    {
-      title: '', key: 'actions', width: 160,
-      render: (_, record) => (
-        <Space>
-          <Button type="text" icon={<EditOutlined />} onClick={() => openEdit(record)} />
-          <Popconfirm
-            title={record.isActive ? 'Khóa tài khoản này?' : 'Mở khóa tài khoản này?'}
-            onConfirm={() => toggleActiveMutation.mutate({ id: record.id, isActive: !record.isActive })}
-          >
-            <Button type="text" icon={record.isActive ? <LockOutlined /> : <UnlockOutlined />} />
-          </Popconfirm>
-          <Popconfirm
-            title="Đặt lại mật khẩu về '123456'?" okText="Đồng ý" cancelText="Hủy"
-            onConfirm={() => resetPasswordMutation.mutate({ id: record.id, password: '123456' })}
-          >
-            <Button type="text" icon={<KeyOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ]
-
   return (
     <div>
-      <Typography.Title level={3}>Người dùng</Typography.Title>
+      <h2>Người dùng</h2>
       <DataTable<UserRow>
         queryKey="admin-users"
         endpoint="/admin/users"
-        columns={columns}
-        searchPlaceholder="Tìm kiếm user..."
-        toolbarExtra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Thêm người dùng</Button>
-        }
-      />
-      <Drawer
-        title={editing ? 'Sửa người dùng' : 'Thêm người dùng'}
-        open={open}
-        onClose={() => setOpen(false)}
-        width={560}
-        extra={
-          <Space>
-            <Button onClick={() => setOpen(false)}>Hủy</Button>
-            <Button type="primary" loading={saveMutation.isPending} onClick={handleSubmit}>Lưu</Button>
-          </Space>
-        }
-      >
-        <Tabs activeKey={activeTab} onChange={setActiveTab} items={[
+        columns={[
+          { field: 'username', headerText: 'Tên đăng nhập', width: 150 },
+          { field: 'employeeName', headerText: 'Nhân viên', width: 150, template: (data: UserRow) => data.employeeName || '-' },
+          { field: 'isAdmin', headerText: 'Quản trị', width: 100, template: (data: UserRow) => data.isAdmin ? 'Admin' : 'User' },
+          { field: 'isActive', headerText: 'Trạng thái', width: 100, template: (data: UserRow) => data.isActive ? 'Hoạt động' : 'Khóa' },
+          { field: 'createdAt', headerText: 'Ngày tạo', width: 150, format: 'd/M/yyyy HH:mm' },
           {
-            key: 'info',
-            label: 'Thông tin',
-            children: (
-              <Form form={form} layout="vertical">
-                <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, message: 'Vui lòng nhập' }]}>
-                  <Input />
-                </Form.Item>
-                {!editing && (
-                  <Form.Item name="password" label="Mật khẩu" rules={[{ required: true, message: 'Vui lòng nhập' }]}>
-                    <Input.Password />
-                  </Form.Item>
-                )}
-                <Form.Item name="employeeId" label="Nhân viên">
-                  <LookupSelect resource="employees" labelField="fullName" />
-                </Form.Item>
-                <Form.Item name="isAdmin" label="Quản trị viên" valuePropName="checked">
-                  <Switch />
-                </Form.Item>
-                {editing && (
-                  <Space style={{ marginTop: 16 }}>
-                    <Popconfirm
-                      title="Đặt lại mật khẩu về '123456'?"
-                      onConfirm={() => resetPasswordMutation.mutate({ id: editing.id, password: '123456' })}
-                    >
-                      <Button icon={<KeyOutlined />}>Đặt lại mật khẩu</Button>
-                    </Popconfirm>
-                    <Popconfirm
-                      title={editing.isActive ? 'Khóa tài khoản?' : 'Mở khóa tài khoản?'}
-                      onConfirm={() => toggleActiveMutation.mutate({ id: editing.id, isActive: !editing.isActive })}
-                    >
-                      <Button icon={editing.isActive ? <LockOutlined /> : <UnlockOutlined />}>
-                        {editing.isActive ? 'Khóa' : 'Mở khóa'}
-                      </Button>
-                    </Popconfirm>
-                  </Space>
-                )}
-              </Form>
+            field: 'actions',
+            headerText: '',
+            width: 150,
+            template: (data: UserRow) => (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <ButtonComponent cssClass="e-flat e-primary" onClick={() => openEdit(data)}>Sửa</ButtonComponent>
+                <ButtonComponent 
+                  cssClass="e-flat"
+                  onClick={() => {
+                    DialogUtility.confirm({
+                      title: data.isActive ? 'Khóa tài khoản?' : 'Mở khóa tài khoản?',
+                      content: `Bạn có chắc chắn muốn ${data.isActive ? 'khóa' : 'mở khóa'} tài khoản này?`,
+                      isModal: true,
+                      position: { X: 'center', Y: 'center' },
+                      okButton: { text: 'Đồng ý', click: () => toggleActiveMutation.mutate({ id: data.id, isActive: !data.isActive }) },
+                      cancelButton: { text: 'Hủy' },
+                    })
+                  }}
+                >
+                  {data.isActive ? 'Khóa' : 'Mở khóa'}
+                </ButtonComponent>
+                <ButtonComponent 
+                  cssClass="e-flat"
+                  onClick={() => {
+                    DialogUtility.confirm({
+                      title: "Đặt lại mật khẩu?",
+                      content: "Đặt lại mật khẩu về '123456'?",
+                      isModal: true,
+                      position: { X: 'center', Y: 'center' },
+                      okButton: { text: 'Đồng ý', click: () => resetPasswordMutation.mutate({ id: data.id, password: '123456' }) },
+                      cancelButton: { text: 'Hủy' },
+                    })
+                  }}
+                >
+                  Đặt lại mật khẩu
+                </ButtonComponent>
+              </div>
             ),
           },
-          {
-            key: 'groups',
-            label: 'Thuộc nhóm',
-            children: (
-              <div>
-                <Typography.Text strong>Chọn nhóm cho người dùng</Typography.Text>
+        ]}
+        searchPlaceholder="Tìm kiếm user..."
+        toolbarExtra={
+          <ButtonComponent cssClass="e-success" onClick={openCreate}>Thêm người dùng</ButtonComponent>
+        }
+      />
+
+      <DialogComponent
+        header={editing ? 'Sửa người dùng' : 'Thêm người dùng'}
+        showCloseIcon={true}
+        visible={open}
+        close={() => setOpen(false)}
+        width="560"
+        target="#root"
+        position={{ X: 'center', Y: 'center' }}
+        isModal={true}
+        footerTemplate={() => (
+          <div style={{ textAlign: 'right' }}>
+            <ButtonComponent cssClass="e-flat" onClick={() => setOpen(false)}>Hủy</ButtonComponent>
+            <ButtonComponent 
+              cssClass="e-flat e-primary" 
+              onClick={handleSubmit} 
+              disabled={saveMutation.isPending}
+            >
+              {saveMutation.isPending ? 'Đang lưu...' : 'Lưu'}
+            </ButtonComponent>
+          </div>
+        )}
+      >
+        <TabComponent selectedItem={activeTab} selecting={(e) => setActiveTab(e.selectingIndex as number)}>
+          <TabItemsDirective>
+            <TabItemDirective header={{ text: 'Thông tin' }} />
+            <TabItemDirective header={{ text: 'Thuộc nhóm' }} />
+            <TabItemDirective header={{ text: 'Phạm vi dữ liệu' }} />
+            <TabItemDirective header={{ text: 'Quyền phê duyệt' }} />
+          </TabItemsDirective>
+        </TabComponent>
+        <div>
+          {activeTab === 0 && (
+              <div style={{ padding: 16 }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 8 }}>Tên đăng nhập *</label>
+                  <TextBoxComponent 
+                    value={username} 
+                    change={(e: any) => setUsername(e.value)} 
+                    placeholder="Tên đăng nhập" 
+                  />
+                </div>
+                {!editing && (
+                  <div style={{ marginBottom: 16 }}>
+                    <label style={{ display: 'block', marginBottom: 8 }}>Mật khẩu *</label>
+                    <TextBoxComponent 
+                      type="password"
+                      value={password} 
+                      change={(e: any) => setPassword(e.value)} 
+                      placeholder="Mật khẩu" 
+                    />
+                  </div>
+                )}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', marginBottom: 8 }}>Nhân viên</label>
+                  <LookupSelect resource="employees" labelField="fullName" value={employeeId} onChange={(v) => setEmployeeId(v as number | null)} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CheckBoxComponent 
+                      checked={isAdmin} 
+                      change={(e: any) => setIsAdmin(e.checked)} 
+                    />
+                    <span>Quản trị viên</span>
+                  </label>
+                </div>
+                {editing && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                    <ButtonComponent 
+                      cssClass="e-flat e-warning"
+                      onClick={() => {
+                        DialogUtility.confirm({
+                          title: "Đặt lại mật khẩu?",
+                          content: "Đặt lại mật khẩu về '123456'?",
+                          isModal: true,
+                          position: { X: 'center', Y: 'center' },
+                          okButton: { text: 'Đồng ý', click: () => resetPasswordMutation.mutate({ id: editing.id, password: '123456' }) },
+                          cancelButton: { text: 'Hủy' },
+                        })
+                      }}
+                    >
+                      Đặt lại mật khẩu
+                    </ButtonComponent>
+                    <ButtonComponent 
+                      cssClass="e-flat"
+                      onClick={() => {
+                        DialogUtility.confirm({
+                          title: editing.isActive ? 'Khóa tài khoản?' : 'Mở khóa tài khoản?',
+                          content: `Bạn có chắc chắn muốn ${editing.isActive ? 'khóa' : 'mở khóa'} tài khoản này?`,
+                          isModal: true,
+                          position: { X: 'center', Y: 'center' },
+                          okButton: { text: 'Đồng ý', click: () => toggleActiveMutation.mutate({ id: editing.id, isActive: !editing.isActive }) },
+                          cancelButton: { text: 'Hủy' },
+                        })
+                      }}
+                    >
+                      {editing.isActive ? 'Khóa' : 'Mở khóa'}
+                    </ButtonComponent>
+                  </div>
+                )}
+              </div>
+            )}
+          {activeTab === 1 && (
+              <div style={{ padding: 16 }}>
+                <strong>Chọn nhóm cho người dùng</strong>
                 <div style={{ maxHeight: 400, overflow: 'auto', marginTop: 8 }}>
                   {(groupsData || []).map((g) => (
                     <div key={g.id} style={{ padding: '4px 0' }}>
-                      <label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <input
                           type="checkbox"
                           checked={selectedGroups.includes(g.id)}
@@ -304,7 +391,6 @@ export default function UsersPage() {
                             if (e.target.checked) setSelectedGroups([...selectedGroups, g.id])
                             else setSelectedGroups(selectedGroups.filter(id => id !== g.id))
                           }}
-                          style={{ marginRight: 8 }}
                         />
                         {g.name} ({g.code})
                       </label>
@@ -312,39 +398,46 @@ export default function UsersPage() {
                   ))}
                 </div>
               </div>
-            ),
-          },
-          {
-            key: 'dataScope',
-            label: 'Phạm vi dữ liệu',
-            children: departments ? (
-              <div>
-                <Typography.Text strong>Phòng ban được phép truy cập</Typography.Text>
-                <Tree
-                  checkable
-                  defaultExpandAll
-                  treeData={buildTree(departments).map(n => ({
-                    title: n.name,
-                    key: n.id,
-                    children: n.children?.map(c => ({ title: c.name, key: c.id, children: c.children?.map(ch => ({ title: ch.name, key: ch.id })) }))
-                  }))}
-                  checkedKeys={selectedDepts}
-                  onCheck={(keys) => setSelectedDepts(keys as number[])}
-                  style={{ marginTop: 8 }}
-                />
+            )}
+          {activeTab === 2 && (
+              <div style={{ padding: 16 }}>
+                {departments ? (
+                  <>
+                    <strong>Phòng ban được phép truy cập</strong>
+                    <div style={{ marginTop: 8 }}>
+                      <TreeViewComponent
+                        fields={{
+                          dataSource: buildTree(departments),
+                          id: 'id',
+                          text: 'name',
+                          child: 'children',
+                        }}
+                        checkedNodes={selectedDepts.map(String)}
+                        showCheckBox={true}
+                        nodeChecked={(e: any) => {
+                          if (e.action === 'check') {
+                            if (e.data.length === 1) {
+                              setSelectedDepts([...new Set([...selectedDepts, e.data[0].id])])
+                            } else {
+                              setSelectedDepts([...new Set([...selectedDepts, ...e.data.map((d: DepartmentNode) => d.id)])])
+                            }
+                          } else {
+                            setSelectedDepts(selectedDepts.filter(id => !e.data.some((d: DepartmentNode) => d.id === id)))
+                          }
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : <div>Đang tải...</div>}
               </div>
-            ) : <Typography.Text>Đang tải...</Typography.Text>,
-          },
-          {
-            key: 'approvalRights',
-            label: 'Quyền phê duyệt',
-            children: (
-              <div>
-                <Typography.Text strong>Loại chứng từ được phê duyệt</Typography.Text>
+            )}
+          {activeTab === 3 && (
+              <div style={{ padding: 16 }}>
+                <strong>Loại chứng từ được phê duyệt</strong>
                 <div style={{ maxHeight: 400, overflow: 'auto', marginTop: 8 }}>
                   {DOC_TYPES.map((dt) => (
                     <div key={dt} style={{ padding: '4px 0' }}>
-                      <label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <input
                           type="checkbox"
                           checked={selectedDocTypes.includes(dt)}
@@ -352,7 +445,6 @@ export default function UsersPage() {
                             if (e.target.checked) setSelectedDocTypes([...selectedDocTypes, dt])
                             else setSelectedDocTypes(selectedDocTypes.filter(d => d !== dt))
                           }}
-                          style={{ marginRight: 8 }}
                         />
                         {dt}
                       </label>
@@ -360,10 +452,9 @@ export default function UsersPage() {
                   ))}
                 </div>
               </div>
-            ),
-          },
-        ]} />
-      </Drawer>
+            )}
+        </div>
+      </DialogComponent>
     </div>
   )
 }

@@ -47,6 +47,8 @@ public class AccountingPolicy
     public int FiscalStartMonth { get; set; } = 1;
     public string InventoryCosting { get; set; } = "AVG";
     public long? FirstPeriodId { get; set; }
+    public bool RequireCostCenter { get; set; }
+    public bool PerpetualInventory { get; set; } = true;
 }
 
 /// <summary>finance.opening_balance — Số dư đầu kỳ.</summary>
@@ -148,6 +150,19 @@ public class Voucher
     public long? CreatedBy { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
+    // ===== Task 23: ERPNext upgrade =====
+    /// <summary>Số tiền còn phải thu/trả (hóa đơn HOA_DON_BAN/PHIEU_MUA_HANG).</summary>
+    public decimal? OutstandingAmount { get; set; }
+    public DateOnly? DueDate { get; set; }
+    /// <summary>UNPAID / PARTLY_PAID / PAID / OVERDUE / RETURN.</summary>
+    public string? PaymentStatus { get; set; }
+    /// <summary>RECEIVE / PAY / INTERNAL_TRANSFER (cho PHIEU_THU/PHIEU_CHI).</summary>
+    public string? PaymentType { get; set; }
+    public decimal? PaidAmount { get; set; }
+    public decimal? UnallocatedAmount { get; set; }
+    /// <summary>Voucher gốc khi amend (cancel rồi tạo bản copy doc_no -1).</summary>
+    public long? AmendedFromId { get; set; }
+
     public List<VoucherLine> Lines { get; set; } = new();
 }
 
@@ -170,6 +185,8 @@ public class VoucherLine
     public long? CrObjectId { get; set; }
     public string? CrObjectType { get; set; }
     public long? RefVoucherId { get; set; }
+    /// <summary>Task 23: trung tâm chi phí (bắt buộc cho TK 642... nếu accounting_policy.require_cost_center).</summary>
+    public long? CostCenterId { get; set; }
 }
 
 /// <summary>finance.gl_entry — Sổ cái (immutable khi POSTED).</summary>
@@ -190,6 +207,16 @@ public class GlEntry
     public DateOnly? PostingDate { get; set; }
     public long? PeriodId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+
+    // ===== Task 23: ERPNext upgrade =====
+    /// <summary>Bút toán đảo (cancel-posting) — cả bộ gốc và bộ đảo đều set true.</summary>
+    public bool IsCancelled { get; set; }
+    public string? Remarks { get; set; }
+    public long? CostCenterId { get; set; }
+    /// <summary>Tóm tắt TK đối ứng (vd "111" khi định khoản Nợ 632 / Có 111).</summary>
+    public string? Against { get; set; }
+    public string? PartyType { get; set; }
+    public long? PartyId { get; set; }
 }
 
 /// <summary>finance.bank_fee — Phí ngân hàng.</summary>
@@ -201,4 +228,47 @@ public class BankFee
     public long FeeAccountId { get; set; }
     public long? PaidFromFundId { get; set; }
     public string? Note { get; set; }
+}
+
+// ============================================================
+// Task 23: Finance ERPNext upgrade
+// ============================================================
+
+/// <summary>finance.cost_center — Cây trung tâm chi phí.</summary>
+public class CostCenter
+{
+    public long Id { get; set; }
+    public string Code { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public long? ParentId { get; set; }
+    public bool IsGroup { get; set; }
+    public bool IsActive { get; set; } = true;
+}
+
+/// <summary>finance.payment_allocation — Phân bổ Payment Entry vào hóa đơn.</summary>
+public class PaymentAllocation
+{
+    public long Id { get; set; }
+    public long PaymentVoucherId { get; set; }
+    public long InvoiceVoucherId { get; set; }
+    public decimal AllocatedAmount { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
+/// <summary>finance.fs_mapping — Mapping chỉ tiêu báo cáo tài chính (B01/B02/B03) ↔ tài khoản, theo TT200.</summary>
+public class FsMapping
+{
+    public long Id { get; set; }
+    public string Statement { get; set; } = null!; // B01 / B02 / B03
+    public string ItemCode { get; set; } = null!;
+    public string ItemName { get; set; } = null!;
+    public int DisplayOrder { get; set; }
+    public int IndentLevel { get; set; }
+    public string[]? AccountPrefixes { get; set; }
+    /// <summary>Tham chiếu chỉ tiêu khác, dạng "CODE" (cùng statement) hoặc "STMT:CODE" (statement khác).</summary>
+    public string[]? FormulaItemCodes { get; set; }
+    public int[]? FormulaSigns { get; set; }
+    public int Sign { get; set; } = 1;
+    /// <summary>True nếu giá trị là biến động kỳ (end - start) thay vì số dư tại thời điểm/lũy kế kỳ.</summary>
+    public bool IsPeriodDelta { get; set; }
 }

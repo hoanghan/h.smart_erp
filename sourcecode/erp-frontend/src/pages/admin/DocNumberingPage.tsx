@@ -1,9 +1,8 @@
 ﻿import { useState } from 'react'
-import { App as AntApp, Button, Col, Input, InputNumber, Row, Select, Space, Table, Tag, Typography } from 'antd'
+import { App as AntApp, Button, Input, Select, Space, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { EditOutlined, PlusOutlined } from '@ant-design/icons'
 import { Form } from 'antd'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../../api/client'
 
 interface DocNumberingRow {
@@ -17,16 +16,23 @@ interface DocNumberingRow {
 const RESET_BY_OPTIONS = [
   { label: 'Hàng tháng', value: 'MONTH' },
   { label: 'Hàng năm', value: 'YEAR' },
-  { label: 'Không reset', value: 'NEVER' },
+  { label: 'Không reset', value: 'NONE' },
 ]
 
 export default function DocNumberingPage() {
   const { message } = AntApp.useApp()
   const queryClient = useQueryClient()
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editingRecord, setEditingRecord] = useState<DocNumberingRow | null>(null)
   const [form] = Form.useForm()
   const [preview, setPreview] = useState('')
+
+  const { data: items, isLoading } = useQuery({
+    queryKey: ['admin-doc-numbering'],
+    queryFn: async () => {
+      const res = await apiClient.get<DocNumberingRow[]>('/admin/doc-numbering')
+      return res.data
+    },
+  })
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, pattern, resetBy }: { id: number; pattern: string; resetBy: string }) => {
@@ -36,7 +42,6 @@ export default function DocNumberingPage() {
       message.success('Đã cập nhật')
       queryClient.invalidateQueries({ queryKey: ['admin-doc-numbering'] })
       setEditingId(null)
-      setEditingRecord(null)
       setPreview('')
     },
     onError: (err: unknown) => {
@@ -140,23 +145,11 @@ export default function DocNumberingPage() {
         }
         return (
           <Space>
-            <Button size="small" onClick={() => { setEditingId(record.id); form.resetFields(); setPreview('') }}>Sửa</Button>
+            <Button size="small" onClick={() => { setEditingId(record.id); form.setFieldsValue({ pattern: record.pattern, resetBy: record.resetBy }); setPreview('') }}>Sửa</Button>
           </Space>
         )
       },
     },
-  ]
-
-  const items = [
-    { id: 1, docType: 'QUOTATION', pattern: 'QT{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 2, docType: 'SALES_ORDER', pattern: 'SO{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 3, docType: 'PURCHASE_ORDER', pattern: 'PO{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 4, docType: 'PURCHASE_REQUEST', pattern: 'PR{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 5, docType: 'STOCK_RECEIPT', pattern: 'NK{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 6, docType: 'STOCK_ISSUE', pattern: 'XK{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 7, docType: 'STOCK_TRANSFER', pattern: 'CK{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 8, docType: 'SALES_ALLOWANCE', pattern: 'GG{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
-    { id: 9, docType: 'SUPPLIER_RETURN', pattern: 'TH{YYMM}{####}', resetBy: 'MONTH', lastSeq: 0 },
   ]
 
   return (
@@ -165,13 +158,16 @@ export default function DocNumberingPage() {
       <Typography.Paragraph type="secondary">
         Cấu hình mẫu đánh số tự động cho từng loại chứng từ. Token: {'{YYYY}'}, {'{YY}'}, {'{MM}'}, {'{DD}'}, {'{####}'} (số # = độ dài số).
       </Typography.Paragraph>
-      <Table<DocNumberingRow>
-        rowKey="id"
-        dataSource={items}
-        columns={columns}
-        pagination={false}
-        scroll={{ x: 1000 }}
-      />
+      <Form form={form} component={false}>
+        <Table<DocNumberingRow>
+          rowKey="id"
+          dataSource={items ?? []}
+          loading={isLoading}
+          columns={columns}
+          pagination={false}
+          scroll={{ x: 1000 }}
+        />
+      </Form>
     </div>
   )
 }

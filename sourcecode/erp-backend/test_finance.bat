@@ -17,7 +17,15 @@ if errorlevel 1 (
 
 echo ===== START API ===== >> finance_log.txt
 start "erp-api" cmd /c "dotnet run --project src/Erp.Api --no-build --urls http://localhost:5000 > api_log.txt 2>&1"
-timeout /t 10 /nobreak > nul
+
+set READY=
+for /l %%n in (1,1,24) do (
+  if not defined READY (
+    curl -s -o nul -w "%%{http_code}" http://localhost:5000/health > health.txt
+    set /p HCODE=<health.txt
+    if "!HCODE!"=="200" (set READY=1) else (timeout /t 5 /nobreak > nul)
+  )
+)
 
 curl -s -X POST %API%/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"admin123\"}" > login.json
 for /f "delims=" %%t in ('powershell -NoProfile -Command "(Get-Content login.json | ConvertFrom-Json).accessToken"') do set TOKEN=%%t
@@ -49,7 +57,7 @@ curl -s "%API%/finance/accounts" -H "%AUTH%" >> finance_log.txt
 echo. >> finance_log.txt
 
 echo --- Get account 111 (Tien mat) --- >> finance_log.txt
-curl -s %API%/finance/accounts/1 -H "%AUTH%" > acc111.json
+curl -s %API%/finance/accounts/2 -H "%AUTH%" > acc111.json
 type acc111.json >> finance_log.txt
 echo. >> finance_log.txt
 
@@ -61,7 +69,7 @@ echo. >> finance_log.txt
 echo ===== PHASE 3: FISCAL PERIODS ===== >> finance_log.txt
 
 echo --- List fiscal periods --- >> finance_log.txt
-curl -s "%API%/finance/fiscal-periods?year=%YEAR%" -H "%AUTH%" >> finance_log.txt
+curl -s "%API%/finance/fiscal-periods?year=%TODAY:~0,4%" -H "%AUTH%" >> finance_log.txt
 echo. >> finance_log.txt
 
 REM ============================================================
@@ -99,7 +107,7 @@ for /f "delims=" %%i in ('powershell -NoProfile -Command "(Get-Content kh.json |
 echo KH_ID = %KH_ID% >> finance_log.txt
 
 echo --- Create voucher (PHIEU_THU) --- >> finance_log.txt
-curl -s -X POST %API%/finance/vouchers -H "%AUTH%" -H "Content-Type: application/json" -d "{\"voucherType\":\"PHIEU_THU\",\"docNo\":\"PT-TEST-001\",\"docDate\":\"%TODAY%\",\"partnerId\":%KH_ID%,\"fundId\":1,\"description\":\"Thu tien test\",\"lines\":[{\"description\":\"Thu tien KH\",\"amount\":1000000,\"drAccountId\":1,\"crAccountId\":2}]}" > vch.json
+curl -s -X POST %API%/finance/vouchers -H "%AUTH%" -H "Content-Type: application/json" -d "{\"voucherType\":\"PHIEU_THU\",\"docDate\":\"%TODAY%\",\"partnerId\":%KH_ID%,\"fundId\":2,\"description\":\"Thu tien test\",\"lines\":[{\"description\":\"Thu tien KH\",\"amount\":1000000,\"drAccountId\":2,\"crAccountId\":5}]}" > vch.json
 type vch.json >> finance_log.txt
 echo. >> finance_log.txt
 for /f "delims=" %%i in ('powershell -NoProfile -Command "(Get-Content vch.json | ConvertFrom-Json).id"') do set VCH_ID=%%i
@@ -170,4 +178,4 @@ type finance_log.txt
 echo.
 echo ===== DONE - check finance_log.txt for results =====
 
-del login.json policy.json acc111.json kh.json vch.json vch_post.json 2>nul
+del login.json policy.json acc111.json kh.json vch.json vch_post.json health.txt 2>nul

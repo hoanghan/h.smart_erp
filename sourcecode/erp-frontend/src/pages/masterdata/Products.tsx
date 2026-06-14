@@ -1,4 +1,3 @@
-import type { ColumnsType } from 'antd/es/table'
 import ActiveTag from '../../components/ActiveTag'
 import CrudPage from '../../components/crud/CrudPage'
 import type { CrudFormField } from '../../components/crud/types'
@@ -12,23 +11,17 @@ const PRODUCT_TYPE_LABELS: Record<string, string> = {
   TOOL: 'Công cụ dụng cụ',
 }
 
-const columns: ColumnsType<ProductOut> = [
-  { title: 'Mã hàng', dataIndex: 'code', key: 'code', width: 140 },
-  { title: 'Tên hàng', dataIndex: 'name', key: 'name' },
+const columns = [
+  { field: 'code', headerText: 'Mã hàng', width: 140 },
+  { field: 'name', headerText: 'Tên hàng' },
   {
-    title: 'Loại',
-    dataIndex: 'productType',
-    key: 'productType',
-    width: 130,
-    render: (type: string) => PRODUCT_TYPE_LABELS[type] ?? type,
+    field: 'productType', headerText: 'Loại', width: 130,
+    template: (r: ProductOut) => PRODUCT_TYPE_LABELS[r.productType] ?? r.productType,
   },
-  { title: 'Quy cách', dataIndex: 'spec', key: 'spec' },
+  { field: 'spec', headerText: 'Quy cách' },
   {
-    title: 'Hoạt động',
-    dataIndex: 'isActive',
-    key: 'isActive',
-    width: 110,
-    render: (active: boolean) => <ActiveTag active={active} />,
+    field: 'isActive', headerText: 'Hoạt động', width: 110,
+    template: (r: ProductOut) => <ActiveTag active={r.isActive} />,
   },
 ]
 

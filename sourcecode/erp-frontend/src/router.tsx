@@ -6,9 +6,11 @@ import RequireAuth from './layout/RequireAuth'
 import LoginPage from './pages/Login'
 
 const HomePage = lazy(() => import('./pages/Home'))
+const CrmPage = lazy(() => import('./pages/crm'))
 const SalesPage = lazy(() => import('./pages/sales'))
 const PurchasingPage = lazy(() => import('./pages/purchasing'))
 const InventoryPage = lazy(() => import('./pages/inventory'))
+const MfgPage = lazy(() => import('./pages/mfg'))
 const AccountingPage = lazy(() => import('./pages/accounting'))
 const MasterDataPage = lazy(() => import('./pages/masterdata'))
 const AdminPage = lazy(() => import('./pages/admin'))
@@ -30,9 +32,11 @@ export default function AppRouter() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={withSuspense(<HomePage />)} />
+          <Route path="crm/*" element={withSuspense(<CrmPage />)} />
           <Route path="sales/*" element={withSuspense(<SalesPage />)} />
           <Route path="purchasing/*" element={withSuspense(<PurchasingPage />)} />
           <Route path="inventory/*" element={withSuspense(<InventoryPage />)} />
+          <Route path="mfg/*" element={withSuspense(<MfgPage />)} />
           <Route path="accounting/*" element={withSuspense(<AccountingPage />)} />
           <Route path="master-data/*" element={withSuspense(<MasterDataPage />)} />
           <Route path="admin/*" element={withSuspense(<AdminPage />)} />

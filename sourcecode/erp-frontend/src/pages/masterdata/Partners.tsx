@@ -1,41 +1,31 @@
 import { Tag } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import ActiveTag from '../../components/ActiveTag'
 import CrudPage from '../../components/crud/CrudPage'
 import type { CrudFormField } from '../../components/crud/types'
 import type { PartnerOut } from '../../api/types'
 import { formatNumberVN } from '../../utils/format'
 
-const columns: ColumnsType<PartnerOut> = [
-  { title: 'Mã', dataIndex: 'code', key: 'code', width: 120 },
-  { title: 'Tên', dataIndex: 'shortName', key: 'shortName' },
-  { title: 'Tên đầy đủ', dataIndex: 'fullName', key: 'fullName' },
-  { title: 'Điện thoại', dataIndex: 'phone', key: 'phone', width: 130 },
+const columns = [
+  { field: 'code', headerText: 'Mã', width: 120 },
+  { field: 'shortName', headerText: 'Tên' },
+  { field: 'fullName', headerText: 'Tên đầy đủ' },
+  { field: 'phone', headerText: 'Điện thoại', width: 130 },
   {
-    title: 'Loại',
-    key: 'type',
-    width: 140,
-    render: (_, record) => (
+    field: 'type', headerText: 'Loại', width: 140,
+    template: (r: PartnerOut) => (
       <>
-        {record.isCustomer && <Tag color="blue">Khách hàng</Tag>}
-        {record.isSupplier && <Tag color="purple">Nhà cung cấp</Tag>}
+        {r.isCustomer && <Tag color="blue">Khách hàng</Tag>}
+        {r.isSupplier && <Tag color="purple">Nhà cung cấp</Tag>}
       </>
     ),
   },
   {
-    title: 'Hạn mức công nợ',
-    dataIndex: 'creditLimit',
-    key: 'creditLimit',
-    width: 150,
-    align: 'right',
-    render: (v: number | null) => formatNumberVN(v),
+    field: 'creditLimit', headerText: 'Hạn mức công nợ', width: 150, textAlign: 'Right',
+    template: (r: PartnerOut) => formatNumberVN(r.creditLimit),
   },
   {
-    title: 'Hoạt động',
-    dataIndex: 'isActive',
-    key: 'isActive',
-    width: 110,
-    render: (active: boolean) => <ActiveTag active={active} />,
+    field: 'isActive', headerText: 'Hoạt động', width: 110,
+    template: (r: PartnerOut) => <ActiveTag active={r.isActive} />,
   },
 ]
 

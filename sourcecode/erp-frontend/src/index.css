@@ -8,3 +8,50 @@ body,
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
+
+/* Sidebar menu (top-level list): blend Syncfusion menu wrapper into the dark sidebar background.
+   Note: Syncfusion also stamps the cssClass onto the flyout popup (.e-menu-popup below), so
+   the top-level rules must exclude it to avoid making the popup transparent too. */
+.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) {
+  background-color: transparent;
+}
+
+.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item:hover,
+.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item.e-focused,
+.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item.e-selected {
+  color: #fff;
+  background-color: #1677ff;
+}
+
+/* The bootstrap5 theme hardcodes .e-menu-url to a dark text color (#212529) at the
+   same specificity as the .e-menu-item color above — make it inherit so the item's
+   light/hover/selected color actually shows on the link text. */
+.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item .e-menu-url {
+  color: inherit;
+}
+
+/* Submenu flyout popup: Syncfusion appends this to <body>, so it can't inherit the
+   sidebar's dark background/text color — give it its own solid theme. */
+.e-menu-wrapper.sidebar-menu.e-menu-popup {
+  background-color: #15324f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item:hover,
+.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item.e-focused,
+.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item.e-selected {
+  color: #fff;
+  background-color: #1677ff;
+}
+
+.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item .e-menu-url {
+  color: inherit;
+}

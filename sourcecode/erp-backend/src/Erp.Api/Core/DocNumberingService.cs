@@ -23,6 +23,11 @@ public class DocNumberingService(ErpDbContext db)
         ["SALES_ALLOWANCE"] = "GG{YY}{MM}-{####}",
         ["PURCHASE_REQUEST"] = "YC{YY}{MM}-{####}",
         ["SUPPLIER_RETURN"] = "TH{YY}{MM}-{####}",
+        ["BOM"] = "BOM{YY}{MM}-{####}",
+        ["WORK_ORDER"] = "LSX{YY}{MM}-{####}",
+        ["PRODUCTION_PLAN"] = "KHSX{YY}{MM}-{####}",
+        ["MATERIAL_TRANSFER"] = "PXSX{YY}{MM}-{####}",
+        ["MANUFACTURE"] = "PNSX{YY}{MM}-{####}",
     };
 
     public async Task<string> NextAsync(string docType, DateOnly? date = null)

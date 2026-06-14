@@ -1,24 +1,13 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react'
-import { App as AntApp, Button, Checkbox, Collapse, Radio, RadioChangeEvent, Select, Space, Typography } from 'antd'
+﻿import { useEffect, useState } from 'react'
+import { App as AntApp, Button, Card, Checkbox, Radio, Space, Spin, Typography } from 'antd'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import axios from 'axios'
 import { apiClient } from '../../api/client'
-import type { ApiErrorBody, PageResult } from '../../api/types'
 import LookupSelect from '../../components/LookupSelect'
 
-interface CatalogSubject {
+interface Subject {
   subjectType: string
   subjectCode: string
   label: string
-}
-
-interface PermissionCatalog {
-  subjectTypes: string[]
-  subjectTypeLabels: Record<string, string>
-  actions: string[]
-  actionLabels: Record<string, string>
-  availableActions: Record<string, string[]>
-  subjects: CatalogSubject[]
 }
 
 interface PermissionEntry {
@@ -27,52 +16,36 @@ interface PermissionEntry {
   action: string
 }
 
-function GroupSelect({ value, onChange }: { value: number | null; onChange: (v: number | null) => void }) {
-  const [options, setOptions] = useState<{ value: number; label: string }[]>([])
-  const { data } = useQuery({
-    queryKey: ['admin-groups-select'],
-    queryFn: async () => {
-      const res = await apiClient.get<PageResult<{ id: number; code: string; name: string }>>('/admin/groups', { params: { size: 100 } })
-      return res.data
-    },
-  })
-  useEffect(() => {
-    if (data) {
-      setOptions(data.items.map((g: { id: number; code: string; name: string }) => ({ value: g.id, label: g.code + ' - ' + g.name })))
-    }
-  }, [data])
-  return (
-    <Select
-      showSearch
-      allowClear
-      placeholder=\"Chọn nhóm...\"
-      value={value ?? undefined}
-      options={options}
-      onChange={(v) => onChange(v ?? null)}
-      filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
-      style={{ minWidth: 200 }}
-    />
-  )
+interface PermissionCatalogResponse {
+  subjectTypes: string[]
+  subjectTypeLabels: Record<string, string>
+  actions: string[]
+  actionLabels: Record<string, string>
+  availableActions: Record<string, string[]>
+  subjects: Subject[]
 }
+
+const ALL_ACTIONS = ['VIEW', 'CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'POST', 'UNLOCK', 'IMPORT', 'EXPORT']
 
 export default function PermissionsPage() {
   const { message } = AntApp.useApp()
   const [granteeType, setGranteeType] = useState<'USER' | 'GROUP'>('USER')
   const [granteeId, setGranteeId] = useState<number | null>(null)
-  const [permSet, setPermSet] = useState<Set<string>>(new Set())
   const [hasChanges, setHasChanges] = useState(false)
-  const originalPermSetRef = useRef<Set<string>>(new Set())
+  const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set())
+  const [selectColumn, setSelectColumn] = useState<Record<string, boolean>>({})
 
-  const { data: catalog } = useQuery({
-    queryKey: ['permission-catalog'],
+  const { data: catalog, isLoading: catalogLoading } = useQuery({
+    queryKey: ['admin-permission-catalog'],
     queryFn: async () => {
-      const res = await apiClient.get<PermissionCatalog>('/admin/permission-catalog')
+      const res = await apiClient.get<PermissionCatalogResponse>('/admin/permission-catalog')
       return res.data
     },
+    enabled: true,
   })
 
-  const { data: currentPerms, refetch: refetchPerms } = useQuery({
-    queryKey: ['permissions', granteeType, granteeId],
+  const { data: existingPerms, isLoading: permsLoading } = useQuery({
+    queryKey: ['admin-permissions', granteeType, granteeId],
     queryFn: async () => {
       if (!granteeId) return []
       const res = await apiClient.get<PermissionEntry[]>('/admin/permissions', {
@@ -80,195 +53,192 @@ export default function PermissionsPage() {
       })
       return res.data
     },
-    enabled: !!granteeId,
+    enabled: granteeId !== null,
   })
-
-  useEffect(() => {
-    if (currentPerms) {
-      const s = new Set(currentPerms.map(p => p.subjectType + ':' + p.subjectCode + ':' + p.action))
-      setPermSet(s)
-      originalPermSetRef.current = new Set(s)
-      setHasChanges(false)
-    }
-  }, [currentPerms])
-
-  const togglePerm = (subjectType: string, subjectCode: string, action: string) => {
-    const key = subjectType + ':' + subjectCode + ':' + action
-    setPermSet(prev => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      setHasChanges(!setsEqual(next, originalPermSetRef.current))
-      return next
-    })
-  }
-
-  const toggleColumn = (action: string, subjectType: string, subjects: CatalogSubject[]) => {
-    setPermSet(prev => {
-      const next = new Set(prev)
-      const allChecked = subjects.every(s => next.has(s.subjectType + ':' + s.subjectCode + ':' + action))
-      for (const s of subjects) {
-        const key = s.subjectType + ':' + s.subjectCode + ':' + action
-        if (allChecked) next.delete(key)
-        else next.add(key)
-      }
-      setHasChanges(!setsEqual(next, originalPermSetRef.current))
-      return next
-    })
-  }
-
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (hasChanges) e.preventDefault()
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [hasChanges])
-
-  const showError = (err: unknown, fallback: string) => {
-    const body = axios.isAxiosError<ApiErrorBody>(err) ? err.response?.data : undefined
-    message.error(body?.message ?? fallback)
-  }
 
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!granteeId) return
       const perms: PermissionEntry[] = []
-      for (const key of permSet) {
-        const parts = key.split(':')
-        perms.push({ subjectType: parts[0], subjectCode: parts[1], action: parts[2] })
+      for (const key of selectedPerms) {
+        const [subjectType, subjectCode, action] = key.split('|')
+        perms.push({ subjectType, subjectCode, action })
       }
       await apiClient.put('/admin/permissions', { granteeType, granteeId, permissions: perms })
     },
     onSuccess: () => {
       message.success('Đã lưu phân quyền')
-      originalPermSetRef.current = new Set(permSet)
       setHasChanges(false)
-      refetchPerms()
     },
-    onError: (err) => showError(err, 'Lỗi lưu phân quyền'),
+    onError: (err) => {
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as any).response?.data?.message ?? 'Lỗi lưu'
+        : 'Lỗi lưu'
+      message.error(msg)
+    },
   })
 
-  const handleGranteeTypeChange = (e: RadioChangeEvent) => {
-    setGranteeType(e.target.value as 'USER' | 'GROUP')
+  const handleGranteeTypeChange = (e: any) => {
+    setGranteeType(e.target.value)
     setGranteeId(null)
-    setPermSet(new Set())
+    setSelectedPerms(new Set())
     setHasChanges(false)
   }
 
-  if (!catalog) return <Typography.Text>Đang tải...</Typography.Text>
+  const handleTogglePerm = (subjectType: string, subjectCode: string, action: string) => {
+    const key = `${subjectType}|${subjectCode}|${action}`
+    const newSet = new Set(selectedPerms)
+    if (newSet.has(key)) {
+      newSet.delete(key)
+    } else {
+      newSet.add(key)
+    }
+    setSelectedPerms(newSet)
+    setHasChanges(true)
+  }
 
-  const subjectsByType = catalog.subjectTypes.map(st => ({
-    type: st,
-    label: catalog.subjectTypeLabels[st] || st,
-    subjects: catalog.subjects.filter(s => s.subjectType === st),
-    availableActions: catalog.availableActions[st] || catalog.actions,
-  }))
+  const handleSelectAllColumn = (action: string, checked: boolean) => {
+    const newSet = new Set(selectedPerms)
+    const newSelectColumn = { ...selectColumn }
+    if (!catalog) return
+    for (const subject of catalog.subjects) {
+      const key = `${subject.subjectType}|${subject.subjectCode}|${action}`
+      if (checked) {
+        newSet.add(key)
+      } else {
+        newSet.delete(key)
+      }
+    }
+    newSelectColumn[action] = checked
+    setSelectedPerms(newSet)
+    setSelectColumn(newSelectColumn)
+    setHasChanges(true)
+  }
+
+  const isActionAvailable = (subjectType: string, action: string) => {
+    if (!catalog) return false
+    return catalog.availableActions[subjectType]?.includes(action) ?? false
+  }
+
+  // Sync existing permissions when data loads
+  useEffect(() => {
+    if (existingPerms) {
+      const keys = existingPerms.map(p => `${p.subjectType}|${p.subjectCode}|${p.action}`)
+      setSelectedPerms(new Set(keys))
+      setHasChanges(false)
+    }
+  }, [existingPerms])
+
+  if (catalogLoading || permsLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: 48 }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
 
   return (
     <div>
       <Typography.Title level={3}>Phân quyền</Typography.Title>
-
-      <Space style={{ marginBottom: 16 }}>
-        <Radio.Group value={granteeType} onChange={handleGranteeTypeChange}>
-          <Radio value=\"USER\">Người dùng</Radio>
-          <Radio value=\"GROUP\">Nhóm</Radio>
-        </Radio.Group>
-        {granteeType === 'USER' ? (
-          <LookupSelect
-            resource=\"employees\"
-            labelField=\"fullName\"
-            value={granteeId}
-            onChange={(v: number | null) => { setGranteeId(v); setHasChanges(false) }}
-            placeholder=\"Chọn nhân viên...\"
-          />
-        ) : (
-          <GroupSelect
-            value={granteeId}
-            onChange={(v: number | null) => { setGranteeId(v); setHasChanges(false) }}
-          />
-        )}
-      </Space>
-
-      {granteeId && (
-        <div>
+      <Card loading={catalogLoading || permsLoading} style={{ maxWidth: 600 }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <div>
+            <Typography.Text strong>Đối tượng</Typography.Text>
+            <Radio.Group value={granteeType} onChange={handleGranteeTypeChange} style={{ marginLeft: 16 }}>
+              <Radio value="USER">Người dùng</Radio>
+              <Radio value="GROUP">Nhóm</Radio>
+            </Radio.Group>
+          </div>
+          {granteeType === 'USER' && (
+            <div>
+              <Typography.Text strong>Người dùng</Typography.Text>
+              <div style={{ marginTop: 8 }}>
+                <LookupSelect
+                  resource="employees"
+                  labelField="fullName"
+                  value={granteeId}
+                  onChange={(v: number | null) => { setGranteeId(v); setHasChanges(false) }}
+                  placeholder="Chọn nhân viên..."
+                />
+              </div>
+            </div>
+          )}
+          {granteeType === 'GROUP' && (
+            <div>
+              <Typography.Text strong>Nhóm</Typography.Text>
+              <div style={{ marginTop: 8 }}>
+                <LookupSelect
+                  resource="groups"
+                  labelField="name"
+                  value={granteeId}
+                  onChange={(v: number | null) => { setGranteeId(v); setHasChanges(false) }}
+                  placeholder="Chọn nhóm..."
+                />
+              </div>
+            </div>
+          )}
           {hasChanges && (
-            <Typography.Text type=\"warning\" style={{ display: 'block', marginBottom: 8 }}>
+            <Typography.Text type="warning" style={{ display: 'block', marginBottom: 8 }}>
               Có thay đổi chưa được lưu
             </Typography.Text>
           )}
           <Button
-            type=\"primary\"
+            type="primary"
             onClick={() => saveMutation.mutate()}
             loading={saveMutation.isPending}
-            disabled={!hasChanges}
-            style={{ marginBottom: 16 }}
+            disabled={!granteeId || !hasChanges}
           >
-            Lưu phân quyền
+            Lưu
           </Button>
-
-          <Collapse
-            defaultActiveKey={catalog.subjectTypes}
-            items={subjectsByType
-              .filter(g => g.subjects.length > 0)
-              .map(group => ({
-                key: group.type,
-                label: group.label,
-                children: (
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ borderCollapse: 'collapse', minWidth: 600 }}>
-                      <thead>
-                        <tr>
-                          <th style={{ border: '1px solid #d9d9d9', padding: '6px 8px', textAlign: 'left', background: '#fafafa', minWidth: 180 }}>
-                            Đối tượng
-                          </th>
-                          {group.availableActions.map(action => (
-                            <th key={action} style={{ border: '1px solid #d9d9d9', padding: '6px 8px', textAlign: 'center', background: '#fafafa' }}>
-                              <div>
-                                <div>{catalog.actionLabels[action] || action}</div>
-                                <Checkbox
-                                  checked={group.subjects.every(s => permSet.has(s.subjectType + ':' + s.subjectCode + ':' + action))}
-                                  indeterminate={
-                                    group.subjects.some(s => permSet.has(s.subjectType + ':' + s.subjectCode + ':' + action)) &&
-                                    !group.subjects.every(s => permSet.has(s.subjectType + ':' + s.subjectCode + ':' + action))
-                                  }
-                                  onChange={() => toggleColumn(action, group.type, group.subjects)}
-                                />
-                              </div>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {group.subjects.map(subj => (
-                          <tr key={subj.subjectType + ':' + subj.subjectCode}>
-                            <td style={{ border: '1px solid #d9d9d9', padding: '6px 8px', fontWeight: 500 }}>
-                              {subj.label}
-                            </td>
-                            {group.availableActions.map(action => (
-                              <td key={action} style={{ border: '1px solid #d9d9d9', padding: '6px 8px', textAlign: 'center' }}>
-                                <Checkbox
-                                  checked={permSet.has(subj.subjectType + ':' + subj.subjectCode + ':' + action)}
-                                  onChange={() => togglePerm(subj.subjectType, subj.subjectCode, action)}
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ),
-              }))}
-          />
-        </div>
+        </Space>
+      </Card>
+      {granteeId && catalog && (
+        <Card title="Ma trận phân quyền" style={{ marginTop: 16 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ border: '1px solid #d9d9d9', padding: 8, textAlign: 'left', background: '#fafafa' }}>Chủ thể</th>
+                {ALL_ACTIONS.filter(action => catalog.actions.includes(action)).map(action => (
+                  <th key={action} style={{ border: '1px solid #d9d9d9', padding: 8, textAlign: 'center', background: '#fafafa', width: 80 }}>
+                    {catalog.actionLabels[action] ?? action}
+                  </th>
+                ))}
+              </tr>
+              <tr>
+                <th style={{ border: '1px solid #d9d9d9', padding: 8 }}></th>
+                {ALL_ACTIONS.filter(action => catalog.actions.includes(action)).map(action => (
+                  <th key={action} style={{ border: '1px solid #d9d9d9', padding: 8, textAlign: 'center', background: '#fafafa' }}>
+                    <Checkbox
+                      checked={selectColumn[action] ?? false}
+                      onChange={(e) => handleSelectAllColumn(action, e.target.checked)}
+                    />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {catalog.subjects.map(subject => (
+                <tr key={`${subject.subjectType}-${subject.subjectCode}`}>
+                  <td style={{ border: '1px solid #d9d9d9', padding: 8 }}>
+                    <Typography.Text strong>{subject.label}</Typography.Text>
+                    <div style={{ fontSize: 11, color: '#888' }}>{subject.subjectType} - {subject.subjectCode}</div>
+                  </td>
+                  {ALL_ACTIONS.filter(action => catalog.actions.includes(action)).map(action => (
+                    <td key={action} style={{ border: '1px solid #d9d9d9', padding: 8, textAlign: 'center' }}>
+                      {isActionAvailable(subject.subjectType, action) ? (
+                        <Checkbox
+                          checked={selectedPerms.has(`${subject.subjectType}|${subject.subjectCode}|${action}`)}
+                          onChange={() => handleTogglePerm(subject.subjectType, subject.subjectCode, action)}
+                        />
+                      ) : <span style={{ color: '#ccc' }}>-</span>}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
       )}
     </div>
   )
-}
-
-function setsEqual(a: Set<string>, b: Set<string>): boolean {
-  if (a.size !== b.size) return false
-  for (const item of a) if (!b.has(item)) return false
-  return true
 }

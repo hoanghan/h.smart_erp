@@ -1,12 +1,11 @@
-import type { ColumnsType } from 'antd/es/table'
 import CrudPage from '../../components/crud/CrudPage'
 import type { CrudFormField } from '../../components/crud/types'
 import type { PaymentMethodOut } from '../../api/types'
 
-const columns: ColumnsType<PaymentMethodOut> = [
-  { title: 'Mã', dataIndex: 'code', key: 'code', width: 160 },
-  { title: 'Tên', dataIndex: 'name', key: 'name' },
-  { title: 'Số ngày công nợ', dataIndex: 'dueDays', key: 'dueDays', width: 150, align: 'right' },
+const columns = [
+  { field: 'code', headerText: 'Mã', width: 160 },
+  { field: 'name', headerText: 'Tên' },
+  { field: 'dueDays', headerText: 'Số ngày công nợ', width: 150, textAlign: 'Right' },
 ]
 
 const formFields: CrudFormField[] = [

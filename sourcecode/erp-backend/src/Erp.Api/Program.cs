@@ -1,6 +1,8 @@
 using System.Text;
 using Erp.Api.Core;
 using Erp.Api.Data;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +18,7 @@ var connString = builder.Configuration.GetConnectionString("ErpDb")
 // ---------- Services ----------
 builder.Services.AddDbContext<ErpDbContext>(o =>
     o.UseNpgsql(connString).UseSnakeCaseNamingConvention());
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton(jwtSettings);
 builder.Services.AddSingleton<JwtService>();
@@ -26,10 +29,19 @@ builder.Services.AddScoped<WorkflowService>();
 builder.Services.AddScoped<OutboxService>();
 builder.Services.AddScoped<PostingService>();
 builder.Services.AddScoped<PricingService>();
+builder.Services.AddScoped<FinanceJobs>();
 builder.Services.AddHostedService<LerpWorker>();
 builder.Services.AddHostedService<QuotationExpiryWorker>();
 
 builder.Services.AddControllers();
+
+// ---------- Hangfire (Task 23.5) ----------
+builder.Services.AddHangfire(cfg => cfg
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(connString));
+builder.Services.AddHangfireServer();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -46,6 +58,14 @@ builder.Services
         // Chỉ chấp nhận access token cho API
         o.Events = new JwtBearerEvents
         {
+            // Cho phép Hangfire dashboard (truy cập từ browser) truyền token qua query string
+            OnMessageReceived = ctx =>
+            {
+                if (ctx.HttpContext.Request.Path.StartsWithSegments("/hangfire")
+                    && ctx.Request.Query.TryGetValue("access_token", out var qsToken))
+                    ctx.Token = qsToken;
+                return Task.CompletedTask;
+            },
             OnTokenValidated = ctx =>
             {
                 if (ctx.Principal?.FindFirst("token_type")?.Value != "access")
@@ -131,6 +151,14 @@ app.UseSwaggerUI(o =>
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new HangfireAdminAuthorizationFilter()],
+});
+RecurringJob.AddOrUpdate<FinanceJobs>(
+    "finance-mark-overdue-invoices", j => j.MarkOverdueInvoicesAsync(), Cron.Daily);
+
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 

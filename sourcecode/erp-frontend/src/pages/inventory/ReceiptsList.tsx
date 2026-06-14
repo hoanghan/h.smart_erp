@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Dropdown, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { PlusOutlined } from '@ant-design/icons'
 import DataTable from '../../components/DataTable'
 import LookupLabel from '../../components/LookupLabel'
@@ -30,58 +29,38 @@ export default function ReceiptsListPage() {
   const [status, setStatus] = useState<string | undefined>()
   const [subType, setSubType] = useState<string | undefined>()
 
-  const columns: ColumnsType<StockDocOut> = [
+  const columns = [
     {
-      title: 'Số phiếu',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 140,
-      render: (v: string, record) => <a onClick={() => navigate(`/inventory/docs/${record.id}`)}>{v}</a>,
+      field: 'docNo', headerText: 'Số phiếu', width: 140,
+      template: (r: StockDocOut) => <a onClick={() => navigate(`/inventory/docs/${r.id}`)}>{r.docNo}</a>,
     },
     {
-      title: 'Loại nhập',
-      dataIndex: 'subType',
-      key: 'subType',
-      width: 130,
-      render: (v: string) => <Tag color={SUB_TYPE_COLORS[v] ?? 'default'}>{RECEIPT_SUB_TYPE_LABELS[v] ?? v}</Tag>,
+      field: 'subType', headerText: 'Loại nhập', width: 130,
+      template: (r: StockDocOut) => <Tag color={SUB_TYPE_COLORS[r.subType] ?? 'default'}>{RECEIPT_SUB_TYPE_LABELS[r.subType] ?? r.subType}</Tag>,
     },
     {
-      title: 'Số tham chiếu',
-      key: 'refDoc',
-      width: 140,
-      render: (_: unknown, record: StockDocOut) => {
-        if (record.purchaseOrderId) return `PO #${record.purchaseOrderId}`
-        if (record.salesOrderId) return `SO #${record.salesOrderId}`
+      field: 'refDoc', headerText: 'Số tham chiếu', width: 140,
+      template: (r: StockDocOut) => {
+        if (r.purchaseOrderId) return `PO #${r.purchaseOrderId}`
+        if (r.salesOrderId) return `SO #${r.salesOrderId}`
         return '—'
       },
     },
     {
-      title: 'Kho nhập',
-      dataIndex: 'toWarehouseId',
-      key: 'toWarehouseId',
-      width: 150,
-      render: (v: number | null) => <LookupLabel resource="warehouses" id={v} />,
+      field: 'toWarehouseId', headerText: 'Kho nhập', width: 150,
+      template: (r: StockDocOut) => <LookupLabel resource="warehouses" id={r.toWarehouseId} />,
     },
     {
-      title: 'Đối tượng',
-      dataIndex: 'partnerId',
-      key: 'partnerId',
-      width: 160,
-      render: (v: number | null) => v ? <LookupLabel resource="partners" id={v} labelField="shortName" /> : '—',
+      field: 'partnerId', headerText: 'Đối tượng', width: 160,
+      template: (r: StockDocOut) => r.partnerId ? <LookupLabel resource="partners" id={r.partnerId} labelField="shortName" /> : '—',
     },
     {
-      title: 'Ngày yêu cầu',
-      dataIndex: 'requestDate',
-      key: 'requestDate',
-      width: 110,
-      render: formatDateVN,
+      field: 'requestDate', headerText: 'Ngày yêu cầu', width: 110,
+      template: (r: StockDocOut) => formatDateVN(r.requestDate),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 130,
-      render: (v: string) => <Tag color={statusColor(v)}>{STOCK_DOC_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'status', headerText: 'Trạng thái', width: 130,
+      template: (r: StockDocOut) => <Tag color={statusColor(r.status)}>{STOCK_DOC_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
   ]
 
@@ -100,7 +79,6 @@ export default function ReceiptsListPage() {
         queryKey="inventory-receipts"
         endpoint="/inventory/docs"
         columns={columns}
-        hideSearch
         extraParams={{ docType: 'RECEIPT', status, subType }}
         toolbarExtra={
           <Space>

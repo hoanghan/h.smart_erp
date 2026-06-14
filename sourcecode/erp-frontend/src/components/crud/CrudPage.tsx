@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { App as AntApp, Button, Drawer, Form, Input, InputNumber, Popconfirm, Select, Space, Switch, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
@@ -96,13 +95,11 @@ export default function CrudPage<TOut extends { id: number }>({
     saveMutation.mutate(values)
   }
 
-  const tableColumns: ColumnsType<TOut> = [
+  const tableColumns = [
     ...columns,
     {
-      title: '',
-      key: '__actions',
-      width: 96,
-      render: (_, record) => (
+      field: '__actions', headerText: '', width: 96,
+      template: (record: TOut) => (
         <Space>
           <Button type="text" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           <Popconfirm

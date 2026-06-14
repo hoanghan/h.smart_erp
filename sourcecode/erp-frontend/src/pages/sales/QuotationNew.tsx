@@ -11,14 +11,10 @@ import LookupLabel from '../../components/LookupLabel'
 import LookupSelect from '../../components/LookupSelect'
 import { formatNumberVN } from '../../utils/format'
 
-const QUOTE_TYPE_OPTIONS = [
-  { value: 'NORMAL', label: 'Thông thường' },
-  { value: 'PROJECT', label: 'Dự án' },
-]
-
-const QUOTE_FORM_OPTIONS = [
-  { value: 'NORMAL', label: 'Thông thường' },
-  { value: 'ESTIMATE', label: 'Báo giá tạm tính' },
+const ORDER_TYPE_OPTIONS = [
+  { value: 'SALES', label: 'Bán hàng' },
+  { value: 'MAINTENANCE', label: 'Bảo trì' },
+  { value: 'SHOPPING_CART', label: 'Đặt hàng online' },
 ]
 
 interface LocalLine extends QuotationLineIn {
@@ -55,7 +51,8 @@ export default function QuotationNewPage() {
         key: nextKey,
         productId: values.productId,
         quantity: values.quantity,
-        approvedPrice: values.approvedPrice,
+        rate: values.rate ?? null,
+        discountPct: values.discountPct ?? null,
         vatPct: values.vatPct,
       },
     ])
@@ -71,6 +68,7 @@ export default function QuotationNewPage() {
     const values = await form.validateFields()
     createMutation.mutate({
       ...values,
+      validTill: values.validTill ? values.validTill.format('YYYY-MM-DD') : null,
       requestDeliveryDate: values.requestDeliveryDate ? values.requestDeliveryDate.format('YYYY-MM-DD') : null,
       lines: lines.map(({ key: _key, ...line }) => line),
     })
@@ -83,9 +81,10 @@ export default function QuotationNewPage() {
       key: 'productId',
       render: (v: number) => <LookupLabel resource="products" id={v} />,
     },
-    { title: 'Số lượng', dataIndex: 'quantity', key: 'quantity', align: 'right', width: 110, render: formatNumberVN },
-    { title: 'Giá duyệt', dataIndex: 'approvedPrice', key: 'approvedPrice', align: 'right', width: 130, render: formatNumberVN },
-    { title: 'VAT (%)', dataIndex: 'vatPct', key: 'vatPct', align: 'right', width: 90, render: formatNumberVN },
+    { title: 'Số lượng', dataIndex: 'quantity', key: 'quantity', align: 'right', width: 100, render: formatNumberVN },
+    { title: 'Đơn giá', dataIndex: 'rate', key: 'rate', align: 'right', width: 120, render: (v) => (v == null ? <i style={{ color: '#999' }}>tự động</i> : formatNumberVN(v)) },
+    { title: 'CK (%)', dataIndex: 'discountPct', key: 'discountPct', align: 'right', width: 80, render: (v) => (v == null ? '' : formatNumberVN(v)) },
+    { title: 'VAT (%)', dataIndex: 'vatPct', key: 'vatPct', align: 'right', width: 80, render: formatNumberVN },
     {
       title: '',
       key: '__actions',
@@ -98,7 +97,7 @@ export default function QuotationNewPage() {
     <div>
       <Typography.Title level={3}>Tạo báo giá mới</Typography.Title>
 
-      <Form form={form} layout="vertical" initialValues={{ quoteType: 'NORMAL', quoteForm: 'NORMAL', validityDays: 2 }}>
+      <Form form={form} layout="vertical" initialValues={{ orderType: 'SALES', validityDays: 2 }}>
         <Row gutter={16}>
           <Col span={8}>
             <Form.Item label="Khách hàng" name="partnerId" rules={[{ required: true, message: 'Vui lòng chọn khách hàng' }]}>
@@ -106,23 +105,28 @@ export default function QuotationNewPage() {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="Loại báo giá" name="quoteType">
-              <Select options={QUOTE_TYPE_OPTIONS} />
+            <Form.Item label="Loại đơn" name="orderType">
+              <Select options={ORDER_TYPE_OPTIONS} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="Hình thức báo giá" name="quoteForm">
-              <Select options={QUOTE_FORM_OPTIONS} />
+            <Form.Item label="Bảng giá" name="priceListId">
+              <LookupSelect resource="price-lists" endpoint="/sales/price-lists" placeholder="Chọn bảng giá" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="Ngày giao hàng yêu cầu" name="requestDeliveryDate">
+            <Form.Item label="Hiệu lực đến" name="validTill">
               <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item label="Số ngày hiệu lực" name="validityDays">
               <InputNumber style={{ width: '100%' }} min={0} />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item label="Ngày giao hàng yêu cầu" name="requestDeliveryDate">
+              <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
             </Form.Item>
           </Col>
           <Col span={8}>
@@ -138,6 +142,16 @@ export default function QuotationNewPage() {
           <Col span={8}>
             <Form.Item label="Phương thức giao hàng" name="deliveryMethodId">
               <LookupSelect resource="delivery-methods" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item label="Đối thủ cạnh tranh" name="competitor">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={16}>
+            <Form.Item label="Điều khoản" name="terms">
+              <Input.TextArea rows={2} />
             </Form.Item>
           </Col>
           <Col span={24}>
@@ -156,10 +170,13 @@ export default function QuotationNewPage() {
           <LookupSelect resource="products" placeholder="Sản phẩm" />
         </Form.Item>
         <Form.Item name="quantity" rules={[{ required: true, message: 'Nhập SL' }]} initialValue={1}>
-          <InputNumber min={0} placeholder="Số lượng" style={{ width: 110 }} />
+          <InputNumber min={0} placeholder="Số lượng" style={{ width: 100 }} />
         </Form.Item>
-        <Form.Item name="approvedPrice">
-          <InputNumber min={0} placeholder="Giá duyệt" style={{ width: 140 }} />
+        <Form.Item name="rate">
+          <InputNumber min={0} placeholder="Đơn giá (tự động)" style={{ width: 150 }} />
+        </Form.Item>
+        <Form.Item name="discountPct">
+          <InputNumber min={0} max={100} placeholder="CK %" style={{ width: 90 }} />
         </Form.Item>
         <Form.Item name="vatPct" initialValue={10}>
           <InputNumber min={0} max={100} placeholder="VAT %" style={{ width: 90 }} />

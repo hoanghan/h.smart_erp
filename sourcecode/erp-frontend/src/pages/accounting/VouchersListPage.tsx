@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Button, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { PlusOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import type { VoucherOut } from '../../api/types'
@@ -36,29 +35,27 @@ export default function VouchersListPage() {
       .map((p) => ({ value: p.id, label: `Năm ${p.fiscalYear} — Kỳ ${p.periodNo}` })),
   ]
 
-  const columns: ColumnsType<VoucherOut> = [
-    { title: 'Loại chứng từ', dataIndex: 'voucherType', key: 'voucherType', width: 160, render: (v: string) => VOUCHER_TYPE_LABELS[v] ?? v },
+  const columns = [
     {
-      title: 'Số chứng từ',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 160,
-      render: (v: string, r) => <Link to={`/accounting/vouchers/${r.id}`}>{v}</Link>,
+      field: 'voucherType', headerText: 'Loại chứng từ', width: 160,
+      template: (r: VoucherOut) => VOUCHER_TYPE_LABELS[r.voucherType] ?? r.voucherType,
     },
-    { title: 'Ngày', dataIndex: 'docDate', key: 'docDate', width: 110, render: formatDateVN },
     {
-      title: 'Đối tượng',
-      dataIndex: 'partnerId',
-      key: 'partnerId',
-      render: (v: number | null) => <LookupLabel resource="partners" id={v} labelField="shortName" />,
+      field: 'docNo', headerText: 'Số chứng từ', width: 160,
+      template: (r: VoucherOut) => <Link to={`/accounting/vouchers/${r.id}`}>{r.docNo}</Link>,
     },
-    { title: 'Tổng tiền', dataIndex: 'totalAmount', key: 'totalAmount', align: 'right', width: 130, render: formatNumberVN },
+    { field: 'docDate', headerText: 'Ngày', width: 110, template: (r: VoucherOut) => formatDateVN(r.docDate) },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 130,
-      render: (v: string) => <Tag color={statusColor(v)}>{VOUCHER_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'partnerId', headerText: 'Đối tượng',
+      template: (r: VoucherOut) => <LookupLabel resource="partners" id={r.partnerId} labelField="shortName" />,
+    },
+    {
+      field: 'totalAmount', headerText: 'Tổng tiền', width: 130, textAlign: 'Right',
+      template: (r: VoucherOut) => formatNumberVN(r.totalAmount),
+    },
+    {
+      field: 'status', headerText: 'Trạng thái', width: 130,
+      template: (r: VoucherOut) => <Tag color={statusColor(r.status)}>{VOUCHER_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
   ]
 
@@ -69,7 +66,6 @@ export default function VouchersListPage() {
         queryKey="finance-vouchers"
         endpoint="/finance/vouchers"
         columns={columns}
-        hideSearch
         extraParams={{
           voucherType: voucherType || undefined,
           periodId: periodId || undefined,

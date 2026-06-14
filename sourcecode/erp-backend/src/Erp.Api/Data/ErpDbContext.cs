@@ -1,9 +1,14 @@
-﻿using Erp.Api.Entities;
+﻿using System.Text.Json;
+using Erp.Api.Core;
+using Erp.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Erp.Api.Data;
 
-public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(options)
+public class ErpDbContext(
+    DbContextOptions<ErpDbContext> options,
+    IHttpContextAccessor? httpContextAccessor = null,
+    ILogger<ErpDbContext>? logger = null) : DbContext(options)
 {
     // Org
     public DbSet<Department> Departments => Set<Department>();
@@ -92,6 +97,9 @@ public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(op
     public DbSet<VoucherLine> VoucherLines => Set<VoucherLine>();
     public DbSet<GlEntry> GlEntries => Set<GlEntry>();
     public DbSet<BankFee> BankFees => Set<BankFee>();
+    public DbSet<CostCenter> CostCenters => Set<CostCenter>();
+    public DbSet<PaymentAllocation> PaymentAllocations => Set<PaymentAllocation>();
+    public DbSet<FsMapping> FsMappings => Set<FsMapping>();
 
     // Master data
     public DbSet<Uom> Uoms => Set<Uom>();
@@ -109,6 +117,187 @@ public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(op
     public DbSet<PaymentTermsTemplateLine> PaymentTermsTemplateLines => Set<PaymentTermsTemplateLine>();
     public DbSet<TaxChargeTemplate> TaxChargeTemplates => Set<TaxChargeTemplate>();
     public DbSet<TaxChargeTemplateLine> TaxChargeTemplateLines => Set<TaxChargeTemplateLine>();
+
+    // CRM
+    public DbSet<LeadSource> LeadSources => Set<LeadSource>();
+    public DbSet<SalesStage> SalesStages => Set<SalesStage>();
+    public DbSet<Campaign> Campaigns => Set<Campaign>();
+    public DbSet<Lead> Leads => Set<Lead>();
+    public DbSet<Opportunity> Opportunities => Set<Opportunity>();
+    public DbSet<OpportunityLine> OpportunityLines => Set<OpportunityLine>();
+    public DbSet<Activity> Activities => Set<Activity>();
+
+    // Manufacturing
+    public DbSet<Workstation> Workstations => Set<Workstation>();
+    public DbSet<Operation> Operations => Set<Operation>();
+    public DbSet<Bom> Boms => Set<Bom>();
+    public DbSet<BomItem> BomItems => Set<BomItem>();
+    public DbSet<BomOperation> BomOperations => Set<BomOperation>();
+    public DbSet<BomScrap> BomScraps => Set<BomScrap>();
+    public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
+    public DbSet<WorkOrderItem> WorkOrderItems => Set<WorkOrderItem>();
+    public DbSet<WorkOrderOperation> WorkOrderOperations => Set<WorkOrderOperation>();
+    public DbSet<WoFinishBatch> WoFinishBatches => Set<WoFinishBatch>();
+    public DbSet<JobCard> JobCards => Set<JobCard>();
+    public DbSet<ProductionPlan> ProductionPlans => Set<ProductionPlan>();
+    public DbSet<PpSo> PpSos => Set<PpSo>();
+    public DbSet<PpItem> PpItems => Set<PpItem>();
+    public DbSet<PpMaterial> PpMaterials => Set<PpMaterial>();
+
+    // Entities excluded from auto audit-log: audit_log itself (avoid recursion), tables that
+    // already have their own log (wf_transition_log), internal plumbing (outbox, doc numbering,
+    // lerp linking), and high-volume generated ledger lines (gl_entry, voucher_line, stock_move,
+    // stock_balance) that would flood the audit log without representing a user write action.
+    private static readonly HashSet<Type> AuditExcludedTypes = new()
+    {
+        typeof(AuditLog),
+        typeof(WfTransitionLog),
+        typeof(OutboxEvent),
+        typeof(DocNumbering),
+        typeof(LerpVoucher),
+        typeof(StockBalance),
+        typeof(GlEntry),
+        typeof(VoucherLine),
+        typeof(StockMove),
+    };
+
+    // Property values that should never be copied into the audit log detail JSON.
+    private static readonly HashSet<string> AuditSensitiveProperties = new() { "PasswordHash" };
+
+    private sealed class PendingAudit
+    {
+        public required string Action { get; init; }
+        public required string RefTable { get; init; }
+        public required object Entity { get; init; }
+        public long? RefId { get; init; }
+        public required string Detail { get; init; }
+    }
+
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        var pending = CapturePendingAudits();
+
+        var result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+        if (pending.Count > 0)
+        {
+            try
+            {
+                await WriteAuditLogsAsync(pending, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Failed to write audit log entries");
+            }
+        }
+
+        return result;
+    }
+
+    private List<PendingAudit> CapturePendingAudits()
+    {
+        var pending = new List<PendingAudit>();
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted))
+                continue;
+            if (AuditExcludedTypes.Contains(entry.Entity.GetType()))
+                continue;
+
+            var tableName = entry.Metadata.GetTableName() ?? entry.Entity.GetType().Name;
+            var detail = new Dictionary<string, object?>();
+            string action;
+
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    action = "CREATE";
+                    foreach (var p in entry.Properties)
+                    {
+                        if (!AuditSensitiveProperties.Contains(p.Metadata.Name))
+                            detail[p.Metadata.Name] = p.CurrentValue;
+                    }
+                    break;
+                case EntityState.Modified:
+                    var changed = entry.Properties.Where(p => p.IsModified).ToList();
+                    if (changed.Count == 0)
+                        continue;
+                    action = "UPDATE";
+                    foreach (var p in changed)
+                    {
+                        if (!AuditSensitiveProperties.Contains(p.Metadata.Name))
+                            detail[p.Metadata.Name] = new { old = p.OriginalValue, @new = p.CurrentValue };
+                    }
+                    break;
+                case EntityState.Deleted:
+                    action = "DELETE";
+                    foreach (var p in entry.Properties)
+                    {
+                        if (!AuditSensitiveProperties.Contains(p.Metadata.Name))
+                            detail[p.Metadata.Name] = p.OriginalValue;
+                    }
+                    break;
+                default:
+                    continue;
+            }
+
+            // For Added entities, the Id is only populated by the database after SaveChanges,
+            // so RefId is resolved post-save in WriteAuditLogsAsync instead.
+            long? refId = null;
+            if (entry.State != EntityState.Added)
+            {
+                var idProp = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "Id");
+                refId = ToLong(idProp?.CurrentValue);
+            }
+
+            pending.Add(new PendingAudit
+            {
+                Action = action,
+                RefTable = tableName,
+                Entity = entry.Entity,
+                RefId = refId,
+                Detail = JsonSerializer.Serialize(detail),
+            });
+        }
+
+        return pending;
+    }
+
+    private async Task WriteAuditLogsAsync(List<PendingAudit> pending, CancellationToken cancellationToken)
+    {
+        var user = httpContextAccessor?.HttpContext?.User;
+        var userId = user is null ? null : RbacService.GetUserId(user);
+        string? username = userId is null
+            ? null
+            : await AppUsers.Where(u => u.Id == userId).Select(u => u.Username).FirstOrDefaultAsync(cancellationToken);
+
+        var now = DateTimeOffset.UtcNow;
+        foreach (var p in pending)
+        {
+            var refId = p.RefId ?? ToLong(p.Entity.GetType().GetProperty("Id")?.GetValue(p.Entity));
+            AuditLogs.Add(new AuditLog
+            {
+                UserId = userId,
+                Username = username,
+                Action = p.Action,
+                RefTable = p.RefTable,
+                RefId = refId,
+                Detail = p.Detail,
+                CreatedAt = now,
+            });
+        }
+
+        await base.SaveChangesAsync(true, cancellationToken);
+    }
+
+    private static long? ToLong(object? value) => value switch
+    {
+        null => null,
+        long l => l,
+        int i => i,
+        _ => Convert.ToInt64(value),
+    };
 
     protected override void OnModelCreating(ModelBuilder mb)
     {
@@ -132,6 +321,7 @@ public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(op
         mb.Entity<AuditLog>().ToTable("audit_log", "core");
         mb.Entity<AuditLog>().Property(x => x.CreatedAt)
           .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<AuditLog>().Property(x => x.Detail).HasColumnType("jsonb");
 
         mb.Entity<Quotation>().ToTable("quotation", "sales");
         mb.Entity<Quotation>().HasMany(x => x.Lines).WithOne()
@@ -300,6 +490,13 @@ public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(op
         mb.Entity<GlEntry>().ToTable("gl_entry", "finance");
         mb.Entity<GlEntry>().Property(x => x.CreatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAdd();
         mb.Entity<BankFee>().ToTable("bank_fee", "finance");
+        // ----- Task 23: ERPNext upgrade -----
+        mb.Entity<CostCenter>().ToTable("cost_center", "finance");
+        mb.Entity<CostCenter>().HasIndex(x => x.Code).IsUnique();
+        mb.Entity<PaymentAllocation>().ToTable("payment_allocation", "finance");
+        mb.Entity<PaymentAllocation>().Property(x => x.CreatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<FsMapping>().ToTable("fs_mapping", "finance");
+        mb.Entity<FsMapping>().HasIndex(x => new { x.Statement, x.ItemCode }).IsUnique();
 
         mb.Entity<Process>().ToTable("process", "core");
         mb.Entity<CostType>().ToTable("cost_type", "core");
@@ -323,6 +520,73 @@ public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(op
         mb.Entity<Product>().ToTable("product", "core");
         mb.Entity<Partner>().ToTable("partner", "core");
         mb.Entity<Warehouse>().ToTable("warehouse", "core");
+
+        // ----- schema crm -----
+        mb.Entity<LeadSource>().ToTable("lead_source", "crm");
+        mb.Entity<SalesStage>().ToTable("sales_stage", "crm");
+        mb.Entity<Campaign>().ToTable("campaign", "crm");
+        mb.Entity<Campaign>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<Lead>().ToTable("lead", "crm");
+        mb.Entity<Lead>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<Lead>().HasIndex(x => x.DocNo).IsUnique();
+        mb.Entity<Opportunity>().ToTable("opportunity", "crm");
+        mb.Entity<Opportunity>().HasMany(x => x.Lines).WithOne()
+          .HasForeignKey(l => l.OpportunityId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<Opportunity>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<Opportunity>().HasIndex(x => x.DocNo).IsUnique();
+        mb.Entity<OpportunityLine>().ToTable("opportunity_line", "crm");
+        mb.Entity<Activity>().ToTable("activity", "crm");
+        mb.Entity<Activity>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<Activity>().HasIndex(x => new { x.RefTable, x.RefId });
+
+        // ----- schema mfg -----
+        mb.Entity<Workstation>().ToTable("workstation", "mfg");
+        mb.Entity<Operation>().ToTable("operation", "mfg");
+        mb.Entity<Bom>().ToTable("bom", "mfg");
+        mb.Entity<Bom>().HasMany(x => x.Items).WithOne()
+          .HasForeignKey(i => i.BomId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<Bom>().HasMany(x => x.Operations).WithOne()
+          .HasForeignKey(o => o.BomId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<Bom>().HasMany(x => x.Scraps).WithOne()
+          .HasForeignKey(s => s.BomId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<Bom>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<Bom>().HasIndex(x => x.DocNo).IsUnique();
+        mb.Entity<BomItem>().ToTable("bom_item", "mfg");
+        mb.Entity<BomOperation>().ToTable("bom_operation", "mfg");
+        mb.Entity<BomScrap>().ToTable("bom_scrap", "mfg");
+        mb.Entity<WorkOrder>().ToTable("work_order", "mfg");
+        mb.Entity<WorkOrder>().HasMany(x => x.Items).WithOne()
+          .HasForeignKey(i => i.WorkOrderId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<WorkOrder>().HasMany(x => x.Operations).WithOne()
+          .HasForeignKey(o => o.WorkOrderId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<WorkOrder>().HasMany(x => x.FinishBatches).WithOne()
+          .HasForeignKey(f => f.WorkOrderId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<WorkOrder>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<WorkOrder>().HasIndex(x => x.DocNo).IsUnique();
+        mb.Entity<WorkOrderItem>().ToTable("wo_item", "mfg");
+        mb.Entity<WorkOrderOperation>().ToTable("wo_operation", "mfg");
+        mb.Entity<WoFinishBatch>().ToTable("wo_finish_batch", "mfg");
+        mb.Entity<JobCard>().ToTable("job_card", "mfg");
+        mb.Entity<JobCard>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<ProductionPlan>().ToTable("production_plan", "mfg");
+        mb.Entity<ProductionPlan>().HasMany(x => x.SalesOrders).WithOne()
+          .HasForeignKey(so => so.ProductionPlanId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<ProductionPlan>().HasMany(x => x.Items).WithOne()
+          .HasForeignKey(i => i.ProductionPlanId).OnDelete(DeleteBehavior.Cascade);
+        mb.Entity<ProductionPlan>().Property(x => x.CreatedAt)
+          .HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<ProductionPlan>().HasIndex(x => x.DocNo).IsUnique();
+        mb.Entity<PpSo>().ToTable("pp_so", "mfg");
+        mb.Entity<PpSo>().HasKey(x => new { x.ProductionPlanId, x.SalesOrderId });
+        mb.Entity<PpItem>().ToTable("pp_item", "mfg");
+        mb.Entity<PpMaterial>().ToTable("pp_material", "mfg");
 
         // ----- cá»™t id: GENERATED ALWAYS AS IDENTITY -----
         foreach (var entity in new[]
@@ -355,8 +619,17 @@ public class ErpDbContext(DbContextOptions<ErpDbContext> options) : DbContext(op
                       typeof(OpeningBalance), typeof(BusinessOperation), typeof(CashFund),
                       typeof(OutboxEvent), typeof(LerpVoucher),
                       typeof(Voucher), typeof(VoucherLine), typeof(GlEntry), typeof(BankFee),
+                      typeof(CostCenter), typeof(PaymentAllocation), typeof(FsMapping),
                      typeof(UserGroup), typeof(DataScope), typeof(ApprovalRight),
                      typeof(CompanyInfo), typeof(AuditLog),
+                     // CRM
+                     typeof(LeadSource), typeof(SalesStage), typeof(Campaign), typeof(Lead),
+                     typeof(Opportunity), typeof(OpportunityLine), typeof(Activity),
+                     // Manufacturing
+                     typeof(Workstation), typeof(Operation), typeof(Bom), typeof(BomItem), typeof(BomOperation),
+                     typeof(BomScrap), typeof(WorkOrder), typeof(WorkOrderItem), typeof(WorkOrderOperation),
+                     typeof(WoFinishBatch), typeof(JobCard),
+                     typeof(ProductionPlan), typeof(PpItem), typeof(PpMaterial),
                   })
         {
             mb.Entity(entity).Property("Id").UseIdentityAlwaysColumn();

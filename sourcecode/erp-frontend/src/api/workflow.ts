@@ -10,15 +10,12 @@ export interface WfTransition {
 
 export const WF_DEFINITIONS: Record<string, WfTransition[]> = {
   quotations: [
-    { action: 'request-pricing', from: ['NEW'], to: 'PRICE_REQUESTED' },
-    { action: 'start-pricing', from: ['PRICE_REQUESTED'], to: 'PRICING' },
-    { action: 'request-approval', from: ['NEW', 'PRICE_REQUESTED', 'PRICING'], to: 'APPROVAL_REQUESTED' },
-    { action: 'approve', from: ['APPROVAL_REQUESTED'], to: 'APPROVED' },
-    { action: 'reject', from: ['PRICE_REQUESTED', 'PRICING', 'APPROVAL_REQUESTED'], to: 'REJECTED', requireReason: true },
-    { action: 'mark-order-pending', from: ['APPROVED'], to: 'ORDER_PENDING' },
-    { action: 'convert-to-order', from: ['APPROVED', 'ORDER_PENDING'], to: 'ORDERED' },
-    { action: 'mark-failed', from: ['APPROVED', 'ORDER_PENDING'], to: 'FAILED', requireReason: true },
-    { action: 'cancel', from: ['NEW', 'PRICE_REQUESTED', 'PRICING', 'APPROVAL_REQUESTED', 'APPROVED', 'ORDER_PENDING'], to: 'CANCELLED', requireReason: true },
+    { action: 'submit', from: ['DRAFT'], to: 'OPEN' },
+    { action: 'make-sales-order', from: ['OPEN'], to: 'ORDERED' },
+    { action: 'set-as-lost', from: ['OPEN'], to: 'LOST' },
+    { action: 'extend', from: ['EXPIRED'], to: 'OPEN' },
+    { action: 'cancel', from: ['DRAFT', 'OPEN'], to: 'CANCELLED', requireReason: true },
+    { action: 'amend', from: ['CANCELLED'], to: 'DRAFT' },
   ],
   'sales-orders': [
     { action: 'request-approval', from: ['DRAFT'], to: 'APPROVAL_REQUESTED' },
@@ -55,37 +52,32 @@ export const WF_DEFINITIONS: Record<string, WfTransition[]> = {
 }
 
 export const ACTION_LABELS: Record<string, string> = {
-  'request-pricing': 'Yêu cầu tính giá',
-  'start-pricing': 'Bắt đầu định giá',
   'request-approval': 'Yêu cầu duyệt',
   approve: 'Duyệt',
-  reject: 'Từ chối',
-  'mark-order-pending': 'Chờ lên đơn',
-  'convert-to-order': 'Chuyển đơn hàng',
-  'mark-failed': 'Đánh dấu thất bại',
   cancel: 'Hủy',
   complete: 'Hoàn tất',
   reprocess: 'Xử lý lại đơn hàng',
   request: 'Yêu cầu',
   confirm: 'Xác nhận',
+  submit: 'Gửi báo giá',
+  'make-sales-order': 'Tạo đơn hàng',
+  'set-as-lost': 'Đánh dấu mất báo giá',
+  extend: 'Gia hạn',
+  amend: 'Tạo bản sửa đổi',
 }
 
 /** Hành động chính (nút primary, màu nhấn). */
-export const PRIMARY_ACTIONS = new Set(['approve', 'convert-to-order', 'complete', 'request-approval', 'request-pricing', 'start-pricing', 'mark-order-pending', 'request', 'confirm'])
+export const PRIMARY_ACTIONS = new Set(['approve', 'complete', 'request-approval', 'request', 'confirm', 'submit', 'make-sales-order', 'extend', 'amend'])
 /** Hành động nguy hiểm (nút đỏ). */
-export const DANGER_ACTIONS = new Set(['cancel', 'reject', 'mark-failed'])
+export const DANGER_ACTIONS = new Set(['cancel', 'set-as-lost'])
 
 export const QUOTATION_STATUS_LABELS: Record<string, string> = {
-  NEW: 'Mới',
-  PRICE_REQUESTED: 'Đã yêu cầu báo giá',
-  PRICING: 'Đang định giá',
-  APPROVAL_REQUESTED: 'Chờ duyệt',
-  APPROVED: 'Đã duyệt',
-  ORDER_PENDING: 'Chờ lên đơn',
+  DRAFT: 'Nháp',
+  OPEN: 'Đang chào giá',
   ORDERED: 'Đã lên đơn',
-  FAILED: 'Thất bại',
+  LOST: 'Mất báo giá',
+  EXPIRED: 'Hết hiệu lực',
   CANCELLED: 'Đã hủy',
-  REJECTED: 'Từ chối',
 }
 
 export const SALES_ORDER_STATUS_LABELS: Record<string, string> = {
@@ -135,13 +127,12 @@ export const STOCK_DOC_STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  NEW: 'default',
   DRAFT: 'default',
-  PRICE_REQUESTED: 'default',
-  PRICING: 'default',
+  OPEN: 'blue',
+  LOST: 'red',
+  EXPIRED: 'orange',
   APPROVAL_REQUESTED: 'blue',
   APPROVED: 'green',
-  ORDER_PENDING: 'green',
   ORDERED: 'green',
   NOT_RECEIVED: 'orange',
   RECEIVED: 'blue',
@@ -152,8 +143,6 @@ const STATUS_COLORS: Record<string, string> = {
   CONFIRMED: 'orange',
   COMPLETED: 'green',
   CANCELLED: 'red',
-  REJECTED: 'red',
-  FAILED: 'red',
 }
 
 /** Màu Tag theo nhóm trạng thái: xám (nháp), xanh dương (chờ duyệt), xanh lá (đã duyệt), đỏ (hủy/từ chối/thất bại). */

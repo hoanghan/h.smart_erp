@@ -1,11 +1,10 @@
-import type { ColumnsType } from 'antd/es/table'
 import CrudPage from '../../components/crud/CrudPage'
 import type { CrudFormField } from '../../components/crud/types'
 import type { DeliveryMethodOut } from '../../api/types'
 
-const columns: ColumnsType<DeliveryMethodOut> = [
-  { title: 'Mã', dataIndex: 'code', key: 'code', width: 160 },
-  { title: 'Tên', dataIndex: 'name', key: 'name' },
+const columns = [
+  { field: 'code', headerText: 'Mã', width: 160 },
+  { field: 'name', headerText: 'Tên' },
 ]
 
 const formFields: CrudFormField[] = [

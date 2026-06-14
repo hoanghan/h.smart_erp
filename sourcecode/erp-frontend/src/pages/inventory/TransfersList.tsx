@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { PlusOutlined } from '@ant-design/icons'
 import DataTable from '../../components/DataTable'
 import LookupLabel from '../../components/LookupLabel'
@@ -13,55 +12,32 @@ export default function TransfersListPage() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<string | undefined>()
 
-  const columns: ColumnsType<StockDocOut> = [
+  const columns = [
     {
-      title: 'Số phiếu',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 140,
-      render: (v: string, record) => <a onClick={() => navigate(`/inventory/docs/${record.id}`)}>{v}</a>,
+      field: 'docNo', headerText: 'Số phiếu', width: 140,
+      template: (r: StockDocOut) => <a onClick={() => navigate(`/inventory/docs/${r.id}`)}>{r.docNo}</a>,
     },
     {
-      title: 'Kho xuất',
-      dataIndex: 'fromWarehouseId',
-      key: 'fromWarehouseId',
-      width: 150,
-      render: (v: number | null) => <LookupLabel resource="warehouses" id={v} />,
+      field: 'fromWarehouseId', headerText: 'Kho xuất', width: 150,
+      template: (r: StockDocOut) => <LookupLabel resource="warehouses" id={r.fromWarehouseId} />,
     },
     {
-      title: 'Kho nhập',
-      dataIndex: 'toWarehouseId',
-      key: 'toWarehouseId',
-      width: 150,
-      render: (v: number | null) => <LookupLabel resource="warehouses" id={v} />,
+      field: 'toWarehouseId', headerText: 'Kho nhập', width: 150,
+      template: (r: StockDocOut) => <LookupLabel resource="warehouses" id={r.toWarehouseId} />,
     },
     {
-      title: 'Ngày yêu cầu',
-      dataIndex: 'requestDate',
-      key: 'requestDate',
-      width: 110,
-      render: formatDateVN,
+      field: 'requestDate', headerText: 'Ngày yêu cầu', width: 110,
+      template: (r: StockDocOut) => formatDateVN(r.requestDate),
     },
     {
-      title: 'Ngày thực tế',
-      dataIndex: 'actualDate',
-      key: 'actualDate',
-      width: 110,
-      render: (v: string | null) => (v ? formatDateVN(v) : '—'),
+      field: 'actualDate', headerText: 'Ngày thực tế', width: 110,
+      template: (r: StockDocOut) => (r.actualDate ? formatDateVN(r.actualDate) : '—'),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 130,
-      render: (v: string) => <Tag color={statusColor(v)}>{STOCK_DOC_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'status', headerText: 'Trạng thái', width: 130,
+      template: (r: StockDocOut) => <Tag color={statusColor(r.status)}>{STOCK_DOC_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
-    {
-      title: 'Ghi chú',
-      dataIndex: 'note',
-      key: 'note',
-      ellipsis: true,
-    },
+    { field: 'note', headerText: 'Ghi chú' },
   ]
 
   return (
@@ -71,7 +47,6 @@ export default function TransfersListPage() {
         queryKey="inventory-transfers"
         endpoint="/inventory/docs"
         columns={columns}
-        hideSearch
         extraParams={{ docType: 'TRANSFER', status }}
         toolbarExtra={
           <Space>

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Select, Space, Tag, Typography } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
 import { PlusOutlined } from '@ant-design/icons'
 import DataTable from '../../components/DataTable'
 import LookupSelect from '../../components/LookupSelect'
@@ -21,36 +20,34 @@ export default function PurchaseOrdersListPage() {
   const [status, setStatus] = useState<string | undefined>()
   const [partnerId, setPartnerId] = useState<number | null>(null)
 
-  const columns: ColumnsType<PurchaseOrderOut> = [
+  const columns = [
     {
-      title: 'Số PO',
-      dataIndex: 'docNo',
-      key: 'docNo',
-      width: 160,
-      render: (v: string, record) => <a onClick={() => navigate(`/purchasing/orders/${record.id}`)}>{v}</a>,
-    },
-    { title: 'Ngày đặt', dataIndex: 'orderDate', key: 'orderDate', width: 110, render: formatDateVN },
-    {
-      title: 'Nhà cung cấp',
-      dataIndex: 'partnerId',
-      key: 'partnerId',
-      render: (v: number) => <LookupLabel resource="partners" id={v} labelField="shortName" />,
+      field: 'docNo', headerText: 'Số PO', width: 160,
+      template: (r: PurchaseOrderOut) => <a onClick={() => navigate(`/purchasing/orders/${r.id}`)}>{r.docNo}</a>,
     },
     {
-      title: 'Hình thức',
-      dataIndex: 'orderForm',
-      key: 'orderForm',
-      width: 120,
-      render: (v: string) => ORDER_FORM_LABELS[v] ?? v,
+      field: 'orderDate', headerText: 'Ngày đặt', width: 110,
+      template: (r: PurchaseOrderOut) => formatDateVN(r.orderDate),
     },
-    { title: 'Tổng tiền', dataIndex: 'totalAmount', key: 'totalAmount', width: 130, align: 'right', render: formatNumberVN },
-    { title: 'VAT', dataIndex: 'totalVat', key: 'totalVat', width: 110, align: 'right', render: formatNumberVN },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 150,
-      render: (v: string) => <Tag color={statusColor(v)}>{PURCHASE_ORDER_STATUS_LABELS[v] ?? v}</Tag>,
+      field: 'partnerId', headerText: 'Nhà cung cấp',
+      template: (r: PurchaseOrderOut) => <LookupLabel resource="partners" id={r.partnerId} labelField="shortName" />,
+    },
+    {
+      field: 'orderForm', headerText: 'Hình thức', width: 120,
+      template: (r: PurchaseOrderOut) => ORDER_FORM_LABELS[r.orderForm] ?? r.orderForm,
+    },
+    {
+      field: 'totalAmount', headerText: 'Tổng tiền', width: 130, textAlign: 'Right',
+      template: (r: PurchaseOrderOut) => formatNumberVN(r.totalAmount),
+    },
+    {
+      field: 'totalVat', headerText: 'VAT', width: 110, textAlign: 'Right',
+      template: (r: PurchaseOrderOut) => formatNumberVN(r.totalVat),
+    },
+    {
+      field: 'status', headerText: 'Trạng thái', width: 150,
+      template: (r: PurchaseOrderOut) => <Tag color={statusColor(r.status)}>{PURCHASE_ORDER_STATUS_LABELS[r.status] ?? r.status}</Tag>,
     },
   ]
 
@@ -61,7 +58,6 @@ export default function PurchaseOrdersListPage() {
         queryKey="purchase-orders"
         endpoint="/purchasing/orders"
         columns={columns}
-        hideSearch
         extraParams={{ status, partnerId: partnerId ?? undefined }}
         toolbarExtra={
           <Space>

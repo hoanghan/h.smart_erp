@@ -1,0 +1,4 @@
+# Accidental root-level npm artifacts (Syncfusion install run from repo root by mistake)
+/node_modules/
+/package.json
+/package-lock.json

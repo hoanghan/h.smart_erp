@@ -129,9 +129,8 @@ export interface QuotationLineIn {
   quantity: number;
   projectHouse?: string | null;
   vatPct?: number | null;
-  calcPrice?: number | null;
-  approvedPrice?: number | null;
-  priceWeight?: number | null;
+  rate?: number | null;
+  discountPct?: number | null;
   note?: string | null;
 }
 
@@ -141,9 +140,10 @@ export interface QuotationLineOut {
   projectHouse: string | null;
   quantity: number;
   vatPct: number | null;
-  calcPrice: number | null;
-  approvedPrice: number | null;
-  priceWeight: number | null;
+  rate: number | null;
+  discountPct: number | null;
+  amount: number;
+  orderedQty: number;
   note: string | null;
 }
 
@@ -151,16 +151,17 @@ export interface QuotationLineUpdate {
   quantity?: number | null;
   projectHouse?: string | null;
   vatPct?: number | null;
-  calcPrice?: number | null;
-  approvedPrice?: number | null;
-  priceWeight?: number | null;
+  rate?: number | null;
+  discountPct?: number | null;
   note?: string | null;
 }
 
 export interface QuotationCreate {
   partnerId: number;
-  quoteType?: string;
-  quoteForm?: string;
+  orderType?: string;
+  validTill?: string | null;
+  priceListId?: number | null;
+  taxTemplateId?: number | null;
   requestDeliveryDate?: string | null;
   validityDays?: number | null;
   deliveryLead?: string | null;
@@ -172,6 +173,8 @@ export interface QuotationCreate {
   deliveryMethodId?: number | null;
   bankAccount?: string | null;
   attachedService?: string | null;
+  competitor?: string | null;
+  terms?: string | null;
   note?: string | null;
   lines?: QuotationLineIn[];
 }
@@ -183,8 +186,10 @@ export interface QuotationOut {
   docNo: string;
   docDate: string;
   partnerId: number;
-  quoteType: string;
-  quoteForm: string;
+  orderType: string;
+  validTill: string | null;
+  priceListId: number | null;
+  taxTemplateId: number | null;
   requestDeliveryDate: string | null;
   validityDays: number | null;
   deliveryLead: string | null;
@@ -194,10 +199,58 @@ export interface QuotationOut {
   approvedAt: string | null;
   paymentMethodId: number | null;
   deliveryMethodId: number | null;
+  competitor: string | null;
+  terms: string | null;
   note: string | null;
   status: string;
   statusReason: string | null;
+  lostReasonIds: number[] | null;
   lines: QuotationLineOut[];
+}
+
+// ---------- Quotation workflow actions ----------
+export interface MakeSalesOrderLineIn {
+  lineId: number;
+  qty: number;
+}
+
+export interface MakeSalesOrderRequest {
+  lines?: MakeSalesOrderLineIn[];
+}
+
+export interface MakeSalesOrderResult {
+  quotationId: number;
+  quotationStatus: string;
+  orderId: number;
+  orderDocNo: string;
+}
+
+export interface SetAsLostRequest {
+  lostReasonIds: number[];
+  competitor?: string | null;
+  detail?: string | null;
+}
+
+export interface ExtendQuotationRequest {
+  validTill: string;
+}
+
+export interface LostReasonOut {
+  id: number;
+  code: string;
+  name: string;
+  isActive: boolean;
+}
+
+export interface LostReasonCreate {
+  code: string;
+  name: string;
+}
+
+export interface LostReasonUpdate {
+  code?: string;
+  name?: string;
+  isActive?: boolean;
 }
 
 /** Pháº£n há»“i cá»§a action convert-to-order: khÃ´ng pháº£i QuotationOut mÃ  lÃ  tÃ³m táº¯t Ä‘Æ¡n hÃ ng vá»«a táº¡o. */
@@ -271,6 +324,135 @@ export interface SalesOrderOut {
   note: string | null;
   status: string;
   lines: SalesOrderLineOut[];
+}
+
+// ---------- Promotional scheme / Pricing rule / Coupon code ----------
+export interface SchemeItemIn {
+  productId: number;
+}
+export interface SchemeItemOut {
+  id: number;
+  productId: number;
+}
+
+export interface SchemePriceSlabIn {
+  productId?: number | null;
+  minQty: number;
+  maxQty?: number | null;
+  discountPct?: number | null;
+  rate?: number | null;
+}
+export interface SchemePriceSlabOut {
+  id: number;
+  productId: number | null;
+  minQty: number;
+  maxQty: number | null;
+  discountPct: number | null;
+  rate: number | null;
+}
+
+export interface SchemeProductSlabIn {
+  productId?: number | null;
+  minQty: number;
+  maxQty?: number | null;
+  freeProductId: number;
+  freeQty: number;
+  freeRate?: number;
+}
+export interface SchemeProductSlabOut {
+  id: number;
+  productId: number | null;
+  minQty: number;
+  maxQty: number | null;
+  freeProductId: number;
+  freeQty: number;
+  freeRate: number;
+}
+
+export interface PromotionalSchemeCreate {
+  code: string;
+  name: string;
+  applyOn?: string;
+  productGroupId?: number | null;
+  partnerId?: number | null;
+  validFrom?: string | null;
+  validTo?: string | null;
+  items?: SchemeItemIn[];
+  priceSlabs?: SchemePriceSlabIn[];
+  productSlabs?: SchemeProductSlabIn[];
+}
+
+export type PromotionalSchemeUpdate = Partial<PromotionalSchemeCreate> & { isActive?: boolean };
+
+export interface PromotionalSchemeOut {
+  id: number;
+  code: string;
+  name: string;
+  applyOn: string;
+  productGroupId: number | null;
+  partnerId: number | null;
+  validFrom: string | null;
+  validTo: string | null;
+  isActive: boolean;
+  items: SchemeItemOut[];
+  priceSlabs: SchemePriceSlabOut[];
+  productSlabs: SchemeProductSlabOut[];
+}
+
+export interface PricingFreeItem {
+  productId: number;
+  qty: number;
+}
+
+export interface PricingResolveResult {
+  rate: number;
+  discountPct: number;
+  freeItems: PricingFreeItem[];
+  appliedRules: number[];
+}
+
+export interface PricingRuleOut {
+  id: number;
+  schemeId: number | null;
+  priority: number;
+  productId: number | null;
+  productGroupId: number | null;
+  partnerId: number | null;
+  minQty: number;
+  maxQty: number | null;
+  discountPct: number | null;
+  rate: number | null;
+  freeProductId: number | null;
+  freeQty: number | null;
+  freeRate: number;
+  validFrom: string | null;
+  validTo: string | null;
+  isActive: boolean;
+}
+
+export interface CouponCodeOut {
+  id: number;
+  code: string;
+  pricingRuleId: number;
+  maxUse: number | null;
+  used: number;
+  validFrom: string | null;
+  validTo: string | null;
+  isActive: boolean;
+}
+export interface CouponCodeCreate {
+  code: string;
+  pricingRuleId: number;
+  maxUse?: number | null;
+  validFrom?: string | null;
+  validTo?: string | null;
+}
+export interface CouponCodeUpdate {
+  code?: string;
+  maxUse?: number | null;
+  validFrom?: string | null;
+  validTo?: string | null;
+  isActive?: boolean;
 }
 
 // ---------- Purchasing: YÃªu cáº§u mua hÃ ng ----------

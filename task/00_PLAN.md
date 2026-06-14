@@ -48,6 +48,12 @@ Chạy dev: `dotnet run --project src/Erp.Api` → Swagger `http://localhost:500
 | 27 | Tích hợp liên phân hệ cho MRP & CRM: Kho (WIP, Manufacture 2 chiều, Bin planned), Mua hàng (PR→PO theo NCC, subcontracting BOM), Finance (GL 154/155, cost center, campaign ROI) | `27_mrp_crm_integration.md` | Trung |
 | 28 | Kết nối Shopee + TikTok Shop: connector OAuth/token, đơn sàn → SO → xuất kho, push tồn, đối soát phí sàn TT200 (3 prompt A/B/C) — solution: `system_design/ecommerce_integration.md` | `28_ecommerce_shopee_tiktok.md` | Cao |
 | 29 | Tái cấu trúc cho AI agent: CLAUDE.md, module README, tách file lớn, SchemaBootstrap → migrations runner, docs sinh từ code (ENDPOINTS/STATUS_MACHINES/DB_TABLES) | `29_agent_friendly_structure.md` | **Làm sớm** |
+| 30 | Frontend CRM: Lead, Opportunity (Kanban theo stage), Timeline hoạt động, Campaign, Funnel | `30_frontend_crm.md` | Trung |
+| 31 | Frontend MRP: BOM TreeGrid đa cấp, Work Order (start/finish/job card), Production Plan + gom PO | `31_frontend_mrp.md` | Trung |
+| 32 | Frontend Purchase/Inventory v2: RFQ so sánh giá, Landed Cost, % nhận theo dòng, Kiểm kê, Bin 6 cột, Repost, REPACK | `32_frontend_purchase_inventory_v2.md` | Cao |
+| 33 | Frontend Sales v2 (THAY task 10 phần báo giá): Quotation ERPNext, Promotional Scheme + Thử giá, SO per-line + credit limit | `33_frontend_sales_v2.md` | Cao |
+
+Thứ tự FE đầy đủ: 08 → 09 → 19 → 33 (thay 10) → 13 → 14 → 32 → 15 → 16 → 30 → 31 → 18 → 11. FE Kênh bán hàng (Shopee/TikTok) nằm trong task 28 prompt B/C.
 
 Ghi chú: task 21/22/23 NÂNG CẤP trên nền task 02-07 (làm nền trước rồi nâng cấp, hoặc gộp luôn khi làm mới). Thứ tự nâng cấp: 21 → 22 → 23 (23 mục perpetual inventory cần SLE của 22). FE task 13/14/15 khi làm cần đọc kèm 21/22/23 để bổ sung màn hình: RFQ/so sánh báo giá NCC, % nhận hàng trên PO, Landed Cost, Kiểm kê, cột reserved/ordered/projected, Payment Entry phân bổ hóa đơn, cấn trừ tạm ứng, Cost Center, báo cáo Trial Balance/AR-AP Aging.
 
@@ -99,3 +105,7 @@ Thứ tự FE đề xuất: 08 → 09 → 19 → 10 → 13 → 14 → 15 → 16 
 - [ ] 27 Tích hợp Kho/Mua hàng/Finance cho MRP & CRM
 - [ ] 28 Kết nối Shopee/TikTok Shop (A connector, B đơn hàng, C đối soát)
 - [ ] 29 Cấu trúc agent-friendly (CLAUDE.md, tách file, docs sinh từ code)
+- [ ] 30 FE CRM
+- [ ] 31 FE MRP
+- [ ] 32 FE Purchase/Inventory v2
+- [ ] 33 FE Sales v2 (thay task 10)
