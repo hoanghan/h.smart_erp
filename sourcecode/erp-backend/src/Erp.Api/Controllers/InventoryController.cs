@@ -425,7 +425,7 @@ public class InventoryController(
 
     /// <summary>
     /// Cập nhật reserved_qty (SO) / ordered_qty (PO) trên stock_balance.
-    ///reserved_qty = tổng SL chưa giao của SO đang APPROVED/NOT_DELIVERED.
+    ///reserved_qty = tổng SL chưa giao của SO đang TO_DELIVER_AND_BILL/TO_DELIVER.
     /// ordered_qty = tổng SL chưa nhận của PO đang APPROVED/TO_RECEIVE*.
     /// </summary>
     private async Task UpdateReservedOrderedQty(StockDoc d)
@@ -437,7 +437,7 @@ public class InventoryController(
             var soProducts = d.Lines.Select(l => l.ProductId).Distinct().ToList();
             var activeSoLines = await db.SalesOrderLines
                 .Where(l => soProducts.Contains(l.ProductId) && !l.IsGift)
-                .Join(db.SalesOrders.Where(s => s.Status == "APPROVED" || s.Status == "NOT_DELIVERED"),
+                .Join(db.SalesOrders.Where(s => s.Status == "TO_DELIVER_AND_BILL" || s.Status == "TO_DELIVER"),
                     l => l.OrderId, s => s.Id, (l, s) => new { l.ProductId, l.Quantity })
                 .GroupBy(x => x.ProductId)
                 .Select(g => new { ProductId = g.Key, TotalOrdered = g.Sum(x => x.Quantity) })
@@ -446,7 +446,7 @@ public class InventoryController(
             // Already issued
             var issuedByProduct = await db.StockDocs
                 .Where(x => x.DocType == "ISSUE" && x.Status == "COMPLETED"
-                    && x.SalesOrderId.HasValue && db.SalesOrders.Any(s => s.Id == x.SalesOrderId && (s.Status == "APPROVED" || s.Status == "NOT_DELIVERED")))
+                    && x.SalesOrderId.HasValue && db.SalesOrders.Any(s => s.Id == x.SalesOrderId && (s.Status == "TO_DELIVER_AND_BILL" || s.Status == "TO_DELIVER")))
                 .SelectMany(x => x.Lines)
                 .GroupBy(l => l.ProductId)
                 .Select(g => new { ProductId = g.Key, TotalIssued = g.Sum(l => l.ActualQty ?? 0) })
@@ -500,13 +500,13 @@ public class InventoryController(
         }
     }
 
-    /// <summary>Sau khi hoàn tất chứng từ: SO NOT_DELIVERED→DELIVERED khi xuất đủ, PO NOT_RECEIVED→RECEIVED khi nhập đủ.</summary>
+    /// <summary>Sau khi hoàn tất chứng từ: cập nhật delivered_qty của SO và recompute status (v2), PO NOT_RECEIVED→RECEIVED khi nhập đủ.</summary>
     private async Task UpdateOrderStatuses(StockDoc d)
     {
         if (d.DocType == "ISSUE" && d.SalesOrderId.HasValue)
         {
             var so = await db.SalesOrders.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == d.SalesOrderId.Value);
-            if (so is null || so.Status != "NOT_DELIVERED") return;
+            if (so is null || so.Status is not ("TO_DELIVER_AND_BILL" or "TO_DELIVER")) return;
 
             var issuedQty = await db.StockDocs
                 .Where(x => x.SalesOrderId == so.Id && x.DocType == "ISSUE" && x.Status == "COMPLETED")
@@ -515,19 +515,18 @@ public class InventoryController(
                 .Select(g => new { ProductId = g.Key, Qty = g.Sum(l => l.ActualQty ?? 0) })
                 .ToListAsync();
 
-            var fullyDelivered = so.Lines.Where(l => !l.IsGift)
-                .All(l => issuedQty.FirstOrDefault(x => x.ProductId == l.ProductId)?.Qty >= l.Quantity);
+            foreach (var line in so.Lines)
+                line.DeliveredQty = issuedQty.FirstOrDefault(x => x.ProductId == line.ProductId)?.Qty ?? 0;
 
-            if (fullyDelivered)
+            var fromStatus = so.Status;
+            SalesOrderStatusHelper.Recompute(so);
+            if (so.Status != fromStatus)
             {
                 db.WfTransitionLogs.Add(new WfTransitionLog
                 {
-                    RefTable = "sales-orders", RefId = so.Id,
-                    FromStatus = so.Status, ToStatus = "DELIVERED",
-                    Reason = $"Xuất kho đủ theo phiếu {d.DocNo}",
-                    ActedBy = RbacService.GetUserId(User),
+                    RefTable = "sales-orders", RefId = so.Id, FromStatus = fromStatus, ToStatus = so.Status,
+                    Reason = $"Xuất kho theo phiếu {d.DocNo}", ActedBy = RbacService.GetUserId(User),
                 });
-                so.Status = "DELIVERED";
             }
         }
         else if (d.DocType == "RECEIPT" && d.PurchaseOrderId.HasValue)

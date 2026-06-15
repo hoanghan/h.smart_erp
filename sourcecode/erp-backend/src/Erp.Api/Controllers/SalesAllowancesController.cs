@@ -16,7 +16,7 @@ public class SalesAllowancesController(
     : ControllerBase
 {
     private const string Resource = "sales-allowances";
-    private static readonly string[] AllowedOrderStatuses = { "DELIVERED", "COMPLETED" };
+    private static readonly string[] AllowedOrderStatuses = { "TO_BILL", "COMPLETED" };
 
     private static SalesAllowanceOut ToDto(SalesAllowance a) => new(
         a.Id, a.DocNo, a.DocDate, a.OrderId, a.AllowForm, a.Status, a.Note,
@@ -61,7 +61,7 @@ public class SalesAllowancesController(
         if (order is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {body.OrderId} không tồn tại"));
         if (!AllowedOrderStatuses.Contains(order.Status))
             return Conflict(new ApiError("WF_INVALID_TRANSITION",
-                $"Chỉ tạo giảm giá hàng bán từ đơn ở trạng thái DELIVERED/COMPLETED (hiện tại: {order.Status})"));
+                $"Chỉ tạo giảm giá hàng bán từ đơn đã giao đủ (TO_BILL/COMPLETED) (hiện tại: {order.Status})"));
 
         var a = new SalesAllowance
         {

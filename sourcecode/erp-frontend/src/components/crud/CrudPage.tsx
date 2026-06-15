@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { App as AntApp, Button, Drawer, Form, Input, InputNumber, Popconfirm, Select, Space, Switch, Typography } from 'antd'
+import { App as AntApp, Button, DatePicker, Drawer, Form, Input, InputNumber, Popconfirm, Select, Space, Switch, Typography } from 'antd'
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
+import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
 import type { ApiErrorBody } from '../../api/types'
 import DataTable from '../DataTable'
@@ -25,6 +26,8 @@ function renderField(field: CrudFormField, editingId: number | undefined) {
           excludeId={field.excludeSelf ? editingId : undefined}
         />
       )
+    case 'date':
+      return <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
     case 'textarea':
       return <Input.TextArea rows={2} />
     default:
@@ -40,9 +43,11 @@ export default function CrudPage<TOut extends { id: number }>({
   formFields,
   searchPlaceholder,
   initialValues,
+  endpoint: endpointOverride,
 }: CrudPageConfig<TOut>) {
-  const endpoint = `/md/${resource}`
+  const endpoint = endpointOverride ?? `/md/${resource}`
   const queryKey = `md-${resource}`
+  const dateFields = formFields.filter((f) => f.type === 'date').map((f) => f.name)
   const queryClient = useQueryClient()
   const { message } = AntApp.useApp()
   const [form] = Form.useForm()
@@ -61,7 +66,12 @@ export default function CrudPage<TOut extends { id: number }>({
   const openEdit = (record: TOut) => {
     setEditing(record)
     form.resetFields()
-    form.setFieldsValue(record)
+    const values: Record<string, unknown> = { ...record }
+    for (const name of dateFields) {
+      const v = values[name]
+      values[name] = v ? dayjs(v as string) : null
+    }
+    form.setFieldsValue(values)
     setOpen(true)
   }
 
@@ -92,6 +102,10 @@ export default function CrudPage<TOut extends { id: number }>({
 
   const handleSubmit = async () => {
     const values = await form.validateFields()
+    for (const name of dateFields) {
+      const v = values[name]
+      values[name] = v ? (v as dayjs.Dayjs).format('YYYY-MM-DD') : null
+    }
     saveMutation.mutate(values)
   }
 

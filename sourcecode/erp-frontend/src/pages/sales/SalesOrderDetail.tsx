@@ -3,13 +3,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { App as AntApp, DatePicker, Drawer, Input, InputNumber, Select, Spin, Tabs, Tag } from 'antd'
+import { App as AntApp, Button, DatePicker, Descriptions, Drawer, Input, InputNumber, Modal, Select, Spin, Tabs, Tag } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
-import type { ApiErrorBody, SalesOrderOut, SalesOrderUpdate } from '../../api/types'
+import type { ApiErrorBody, CreditLimitExceededOut, SalesOrderOut, SalesOrderUpdate, StockBalanceOut } from '../../api/types'
 import { SALES_ORDER_STATUS_LABELS, WF_DEFINITIONS, statusColor, ACTION_LABELS, PRIMARY_ACTIONS, DANGER_ACTIONS } from '../../api/workflow'
+import LookupLabel from '../../components/LookupLabel'
 import LookupSelect from '../../components/LookupSelect'
 import { HeaderGrid, BottomToolbar } from '../../components/DocForm'
 import type { WorkflowButton } from '../../components/DocForm'
@@ -31,7 +32,7 @@ const CURRENCY_OPTIONS = [
   { value: 'USD', label: 'USD' },
 ]
 
-const EDITABLE_STATUSES = ['DRAFT', 'APPROVAL_REQUESTED']
+const EDITABLE_STATUSES = ['DRAFT']
 
 export default function SalesOrderDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -54,6 +55,7 @@ export default function SalesOrderDetailPage() {
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false)
   const [showStockDrawer, setShowStockDrawer] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
+  const [creditLimitInfo, setCreditLimitInfo] = useState<CreditLimitExceededOut | null>(null)
 
   useEffect(() => {
     if (!data) return
@@ -108,13 +110,20 @@ export default function SalesOrderDetailPage() {
   }, [data, formValues, saveMutation])
 
   const workflowMutation = useMutation({
-    mutationFn: ({ action, reason }: { action: string; reason?: string }) =>
-      apiClient.post(`/sales/orders/${data?.id}/actions/${action}`, reason ? { reason } : {}),
+    mutationFn: ({ action, reason, bypass }: { action: string; reason?: string; bypass?: boolean }) =>
+      apiClient.post(`/sales/orders/${data?.id}/actions/${action}`, { ...(reason ? { reason } : {}), ...(bypass ? { bypass } : {}) }),
     onSuccess: (res, vars) => {
       message.success(`Đã thực hiện: ${ACTION_LABELS[vars.action] ?? vars.action}`)
       queryClient.setQueryData(queryKey, res.data)
+      setCreditLimitInfo(null)
     },
-    onError: (err) => showError(err, 'Có lỗi xảy ra'),
+    onError: (err, vars) => {
+      if (vars.action === 'approve' && axios.isAxiosError<CreditLimitExceededOut>(err) && err.response?.status === 409 && err.response.data?.code === 'CREDIT_LIMIT_EXCEEDED') {
+        setCreditLimitInfo(err.response.data)
+        return
+      }
+      showError(err, 'Có lỗi xảy ra')
+    },
   })
 
   const handleWorkflowAction = useCallback((action: string, requireReason?: boolean) => {
@@ -138,6 +147,21 @@ export default function SalesOrderDetailPage() {
     const totalVat = data.totalVat ?? 0
     return { totalAmount, totalVat, totalPaid: 0, remaining: totalAmount + totalVat }
   }, [data])
+
+  const { data: stockBalances } = useQuery({
+    queryKey: ['stock-balance', selectedProductId, data?.warehouseId],
+    queryFn: async () => (await apiClient.get<StockBalanceOut[]>('/inventory/stock-balance', {
+      params: { productId: selectedProductId, warehouseId: data?.warehouseId },
+    })).data,
+    enabled: showStockDrawer && !!selectedProductId && !!data?.warehouseId,
+  })
+
+  const stockSummary = useMemo(() => (stockBalances ?? []).reduce((acc, r) => ({
+    qtyOnHand: acc.qtyOnHand + r.qtyOnHand,
+    reservedQty: acc.reservedQty + r.reservedQty,
+    orderedQty: acc.orderedQty + r.orderedQty,
+    projectedQty: acc.projectedQty + r.projectedQty,
+  }), { qtyOnHand: 0, reservedQty: 0, orderedQty: 0, projectedQty: 0 }), [stockBalances])
 
   const workflowButtons: WorkflowButton[] = useMemo(() => {
     if (!data) return []
@@ -243,6 +267,7 @@ export default function SalesOrderDetailPage() {
             orderId={data.id}
             lines={data.lines}
             locked={locked}
+            status={data.status}
             totalAmount={data.totalAmount}
             totalVat={data.totalVat}
             queryKey={queryKey}
@@ -258,7 +283,38 @@ export default function SalesOrderDetailPage() {
       ]} />
       <BottomToolbar onSave={handleSave} onPrint={() => window.print()} onClose={() => navigate('/sales/orders')} workflowButtons={workflowButtons} locked={locked} disabled={saveMutation.isPending} />
       <Drawer title="Lịch sử thao tác" open={showHistoryDrawer} onClose={() => setShowHistoryDrawer(false)} width={600}><p style={{ color: '#999' }}>TODO-BE: Workflow log</p></Drawer>
-      <Drawer title="Thông tin tồn kho" open={showStockDrawer} onClose={() => setShowStockDrawer(false)} width={500}><p>Sản phẩm ID: {selectedProductId}</p><p style={{ color: '#999' }}>TODO-BE: Stock balance</p></Drawer>
+      <Drawer title="Thông tin tồn kho" open={showStockDrawer} onClose={() => setShowStockDrawer(false)} width={400}>
+        {selectedProductId && (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Sản phẩm"><LookupLabel resource="products" id={selectedProductId} /></Descriptions.Item>
+            <Descriptions.Item label="Kho">{data.warehouseId ? <LookupLabel resource="warehouses" id={data.warehouseId} /> : '—'}</Descriptions.Item>
+            <Descriptions.Item label="Tồn kho">{formatNumberVN(stockSummary.qtyOnHand)}</Descriptions.Item>
+            <Descriptions.Item label="Đã đặt trước">{formatNumberVN(stockSummary.reservedQty)}</Descriptions.Item>
+            <Descriptions.Item label="Đang về">{formatNumberVN(stockSummary.orderedQty)}</Descriptions.Item>
+            <Descriptions.Item label="Khả dụng dự kiến">{formatNumberVN(stockSummary.projectedQty)}</Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
+      <Modal
+        title="Vượt hạn mức tín dụng"
+        open={!!creditLimitInfo}
+        onCancel={() => setCreditLimitInfo(null)}
+        footer={[
+          <Button key="cancel" onClick={() => setCreditLimitInfo(null)}>Hủy</Button>,
+          <Button key="bypass" type="primary" danger disabled={!creditLimitInfo?.canBypass} loading={workflowMutation.isPending}
+            onClick={() => workflowMutation.mutate({ action: 'approve', bypass: true })}>
+            Vẫn duyệt
+          </Button>,
+        ]}
+      >
+        <p>{creditLimitInfo?.message}</p>
+        <Descriptions column={1} bordered size="small">
+          <Descriptions.Item label="Hạn mức tín dụng">{formatNumberVN(creditLimitInfo?.creditLimit)}</Descriptions.Item>
+          <Descriptions.Item label="Dư nợ hiện tại">{formatNumberVN(creditLimitInfo?.currentDebt)}</Descriptions.Item>
+          <Descriptions.Item label="Giá trị đơn này">{formatNumberVN(creditLimitInfo?.thisOrderAmount)}</Descriptions.Item>
+        </Descriptions>
+        {!creditLimitInfo?.canBypass && <p style={{ color: '#cf1322', marginTop: 8 }}>Bạn không có quyền duyệt vượt hạn mức.</p>}
+      </Modal>
     </div>
   )
 }

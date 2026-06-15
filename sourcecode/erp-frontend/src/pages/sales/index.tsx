@@ -4,6 +4,11 @@ import QuotationDetailPage from './QuotationDetail'
 import QuotationNewPage from './QuotationNew'
 import SalesOrdersListPage from './SalesOrdersList'
 import SalesOrderDetailPage from './SalesOrderDetail'
+import PromotionalSchemesListPage from './PromotionalSchemesList'
+import PromotionalSchemeDetailPage from './PromotionalSchemeDetail'
+import PricingRulesPage from './PricingRulesPage'
+import CouponsPage from './CouponsPage'
+import PriceCheckPage from './PriceCheckPage'
 
 export default function SalesPage() {
   return (
@@ -13,6 +18,11 @@ export default function SalesPage() {
       <Route path="quotations/:id" element={<QuotationDetailPage />} />
       <Route path="orders" element={<SalesOrdersListPage />} />
       <Route path="orders/:id" element={<SalesOrderDetailPage />} />
+      <Route path="promotional-schemes" element={<PromotionalSchemesListPage />} />
+      <Route path="promotional-schemes/:id" element={<PromotionalSchemeDetailPage />} />
+      <Route path="pricing-rules" element={<PricingRulesPage />} />
+      <Route path="coupons" element={<CouponsPage />} />
+      <Route path="price-check" element={<PriceCheckPage />} />
       <Route index element={<Navigate to="quotations" replace />} />
     </Routes>
   )

@@ -68,7 +68,7 @@ export default function SalesOrderDeliveryTab({ orderId, status, defaultWarehous
     })
   }
 
-  const canCreateDelivery = ['APPROVED', 'NOT_DELIVERED'].includes(status)
+  const canCreateDelivery = ['TO_DELIVER_AND_BILL', 'TO_DELIVER'].includes(status)
 
   const columns: ColumnsType<StockDocOut> = [
     { title: 'Số phiếu', dataIndex: 'docNo', key: 'docNo', width: 160 },

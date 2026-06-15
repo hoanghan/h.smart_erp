@@ -29,14 +29,16 @@ public class WorkflowService(ErpDbContext db, RbacService rbac)
             new WfTransition("extend",           new[] { "EXPIRED" }, "OPEN", "UPDATE"),
             new WfTransition("cancel",           new[] { "DRAFT", "OPEN" }, "CANCELLED", "UPDATE", RequireReason: true),
         },
+        // SalesOrder kiểu ERPNext: Draft → To Deliver and Bill → To Deliver/To Bill → Completed,
+        // trạng thái 3 cái sau được SalesOrderStatusHelper.Recompute tính lại theo delivered/billed per-line.
         ["sales-orders"] = new[]
         {
-            new WfTransition("request-approval", new[] { "DRAFT" }, "APPROVAL_REQUESTED", "UPDATE"),
-            new WfTransition("approve",          new[] { "APPROVAL_REQUESTED" }, "APPROVED", "APPROVE"),
-            new WfTransition("create-delivery-request", new[] { "APPROVED", "NOT_DELIVERED" }, "NOT_DELIVERED", "UPDATE"),
-            new WfTransition("complete",         new[] { "APPROVED", "NOT_DELIVERED", "DELIVERED" }, "COMPLETED", "UPDATE"),
-            new WfTransition("reprocess",        new[] { "APPROVED", "NOT_DELIVERED" }, "DRAFT", "UPDATE"),   // "Xử lý lại đơn hàng"
-            new WfTransition("cancel",           new[] { "DRAFT", "APPROVAL_REQUESTED", "APPROVED" }, "CANCELLED", "UPDATE", RequireReason: true),
+            new WfTransition("approve", new[] { "DRAFT" }, "TO_DELIVER_AND_BILL", "APPROVE"),
+            new WfTransition("hold",    new[] { "TO_DELIVER_AND_BILL", "TO_DELIVER", "TO_BILL" }, "ON_HOLD", "UPDATE", RequireReason: true),
+            new WfTransition("resume",  new[] { "ON_HOLD" }, "TO_DELIVER_AND_BILL", "UPDATE"),
+            new WfTransition("close",   new[] { "TO_DELIVER_AND_BILL", "TO_DELIVER", "TO_BILL" }, "CLOSED", "UPDATE", RequireReason: true),
+            new WfTransition("reopen",  new[] { "CLOSED" }, "TO_DELIVER_AND_BILL", "UPDATE"),
+            new WfTransition("cancel",  new[] { "DRAFT", "TO_DELIVER_AND_BILL" }, "CANCELLED", "UPDATE", RequireReason: true),
         },
         ["sales-allowances"] = new[]
         {

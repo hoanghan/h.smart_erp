@@ -3,6 +3,7 @@ import { Button, Input, InputNumber, Space, Table } from 'antd'
 import type { ColumnType } from 'antd/es/table'
 import { PlusOutlined, MinusOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
 import { formatNumberVN } from '../../utils/format'
+import LookupSelect from '../LookupSelect'
 
 /**
  * EditableGrid — AntD Table wrapper LeanSCRM style:
@@ -23,7 +24,7 @@ export interface EditColumn<T = Record<string, unknown>> {
   /** Cột editable */
   editable?: boolean
   /** Loại editor */
-  editor?: 'input' | 'number' | 'select'
+  editor?: 'input' | 'number' | 'select' | 'lookup'
   /** Select options (khi editor='select') */
   editorOptions?: { value: unknown; label: string }[]
   /** Cột lookup — hiển thị tên từ resource */
@@ -81,9 +82,11 @@ interface CellEditorProps<T> {
   onChange: (value: unknown) => void
   onCancel: () => void
   onSave: () => void
+  /** Lưu trực tiếp giá trị mới (bỏ qua state editValue) — dùng cho editor chọn-là-lưu như lookup */
+  onCommit: (value: unknown) => void
 }
 
-function CellEditor<T extends Record<string, unknown>>({ column, value, onChange, onCancel, onSave }: CellEditorProps<T>) {
+function CellEditor<T extends Record<string, unknown>>({ column, value, onChange, onCancel, onSave, onCommit }: CellEditorProps<T>) {
   const commonProps = {
     size: 'small' as const,
     autoFocus: true,
@@ -119,6 +122,16 @@ function CellEditor<T extends Record<string, unknown>>({ column, value, onChange
             <option key={String(opt.value)} value={String(opt.value)}>{opt.label}</option>
           ))}
         </select>
+      )
+    case 'lookup':
+      return (
+        <LookupSelect
+          resource={column.lookupResource!}
+          value={value as number | null}
+          onChange={(v) => onCommit(v)}
+          allowClear={false}
+          autoFocus
+        />
       )
     default:
       return (
@@ -172,6 +185,15 @@ export default function EditableGrid<T extends Record<string, unknown>>({
     setEditingCell(null)
     setEditValue(null)
   }, [])
+
+  // Lưu trực tiếp giá trị mới, bỏ qua editValue (tránh stale state khi onChange+onSave gọi đồng thời)
+  const commitEdit = useCallback((overrideValue: unknown) => {
+    if (editingCell && onCellChange) {
+      onCellChange(editingCell.row, editingCell.col, overrideValue)
+    }
+    setEditingCell(null)
+    setEditValue(null)
+  }, [editingCell, onCellChange])
 
   // Apply filters
   const filteredData = useMemo(() => {
@@ -232,6 +254,7 @@ export default function EditableGrid<T extends Record<string, unknown>>({
                   onChange={setEditValue}
                   onCancel={cancelEdit}
                   onSave={saveEdit}
+                  onCommit={commitEdit}
                 />
               </div>
             )
@@ -289,7 +312,7 @@ export default function EditableGrid<T extends Record<string, unknown>>({
     }
 
     return columns.map((col) => getCol(col))
-  }, [columns, columnGroups, editingCell, editValue, locked, filters, data, startEdit, saveEdit, cancelEdit])
+  }, [columns, columnGroups, editingCell, editValue, locked, filters, data, startEdit, saveEdit, cancelEdit, commitEdit])
 
   // Footer
   const renderFooter = () => {

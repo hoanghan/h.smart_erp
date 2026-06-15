@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { Rule } from 'antd/es/form'
 
-export type CrudFieldType = 'text' | 'number' | 'switch' | 'select' | 'lookup' | 'textarea'
+export type CrudFieldType = 'text' | 'number' | 'switch' | 'select' | 'lookup' | 'textarea' | 'date'
 
 export interface CrudFormField {
   name: string
@@ -37,4 +37,6 @@ export interface CrudPageConfig<TOut extends { id: number }> {
   formFields: CrudFormField[]
   searchPlaceholder?: string
   initialValues?: Record<string, unknown>
+  /** Ghi đè endpoint mặc định "/md/{resource}" (vd "/sales/coupon-codes") */
+  endpoint?: string
 }
