@@ -151,7 +151,7 @@
 .docform-cell-editing .ant-input-number,
 .docform-cell-editing .ant-select {
   border-radius: 0;
-  border: 1px solid #1677ff;
+  border: 1px solid var(--brand-600);
 }
 
 /* Navigator */

@@ -17,14 +17,14 @@ body {
 }
 
 .e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-sidebar);
 }
 
 .e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item:hover,
 .e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item.e-focused,
 .e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item.e-selected {
-  color: #fff;
-  background-color: #1677ff;
+  color: var(--text-sidebar-strong);
+  background-color: var(--bg-sidebar-hover);
 }
 
 /* The bootstrap5 theme hardcodes .e-menu-url to a dark text color (#212529) at the
@@ -38,18 +38,18 @@ body {
    sidebar's dark background/text color — give it its own solid theme. */
 .e-menu-wrapper.sidebar-menu.e-menu-popup {
   background-color: #15324f;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-sidebar);
 }
 
 .e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-sidebar);
 }
 
 .e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item:hover,
 .e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item.e-focused,
 .e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item.e-selected {
-  color: #fff;
-  background-color: #1677ff;
+  color: var(--text-sidebar-strong);
+  background-color: var(--bg-sidebar-hover);
 }
 
 .e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item .e-menu-url {
