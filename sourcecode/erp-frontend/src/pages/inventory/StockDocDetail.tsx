@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { App as AntApp, Button, Card, Descriptions, Form, Input, Modal, Spin, Tabs, Tag, Typography } from 'antd'
+import { App as AntApp, Button, Form, Input, Modal, Spin, Tabs, Tag, Typography } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { apiClient } from '../../api/client'
@@ -13,9 +13,13 @@ import {
   STOCK_DOC_STATUS_LABELS,
   statusColor,
 } from '../../api/workflow'
-import type { WorkflowButton } from '../../components/DocForm/BottomToolbar'
-import BottomToolbar from '../../components/DocForm/BottomToolbar'
-import LookupLabel from '../../components/LookupLabel'
+import {
+  HeaderGrid, BottomToolbar, DocFormLayout, DocFormSidebar, DocFormAccordion, useDirtyGuard, useDocFormHotkeys,
+} from '../../components/DocForm'
+import type {
+  WorkflowButton, HeaderRow, HeaderCell, RightRow, DocFormInfoRow, DocFormSection, DocFormTimelineItem,
+} from '../../components/DocForm'
+import '../../components/DocForm/DocForm.css'
 import LookupSelect from '../../components/LookupSelect'
 import StockDocLinesTab from './StockDocLinesTab'
 import StockDocCostsTab from './StockDocCostsTab'
@@ -48,6 +52,10 @@ export default function StockDocDetailPage() {
   const [outsourcingModalOpen, setOutsourcingModalOpen] = useState(false)
   const [outsourcingForm] = Form.useForm()
 
+  const [formValues, setFormValues] = useState<Record<string, unknown>>({})
+  const [dirty, setDirty] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   // --- Query doc ---
   const { data: doc, isLoading } = useQuery({
     queryKey,
@@ -55,11 +63,25 @@ export default function StockDocDetailPage() {
     enabled: !isNaN(docId),
   })
 
+  useEffect(() => {
+    if (!doc) return
+    setFormValues({
+      partnerId: doc.partnerId,
+      processId: doc.processId,
+      fromWarehouseId: doc.fromWarehouseId,
+      toWarehouseId: doc.toWarehouseId,
+      note: doc.note,
+    })
+    setDirty(false)
+    setErrors({})
+  }, [doc])
+
   // --- Save header ---
   const saveMutation = useMutation({
-    mutationFn: (body: StockDocUpdate) => apiClient.patch(`/inventory/docs/${docId}`, body),
+    mutationFn: (body: StockDocUpdate) => apiClient.put(`/inventory/docs/${docId}`, body),
     onSuccess: () => {
       message.success('Đã lưu')
+      setDirty(false)
       queryClient.invalidateQueries({ queryKey })
     },
     onError: (err: unknown) => {
@@ -67,6 +89,35 @@ export default function StockDocDetailPage() {
       message.error(body?.message ?? 'Không thể lưu')
     },
   })
+
+  const handleSave = useCallback(() => {
+    if (!doc) return
+    if (doc.docType === 'RECEIPT' && !formValues.toWarehouseId) {
+      setErrors({ toWarehouseId: 'Vui lòng chọn kho nhập' })
+      message.error('Vui lòng chọn kho nhập')
+      return
+    }
+    const body: StockDocUpdate = {
+      partnerId: (formValues.partnerId as number) ?? null,
+      processId: (formValues.processId as number) ?? null,
+      fromWarehouseId: (formValues.fromWarehouseId as number) ?? null,
+      toWarehouseId: (formValues.toWarehouseId as number) ?? null,
+      note: (formValues.note as string) ?? null,
+    }
+    saveMutation.mutate(body)
+  }, [doc, formValues, saveMutation, message])
+
+  const setField = useCallback((key: string, value: unknown) => {
+    setFormValues((prev) => ({ ...prev, [key]: value }))
+    setDirty(true)
+    if (key === 'toWarehouseId' && value) {
+      setErrors((prev) => {
+        if (!prev.toWarehouseId) return prev
+        const { toWarehouseId: _drop, ...rest } = prev
+        return rest
+      })
+    }
+  }, [])
 
   // --- Workflow actions ---
   const workflowMutation = useMutation({
@@ -112,11 +163,55 @@ export default function StockDocDetailPage() {
     },
   })
 
+  // Sidebar phải: ngày yêu cầu/thực tế
+  const sidebarInfoRows: DocFormInfoRow[] = useMemo(() => {
+    if (!doc) return []
+    return [
+      { label: 'Ngày yêu cầu', value: formatDateVN(doc.requestDate) },
+      { label: 'Ngày thực tế', value: doc.actualDate ? formatDateVN(doc.actualDate) : '—' },
+    ]
+  }, [doc])
+
+  // Sidebar phải: dòng thời gian hoạt động — suy ra từ dữ liệu phiếu (chưa có API /timeline)
+  const sidebarTimeline: DocFormTimelineItem[] = useMemo(() => {
+    if (!doc) return []
+    const items: DocFormTimelineItem[] = [
+      {
+        timestamp: doc.requestDate,
+        type: 'ACTIVITY',
+        description: `Tạo phiếu ${DOC_TYPE_LABELS[doc.docType] ?? doc.docType}`,
+        actor: null,
+        metadata: {},
+      },
+    ]
+    if (doc.actualDate) {
+      items.push({
+        timestamp: doc.actualDate,
+        type: 'STATUS_CHANGE',
+        description: STOCK_DOC_STATUS_LABELS[doc.status] ?? doc.status,
+        actor: null,
+        metadata: { status: doc.status },
+      })
+    }
+    if (doc.statusReason && doc.status === 'CANCELLED') {
+      items.push({
+        timestamp: doc.actualDate ?? doc.requestDate,
+        type: 'STATUS_CHANGE',
+        description: `Hủy phiếu: ${doc.statusReason}`,
+        actor: null,
+        metadata: { status: doc.status },
+      })
+    }
+    return items.reverse()
+  }, [doc])
+
+  useDocFormHotkeys({ onSave: handleSave })
+  const { guardAction } = useDirtyGuard(dirty)
+
   if (isLoading) return <Spin style={{ display: 'block', margin: '80px auto' }} />
   if (!doc) return <Typography.Text type="danger">Không tìm thấy phiếu kho</Typography.Text>
 
   const locked = doc.status === 'COMPLETED' || doc.status === 'CANCELLED'
-  const editable = !locked
   const isReceipt = doc.docType === 'RECEIPT'
   const isIssue = doc.docType === 'ISSUE'
   const isTransfer = doc.docType === 'TRANSFER'
@@ -148,11 +243,6 @@ export default function StockDocDetailPage() {
     })
   }
 
-  // --- Header update helpers ---
-  const updateHeader = (field: string, value: number | string | null) => {
-    saveMutation.mutate({ [field]: value })
-  }
-
   // --- Tabs ---
   const tabItems = [
     {
@@ -179,130 +269,122 @@ export default function StockDocDetailPage() {
       : []),
   ]
 
+  // --- Header grid ---
+  const headerCells: HeaderCell[] = [
+    { label: 'Số phiếu', field: <Input size="small" value={doc.docNo} readOnly disabled /> },
+    {
+      label: 'Loại phiếu',
+      field: <Tag>{DOC_TYPE_LABELS[doc.docType] ?? doc.docType} — {ALL_SUB_TYPE_LABELS[doc.subType] ?? doc.subType}</Tag>,
+    },
+    { label: 'Ngày yêu cầu', field: <Input size="small" value={formatDateVN(doc.requestDate)} readOnly disabled /> },
+  ]
+  if (isIssue || isTransfer) {
+    headerCells.push({
+      label: 'Kho xuất',
+      field: <LookupSelect resource="warehouses" value={formValues.fromWarehouseId as number}
+        onChange={(v) => setField('fromWarehouseId', v)} placeholder="Chọn kho xuất" disabled={locked} />,
+    })
+  }
+  if (isReceipt || isTransfer) {
+    headerCells.push({
+      label: 'Kho nhập', required: isReceipt, error: errors.toWarehouseId,
+      field: <LookupSelect resource="warehouses" value={formValues.toWarehouseId as number}
+        onChange={(v) => setField('toWarehouseId', v)} placeholder="Chọn kho nhập" disabled={locked} />,
+    })
+  }
+  if (!isTransfer) {
+    headerCells.push({
+      label: 'Đối tượng',
+      field: <LookupSelect resource="partners" labelField="shortName" value={formValues.partnerId as number}
+        onChange={(v) => setField('partnerId', v)} placeholder="Chọn đối tác" disabled={locked} />,
+    })
+  }
+  if (doc.purchaseOrderId) {
+    headerCells.push({ label: 'Đơn mua', field: <Input size="small" value={`PO #${doc.purchaseOrderId}`} readOnly disabled /> })
+  }
+  if (doc.salesOrderId) {
+    headerCells.push({ label: 'Đơn bán', field: <Input size="small" value={`SO #${doc.salesOrderId}`} readOnly disabled /> })
+  }
+  if (showProcess) {
+    headerCells.push({
+      label: 'Quy trình',
+      field: <LookupSelect resource="processes" value={formValues.processId as number}
+        onChange={(v) => setField('processId', v)} placeholder="Chọn quy trình" disabled={locked} />,
+    })
+  }
+  if (doc.actualDate) {
+    headerCells.push({ label: 'Ngày thực tế', field: <Input size="small" value={formatDateVN(doc.actualDate)} readOnly disabled /> })
+  }
+
+  const headerRows: HeaderRow[] = []
+  for (let i = 0; i < headerCells.length; i += 3) {
+    headerRows.push({ cells: headerCells.slice(i, i + 3) })
+  }
+  headerRows.push({
+    cells: [
+      {
+        label: 'Ghi chú', span: 6,
+        field: <Input.TextArea rows={1} value={formValues.note as string ?? ''}
+          onChange={(e) => setField('note', e.target.value)} disabled={locked} />,
+      },
+    ],
+  })
+
+  const rightRows: RightRow[] = [
+    { label: 'Hiện trạng', value: <Tag color={statusColor(doc.status)}>{STOCK_DOC_STATUS_LABELS[doc.status] ?? doc.status}</Tag> },
+  ]
+
+  const accordionSections: DocFormSection[] = [
+    {
+      key: 'general',
+      header: 'Thông tin chung',
+      content: (
+        <>
+          <HeaderGrid rows={headerRows} rightRows={rightRows} />
+          {doc.status === 'COMPLETED' && doc.docType === 'RECEIPT' && doc.subType === 'PURCHASE' && (
+            <Button type="dashed" style={{ marginTop: 8 }} onClick={() => setOutsourcingModalOpen(true)}>
+              YC Xuất cho SX-DV
+            </Button>
+          )}
+          {doc.status === 'COMPLETED' && doc.docType === 'ISSUE' && doc.subType === 'OUTSOURCING' && (
+            <Button type="dashed" style={{ marginTop: 8 }} onClick={() => createFinishedReceiptMutation.mutate()} loading={createFinishedReceiptMutation.isPending}>
+              YC Nhập SP-TP
+            </Button>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'detail',
+      header: 'Chi tiết',
+      content: <Tabs items={tabItems} />,
+    },
+  ]
+
   return (
-    <div className="docform-container">
-      {/* Header */}
-      <Card size="small" style={{ marginBottom: 12 }}>
-        <Descriptions column={3} size="small">
-          <Descriptions.Item label="Số phiếu">{doc.docNo}</Descriptions.Item>
-          <Descriptions.Item label="Loại phiếu">
-            <Tag>{DOC_TYPE_LABELS[doc.docType] ?? doc.docType} — {ALL_SUB_TYPE_LABELS[doc.subType] ?? doc.subType}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="Trạng thái">
-            <Tag color={statusColor(doc.status)}>{STOCK_DOC_STATUS_LABELS[doc.status] ?? doc.status}</Tag>
-          </Descriptions.Item>
-
-          {(isIssue || isTransfer) && (
-            <Descriptions.Item label="Kho xuất">
-              {editable ? (
-                <LookupSelect
-                  resource="warehouses"
-                  value={doc.fromWarehouseId}
-                  onChange={(v) => updateHeader('fromWarehouseId', v)}
-                  placeholder="Chọn kho xuất"
-                  disabled={locked}
-                />
-              ) : (
-                <LookupLabel resource="warehouses" id={doc.fromWarehouseId} />
-              )}
-            </Descriptions.Item>
-          )}
-          {(isReceipt || isTransfer) && (
-            <Descriptions.Item label="Kho nhập">
-              {editable ? (
-                <LookupSelect
-                  resource="warehouses"
-                  value={doc.toWarehouseId}
-                  onChange={(v) => updateHeader('toWarehouseId', v)}
-                  placeholder="Chọn kho nhập"
-                  disabled={locked}
-                />
-              ) : (
-                <LookupLabel resource="warehouses" id={doc.toWarehouseId} />
-              )}
-            </Descriptions.Item>
-          )}
-          {!isTransfer && (
-            <Descriptions.Item label="Đối tượng">
-              {editable ? (
-                <LookupSelect
-                  resource="partners"
-                  labelField="shortName"
-                  value={doc.partnerId}
-                  onChange={(v) => updateHeader('partnerId', v)}
-                  placeholder="Chọn đối tác"
-                />
-              ) : doc.partnerId ? (
-                <LookupLabel resource="partners" id={doc.partnerId} labelField="shortName" />
-              ) : (
-                '—'
-              )}
-            </Descriptions.Item>
-          )}
-          {doc.purchaseOrderId && (
-            <Descriptions.Item label="Đơn mua">{`PO #${doc.purchaseOrderId}`}</Descriptions.Item>
-          )}
-          {doc.salesOrderId && (
-            <Descriptions.Item label="Đơn bán">{`SO #${doc.salesOrderId}`}</Descriptions.Item>
-          )}
-          {showProcess && (
-            <Descriptions.Item label="Quy trình">
-              {editable ? (
-                <LookupSelect
-                  resource="processes"
-                  value={doc.processId}
-                  onChange={(v) => updateHeader('processId', v)}
-                  placeholder="Chọn quy trình"
-                />
-              ) : doc.processId ? (
-                <LookupLabel resource="processes" id={doc.processId} />
-              ) : (
-                '—'
-              )}
-            </Descriptions.Item>
-          )}
-          <Descriptions.Item label="Ngày yêu cầu">{formatDateVN(doc.requestDate)}</Descriptions.Item>
-          <Descriptions.Item label="Ngày thực tế">{doc.actualDate ? formatDateVN(doc.actualDate) : '—'}</Descriptions.Item>
-          <Descriptions.Item label="Ghi chú">
-            {editable ? (
-              <Input
-                size="small"
-                defaultValue={doc.note ?? ''}
-                onBlur={(e) => {
-                  if (e.target.value !== (doc.note ?? '')) {
-                    saveMutation.mutate({ note: e.target.value || null })
-                  }
-                }}
-              />
-            ) : (
-              doc.note ?? '—'
-            )}
-          </Descriptions.Item>
-        </Descriptions>
-      </Card>
-
-      {/* Special action buttons */}
-      {doc.status === 'COMPLETED' && doc.docType === 'RECEIPT' && doc.subType === 'PURCHASE' && (
-        <Button type="dashed" style={{ marginBottom: 12 }} onClick={() => setOutsourcingModalOpen(true)}>
-          YC Xuất cho SX-DV
-        </Button>
-      )}
-      {doc.status === 'COMPLETED' && doc.docType === 'ISSUE' && doc.subType === 'OUTSOURCING' && (
-        <Button type="dashed" style={{ marginBottom: 12 }} onClick={() => createFinishedReceiptMutation.mutate()} loading={createFinishedReceiptMutation.isPending}>
-          YC Nhập SP-TP
-        </Button>
-      )}
-
-      {/* Tabs */}
-      <Tabs items={tabItems} />
-
-      {/* Bottom toolbar */}
-      <BottomToolbar
-        onClose={() => navigate(-1)}
-        workflowButtons={workflowButtons}
-        locked={locked}
-        disabled={false}
-      />
+    <div style={{ padding: '0 4px' }}>
+      <DocFormLayout
+        actionBar={(
+          <BottomToolbar
+            onSave={handleSave}
+            onClose={() => guardAction(() => navigate(-1))}
+            workflowButtons={workflowButtons}
+            locked={locked}
+            disabled={saveMutation.isPending}
+          />
+        )}
+        sidebar={(
+          <DocFormSidebar
+            statusLabel={STOCK_DOC_STATUS_LABELS[doc.status] ?? doc.status}
+            statusColor={statusColor(doc.status)}
+            statusReason={doc.statusReason}
+            infoRows={sidebarInfoRows}
+            timeline={sidebarTimeline}
+          />
+        )}
+      >
+        <DocFormAccordion sections={accordionSections} />
+      </DocFormLayout>
 
       {/* Cancel modal */}
       <Modal

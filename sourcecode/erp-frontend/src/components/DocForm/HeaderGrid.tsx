@@ -19,6 +19,8 @@ export interface HeaderCell {
   span?: number
   /** true = ô bắt buộc (nền vàng) */
   required?: boolean
+  /** Thông báo lỗi validate — viền đỏ + hiện text dưới field */
+  error?: string
 }
 
 export interface RightRow {
@@ -48,7 +50,7 @@ export default function HeaderGrid({ rows, rightRows, rightExtra }: HeaderGridPr
               return (
                 <div
                   key={ci}
-                  className={`docform-span-${span} ${cell.required ? 'docform-field-required' : ''}`}
+                  className={`docform-span-${span} ${cell.required ? 'docform-field-required' : ''} ${cell.error ? 'docform-field-invalid' : ''}`}
                   style={{ display: 'contents' }}
                 >
                   {cell.label && (
@@ -58,6 +60,7 @@ export default function HeaderGrid({ rows, rightRows, rightExtra }: HeaderGridPr
                   )}
                   <div className={`docform-field`} style={{ gridColumn: cell.label ? undefined : `span ${span - 1}` }}>
                     {cell.field}
+                    {cell.error && <div className="docform-field-error">{cell.error}</div>}
                   </div>
                 </div>
               )

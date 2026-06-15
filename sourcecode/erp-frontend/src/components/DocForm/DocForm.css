@@ -190,3 +190,152 @@
     display: none !important;
   }
 }
+
+/* ========== Bố cục 3 vùng (UI-04) ========== */
+.docform-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Thanh action dính trên cùng */
+.docform-actionbar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 8px;
+  margin-bottom: 12px;
+}
+
+.docform-actionbar .docform-bottom-toolbar {
+  border-top: none;
+  margin-top: 0;
+}
+
+.docform-body {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.docform-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.docform-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+  .docform-body {
+    flex-direction: column;
+  }
+  .docform-sidebar {
+    width: 100%;
+  }
+}
+
+@media print {
+  .docform-actionbar,
+  .docform-sidebar {
+    display: none !important;
+  }
+}
+
+/* ========== Section gập được (antd Collapse) ========== */
+.docform-accordion {
+  background: var(--bg-surface);
+  border-color: var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+}
+
+.docform-accordion .ant-collapse-item {
+  border-color: var(--border);
+}
+
+.docform-accordion .ant-collapse-header {
+  padding: 6px 12px !important;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.docform-accordion .ant-collapse-content-box {
+  padding: 10px 12px !important;
+}
+
+/* ========== Sidebar phải: trạng thái / thông tin / timeline ========== */
+.docform-sidebar-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.docform-sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+
+.docform-sidebar-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.docform-sidebar-label {
+  color: var(--text-2);
+}
+
+.docform-sidebar-value {
+  text-align: right;
+  font-weight: 500;
+}
+
+.docform-sidebar-reason {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.docform-sidebar-timeline {
+  padding: 0;
+  overflow: hidden;
+}
+
+.docform-sidebar-timeline .ant-card {
+  border: none;
+}
+
+.docform-sidebar-timeline .ant-card-body {
+  padding: 4px 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+/* ========== Validate lỗi — viền đỏ + text dưới field ========== */
+.docform-field-invalid .ant-input,
+.docform-field-invalid .ant-select-selector,
+.docform-field-invalid .ant-input-number,
+.docform-field-invalid .ant-picker {
+  border-color: var(--danger) !important;
+}
+
+.docform-field-error {
+  color: var(--danger);
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 2px;
+}

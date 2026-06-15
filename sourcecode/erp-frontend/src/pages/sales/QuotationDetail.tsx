@@ -14,8 +14,10 @@ import {
 } from '../../api/workflow'
 import LookupSelect from '../../components/LookupSelect'
 import LookupLabel from '../../components/LookupLabel'
-import { HeaderGrid, BottomToolbar } from '../../components/DocForm'
-import type { WorkflowButton } from '../../components/DocForm'
+import {
+  HeaderGrid, BottomToolbar, DocFormLayout, DocFormSidebar, DocFormAccordion, useDirtyGuard, useDocFormHotkeys,
+} from '../../components/DocForm'
+import type { WorkflowButton, DocFormInfoRow, DocFormSection, DocFormTimelineItem } from '../../components/DocForm'
 import { formatDateVN, formatNumberVN } from '../../utils/format'
 import '../../components/DocForm/DocForm.css'
 import QuotationLinesTab from './QuotationLinesTab'
@@ -43,6 +45,8 @@ export default function QuotationDetailPage() {
   })
 
   const [formValues, setFormValues] = useState<Record<string, unknown>>({})
+  const [dirty, setDirty] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false)
   const [showStockDrawer, setShowStockDrawer] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
@@ -78,6 +82,8 @@ export default function QuotationDetailPage() {
       terms: data.terms,
       note: data.note,
     })
+    setDirty(false)
+    setErrors({})
   }, [data])
 
   const locked = data ? !EDITABLE_STATUSES.includes(data.status) : true
@@ -91,6 +97,7 @@ export default function QuotationDetailPage() {
     mutationFn: (values: QuotationUpdate) => apiClient.put<QuotationOut>(`/sales/quotations/${id}`, values),
     onSuccess: (res) => {
       message.success('Đã lưu')
+      setDirty(false)
       queryClient.setQueryData(queryKey, res.data)
     },
     onError: (err) => showError(err, 'Không thể lưu'),
@@ -98,6 +105,11 @@ export default function QuotationDetailPage() {
 
   const handleSave = useCallback(() => {
     if (!data) return
+    if (!formValues.partnerId) {
+      setErrors({ partnerId: 'Vui lòng chọn khách hàng' })
+      message.error('Vui lòng chọn khách hàng')
+      return
+    }
     const values: QuotationUpdate = {
       partnerId: (formValues.partnerId as number) ?? data.partnerId,
       orderType: (formValues.orderType as string) ?? data.orderType,
@@ -253,6 +265,51 @@ export default function QuotationDetailPage() {
     return { totalAmount, totalVat, totalWithVat: totalAmount + totalVat }
   }, [data?.lines])
 
+  // Sidebar phải: thông tin người lập/duyệt + ngày
+  const sidebarInfoRows: DocFormInfoRow[] = useMemo(() => {
+    if (!data) return []
+    return [
+      { label: 'Ngày lập', value: formatDateVN(data.docDate) },
+      { label: 'Người lập', value: <LookupLabel resource="users" id={data.creatorId} labelField="fullName" /> },
+      { label: 'Người duyệt', value: <LookupLabel resource="users" id={data.approverId} labelField="fullName" /> },
+      { label: 'Ngày duyệt', value: formatDateVN(data.approvedAt) },
+      { label: 'Hiệu lực đến', value: formatDateVN(data.validTill) },
+    ]
+  }, [data])
+
+  // Sidebar phải: dòng thời gian hoạt động — suy ra từ dữ liệu báo giá (chưa có API /timeline)
+  const sidebarTimeline: DocFormTimelineItem[] = useMemo(() => {
+    if (!data) return []
+    const items: DocFormTimelineItem[] = [
+      {
+        timestamp: data.docDate,
+        type: 'ACTIVITY',
+        description: 'Tạo báo giá',
+        actor: <LookupLabel resource="users" id={data.creatorId} labelField="fullName" />,
+        metadata: {},
+      },
+    ]
+    if (data.approvedAt) {
+      items.push({
+        timestamp: data.approvedAt,
+        type: 'STATUS_CHANGE',
+        description: `Duyệt báo giá — ${QUOTATION_STATUS_LABELS[data.status] ?? data.status}`,
+        actor: <LookupLabel resource="users" id={data.approverId} labelField="fullName" />,
+        metadata: { status: data.status },
+      })
+    }
+    if (data.statusReason && (data.status === 'LOST' || data.status === 'CANCELLED')) {
+      items.push({
+        timestamp: data.approvedAt ?? data.docDate,
+        type: 'STATUS_CHANGE',
+        description: `${QUOTATION_STATUS_LABELS[data.status] ?? data.status}: ${data.statusReason}`,
+        actor: null,
+        metadata: { status: data.status },
+      })
+    }
+    return items.reverse()
+  }, [data])
+
   // Thông tin tồn kho (không lọc theo kho — QuotationOut không có warehouseId)
   const { data: stockBalances } = useQuery({
     queryKey: ['stock-balance', selectedProductId],
@@ -293,13 +350,9 @@ export default function QuotationDetailPage() {
     })
   }, [data, handleWorkflowAction, openMakeSalesOrder, openExtend, amendMutation, anyActionLoading])
 
-  // Keyboard shortcuts
+  // Ctrl+F5: tải lại dữ liệu từ server
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 's') {
-        e.preventDefault()
-        handleSave()
-      }
       if (e.ctrlKey && e.key === 'F5') {
         e.preventDefault()
         refetch()
@@ -307,10 +360,21 @@ export default function QuotationDetailPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [handleSave, refetch])
+  }, [refetch])
+
+  useDocFormHotkeys({ onSave: handleSave })
+  const { guardAction } = useDirtyGuard(dirty)
 
   const setField = useCallback((key: string, value: unknown) => {
     setFormValues((prev) => ({ ...prev, [key]: value }))
+    setDirty(true)
+    if (key === 'partnerId' && value) {
+      setErrors((prev) => {
+        if (!prev.partnerId) return prev
+        const { partnerId: _drop, ...rest } = prev
+        return rest
+      })
+    }
   }, [])
 
   const handlePrint = useCallback(() => window.print(), [])
@@ -356,7 +420,7 @@ export default function QuotationDetailPage() {
     {
       cells: [
         {
-          label: 'Khách hàng', required: true,
+          label: 'Khách hàng', required: true, error: errors.partnerId,
           field: <LookupSelect resource="partners" labelField="shortName" disabled={locked}
             value={formValues.partnerId as number} onChange={(v) => setField('partnerId', v)} />,
         },
@@ -474,11 +538,16 @@ export default function QuotationDetailPage() {
     { label: 'Tổng cộng', value: <span style={{ fontWeight: 700, fontSize: 13, color: '#cf1322' }}>{formatNumberVN(totals.totalWithVat)}</span>, bold: true },
   ]
 
-  return (
-    <div style={{ padding: '0 4px' }}>
-      <HeaderGrid rows={headerRows} rightRows={rightRows} />
-
-      <div style={{ marginTop: 8 }}>
+  const accordionSections: DocFormSection[] = [
+    {
+      key: 'general',
+      header: 'Thông tin chung',
+      content: <HeaderGrid rows={headerRows} rightRows={rightRows} />,
+    },
+    {
+      key: 'lines',
+      header: 'Chi tiết hàng hóa',
+      content: (
         <QuotationLinesTab
           quotationId={data.id}
           lines={data.lines}
@@ -495,17 +564,36 @@ export default function QuotationDetailPage() {
           onAmend={() => amendMutation.mutate()}
           onReload={() => refetch()}
         />
-      </div>
+      ),
+    },
+  ]
 
-      <BottomToolbar
-        onSave={handleSave}
-        onPrint={handlePrint}
-        onPrintPreview={handlePrintPreview}
-        onClose={() => navigate('/sales/quotations')}
-        workflowButtons={workflowButtons}
-        locked={locked}
-        disabled={saveMutation.isPending}
-      />
+  return (
+    <div style={{ padding: '0 4px' }}>
+      <DocFormLayout
+        actionBar={(
+          <BottomToolbar
+            onSave={handleSave}
+            onPrint={handlePrint}
+            onPrintPreview={handlePrintPreview}
+            onClose={() => guardAction(() => navigate('/sales/quotations'))}
+            workflowButtons={workflowButtons}
+            locked={locked}
+            disabled={saveMutation.isPending}
+          />
+        )}
+        sidebar={(
+          <DocFormSidebar
+            statusLabel={QUOTATION_STATUS_LABELS[data.status] ?? data.status}
+            statusColor={statusColor(data.status)}
+            statusReason={data.statusReason}
+            infoRows={sidebarInfoRows}
+            timeline={sidebarTimeline}
+          />
+        )}
+      >
+        <DocFormAccordion sections={accordionSections} />
+      </DocFormLayout>
 
       {/* Dialog: Tạo đơn hàng */}
       <Modal
