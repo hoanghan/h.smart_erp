@@ -1,6 +1,3 @@
-// TODO-BE: Các trường backend chưa có:
-// - Số hợp đồng, Vùng bán hàng (select), Địa chỉ giao hàng, Dịch vụ đính kèm
-
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { App as AntApp, Button, DatePicker, Descriptions, Drawer, Input, InputNumber, Modal, Select, Spin, Tabs, Tag } from 'antd'
@@ -8,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
-import type { ApiErrorBody, CreditLimitExceededOut, SalesOrderOut, SalesOrderUpdate, StockBalanceOut } from '../../api/types'
+import type { ApiErrorBody, CreditLimitExceededOut, PartnerOut, SalesOrderOut, SalesOrderUpdate, StockBalanceOut } from '../../api/types'
 import { SALES_ORDER_STATUS_LABELS, WF_DEFINITIONS, statusColor, ACTION_LABELS, PRIMARY_ACTIONS, DANGER_ACTIONS } from '../../api/workflow'
 import LookupLabel from '../../components/LookupLabel'
 import LookupSelect from '../../components/LookupSelect'
@@ -51,7 +48,6 @@ export default function SalesOrderDetailPage() {
   const [formValues, setFormValues] = useState<Record<string, unknown>>({})
   const [currency, setCurrency] = useState('VND')
   const [exchangeRate, setExchangeRate] = useState(1)
-  const [contractNo, setContractNo] = useState('')
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false)
   const [showStockDrawer, setShowStockDrawer] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
@@ -61,11 +57,11 @@ export default function SalesOrderDetailPage() {
     if (!data) return
     setFormValues({
       orderForm: data.orderForm ?? 'NORMAL',
+      contractNo: data.contractNo ?? '',
       docDate: data.docDate ? dayjs(data.docDate) : null,
       deliveryDatePlan: data.deliveryDatePlan ? dayjs(data.deliveryDatePlan) : null,
       partnerId: data.partnerId,
       salespersonId: data.salespersonId,
-      approverId: data.approverId,
       salesChannel: data.salesChannel,
       salesRegion: data.salesRegion,
       warehouseId: data.warehouseId,
@@ -95,6 +91,7 @@ export default function SalesOrderDetailPage() {
     if (!data) return
     saveMutation.mutate({
       partnerId: (formValues.partnerId as number) ?? data.partnerId,
+      contractNo: (formValues.contractNo as string) ?? data.contractNo,
       orderForm: (formValues.orderForm as string) ?? data.orderForm,
       salesChannel: (formValues.salesChannel as string) ?? data.salesChannel,
       salesRegion: (formValues.salesRegion as string) ?? data.salesRegion,
@@ -148,6 +145,13 @@ export default function SalesOrderDetailPage() {
     return { totalAmount, totalVat, totalPaid: 0, remaining: totalAmount + totalVat }
   }, [data])
 
+  const partnerId = (formValues.partnerId as number) ?? data?.partnerId
+  const { data: partner } = useQuery({
+    queryKey: ['partner', partnerId],
+    queryFn: async () => (await apiClient.get<PartnerOut>(`/md/partners/${partnerId}`)).data,
+    enabled: !!partnerId,
+  })
+
   const { data: stockBalances } = useQuery({
     queryKey: ['stock-balance', selectedProductId, data?.warehouseId],
     queryFn: async () => (await apiClient.get<StockBalanceOut[]>('/inventory/stock-balance', {
@@ -197,7 +201,7 @@ export default function SalesOrderDetailPage() {
     {
       cells: [
         { label: 'Số đơn hàng', field: <Input size="small" value={data.docNo} readOnly disabled /> },
-        { label: 'Số hợp đồng', field: <Input size="small" value={contractNo} onChange={(e) => setContractNo(e.target.value)} disabled={locked} placeholder="TODO-BE" /> },
+        { label: 'Số hợp đồng', field: <Input size="small" value={formValues.contractNo as string ?? ''} onChange={(e) => setField('contractNo', e.target.value)} disabled={locked} /> },
         {
           label: 'Hình thức',
           field: <Select size="small" options={ORDER_FORM_OPTIONS} value={formValues.orderForm as string} onChange={(v) => setField('orderForm', v)} disabled={locked} style={{ width: '100%' }} />,
@@ -213,14 +217,13 @@ export default function SalesOrderDetailPage() {
     },
     {
       cells: [
-        { label: 'Khách hàng', required: true, span: 2, field: <LookupSelect resource="partners" labelField="shortName" disabled={locked} value={formValues.partnerId as number} onChange={(v) => setField('partnerId', v)} /> },
-        { label: 'Tên KH', field: <Input size="small" readOnly disabled value={'' /* TODO-BE */} /> },
+        { label: 'Khách hàng', required: true, span: 6, field: <LookupSelect resource="partners" labelField="shortName" disabled={locked} value={formValues.partnerId as number} onChange={(v) => setField('partnerId', v)} /> },
       ],
     },
     {
       cells: [
         { label: 'Vùng bán hàng', required: true, field: <Input size="small" value={formValues.salesRegion as string ?? ''} onChange={(e) => setField('salesRegion', e.target.value)} disabled={locked} /> },
-        { label: 'Đ/C giao hàng', span: 4, field: <Input size="small" disabled placeholder="TODO-BE" /> },
+        { label: 'Đ/C giao hàng', span: 4, field: <Input size="small" value={partner?.address ?? ''} readOnly disabled /> },
       ],
     },
     {
@@ -232,19 +235,14 @@ export default function SalesOrderDetailPage() {
     },
     {
       cells: [
-        { label: 'Người lập', field: <Input size="small" readOnly disabled value={'' /* TODO-BE: creatorId */} /> },
+        { label: 'Người lập', field: <LookupLabel resource="users" id={data.creatorId} labelField="fullName" /> },
         { label: 'NV bán hàng', field: <LookupSelect resource="employees" labelField="fullName" disabled={locked} value={formValues.salespersonId as number} onChange={(v) => setField('salespersonId', v)} /> },
-        { label: 'Người duyệt', field: <LookupSelect resource="employees" labelField="fullName" disabled={locked} value={formValues.approverId as number} onChange={(v) => setField('approverId', v)} /> },
+        { label: 'Người duyệt', field: <LookupLabel resource="users" id={data.approverId} labelField="fullName" /> },
       ],
     },
     {
       cells: [
         { label: 'Ghi chú', span: 6, field: <Input size="small" value={formValues.note as string ?? ''} onChange={(e) => setField('note', e.target.value)} disabled={locked} /> },
-      ],
-    },
-    {
-      cells: [
-        { label: 'DV đính kèm', span: 6, field: <Input size="small" disabled placeholder="TODO-BE" /> },
       ],
     },
   ]
@@ -272,6 +270,7 @@ export default function SalesOrderDetailPage() {
             totalVat={data.totalVat}
             queryKey={queryKey}
             onShowStock={(pid: number) => { setSelectedProductId(pid); setShowStockDrawer(true) }}
+            onShowHistory={() => setShowHistoryDrawer(true)}
           />
         )},
         { key: 'costs', label: 'Chi phí', children: <SalesOrderCostsTab orderId={data.id} locked={locked} /> },
