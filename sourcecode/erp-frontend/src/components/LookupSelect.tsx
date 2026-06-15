@@ -18,6 +18,7 @@ interface LookupSelectProps {
   /** Loại bỏ một id khỏi danh sách (vd không cho chọn chính nó làm cha) */
   excludeId?: number
   disabled?: boolean
+  autoFocus?: boolean
 }
 
 function labelOf(item: LookupItem, labelField: 'name' | 'fullName' | 'shortName'): string {
@@ -36,6 +37,7 @@ export default function LookupSelect({
   labelField = 'name',
   excludeId,
   disabled,
+  autoFocus,
 }: LookupSelectProps) {
   const base = endpoint ?? `/md/${resource}`
   const [options, setOptions] = useState<{ value: number; label: string }[]>([])
@@ -101,6 +103,8 @@ export default function LookupSelect({
       options={options}
       onSearch={search}
       onChange={handleChange}
+      autoFocus={autoFocus}
+      defaultOpen={autoFocus}
     />
   )
 }

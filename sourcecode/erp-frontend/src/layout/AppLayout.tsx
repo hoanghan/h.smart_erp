@@ -29,6 +29,10 @@ const menuItems: MenuItemModel[] = [
     items: [
       { text: 'Báo giá', url: '/sales/quotations' },
       { text: 'Đơn hàng bán', url: '/sales/orders' },
+      { text: 'Chương trình KM', url: '/sales/promotional-schemes' },
+      { text: 'Quy tắc giá', url: '/sales/pricing-rules' },
+      { text: 'Mã giảm giá', url: '/sales/coupons' },
+      { text: 'Thử giá', url: '/sales/price-check' },
     ],
   },
   {
