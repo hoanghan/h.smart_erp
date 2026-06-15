@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { App as AntApp, Button, DatePicker, Form, InputNumber, Modal, Popconfirm, Progress, Switch, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { DeleteOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons'
+import { DeleteOutlined, FileTextOutlined, HistoryOutlined, PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import axios from 'axios'
 import dayjs from 'dayjs'
@@ -22,10 +22,11 @@ interface SalesOrderLinesTabProps {
   totalVat: number | null
   queryKey: QueryKey
   onShowStock?: (productId: number) => void
+  onShowHistory?: () => void
 }
 
 /** Tab "Hàng hóa" của đơn hàng bán — Đơn giá bán nền đỏ nhạt khi < giá vốn/giá sàn. */
-export default function SalesOrderLinesTab({ orderId, lines, locked, status, totalAmount, totalVat, queryKey, onShowStock }: SalesOrderLinesTabProps) {
+export default function SalesOrderLinesTab({ orderId, lines, locked, status, totalAmount, totalVat, queryKey, onShowStock, onShowHistory }: SalesOrderLinesTabProps) {
   const { message } = AntApp.useApp()
   const queryClient = useQueryClient()
   const [form] = Form.useForm()
@@ -195,13 +196,16 @@ export default function SalesOrderLinesTab({ orderId, lines, locked, status, tot
 
   return (
     <div>
-      {canMakeInvoice && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+        <Button icon={<HistoryOutlined />} onClick={onShowHistory}>
+          Lịch sử thao tác
+        </Button>
+        {canMakeInvoice && (
           <Button type="primary" icon={<FileTextOutlined />} onClick={handleOpenMakeInvoice}>
             Xuất hóa đơn
           </Button>
-        </div>
-      )}
+        )}
+      </div>
       <Table<SalesOrderLineOut>
         rowKey="id"
         columns={columns}
