@@ -55,17 +55,6 @@ export default function StockDocDetailPage() {
     enabled: !isNaN(docId),
   })
 
-  if (isLoading) return <Spin style={{ display: 'block', margin: '80px auto' }} />
-  if (!doc) return <Typography.Text type="danger">Không tìm thấy phiếu kho</Typography.Text>
-
-  const locked = doc.status === 'COMPLETED' || doc.status === 'CANCELLED'
-  const editable = !locked
-  const isReceipt = doc.docType === 'RECEIPT'
-  const isIssue = doc.docType === 'ISSUE'
-  const isTransfer = doc.docType === 'TRANSFER'
-  const showProcess = ['OUTSOURCING', 'FINISHED_GOODS'].includes(doc.subType)
-  const hasRefDoc = !!(doc.purchaseOrderId || doc.salesOrderId)
-
   // --- Save header ---
   const saveMutation = useMutation({
     mutationFn: (body: StockDocUpdate) => apiClient.patch(`/inventory/docs/${docId}`, body),
@@ -122,6 +111,17 @@ export default function StockDocDetailPage() {
       message.error(body?.message ?? 'Không thể tạo phiếu nhập SP-TP')
     },
   })
+
+  if (isLoading) return <Spin style={{ display: 'block', margin: '80px auto' }} />
+  if (!doc) return <Typography.Text type="danger">Không tìm thấy phiếu kho</Typography.Text>
+
+  const locked = doc.status === 'COMPLETED' || doc.status === 'CANCELLED'
+  const editable = !locked
+  const isReceipt = doc.docType === 'RECEIPT'
+  const isIssue = doc.docType === 'ISSUE'
+  const isTransfer = doc.docType === 'TRANSFER'
+  const showProcess = ['OUTSOURCING', 'FINISHED_GOODS'].includes(doc.subType)
+  const hasRefDoc = !!(doc.purchaseOrderId || doc.salesOrderId)
 
   // --- Build workflow buttons ---
   const transitions = WF_DEFINITIONS['stock-docs']?.filter((t) => t.from.includes(doc.status)) ?? []

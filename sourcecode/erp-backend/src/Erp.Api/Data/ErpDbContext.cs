@@ -479,6 +479,7 @@ public class ErpDbContext(
         mb.Entity<CashFund>().ToTable("cash_fund", "finance");
         mb.Entity<OutboxEvent>().ToTable("outbox_event", "finance");
         mb.Entity<OutboxEvent>().Property(x => x.CreatedAt).HasDefaultValueSql("now()").ValueGeneratedOnAdd();
+        mb.Entity<OutboxEvent>().Property(x => x.Payload).HasColumnType("jsonb");
         mb.Entity<LerpVoucher>().ToTable("lerp_voucher", "finance");
         mb.Entity<LerpVoucher>().HasIndex(x => new { x.SourceTable, x.SourceId, x.VoucherType }).IsUnique();
         mb.Entity<Voucher>().ToTable("voucher", "finance");
