@@ -1,12 +1,26 @@
-﻿import { Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   SidebarComponent,
-  MenuComponent,
-  MenuItemModel,
-  MenuEventArgs
+  BreadcrumbComponent,
+  type MenuItemModel,
+  type BreadcrumbItemModel,
+  type BreadcrumbClickEventArgs,
 } from '@syncfusion/ej2-react-navigations'
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons'
+import { App as AntApp, AutoComplete, Avatar, Button, Dropdown, Input, Modal } from 'antd'
+import type { MenuProps } from 'antd'
+import {
+  IdcardOutlined,
+  LockOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  PlusOutlined,
+  SearchOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import { useAuthStore } from '../stores/auth'
+
+const SIDEBAR_COLLAPSED_KEY = 'erp.sidebarCollapsed'
 
 const menuItems: MenuItemModel[] = [
   {
@@ -111,53 +125,245 @@ const menuItems: MenuItemModel[] = [
   },
 ]
 
+// Nhãn tiếng Việt cho từng module (đoạn đầu của route) — dùng cho breadcrumb.
+const MODULE_LABELS: Record<string, string> = {
+  crm: 'CRM',
+  sales: 'Bán hàng',
+  purchasing: 'Mua hàng',
+  inventory: 'Kho hàng',
+  mfg: 'Sản xuất',
+  accounting: 'Kế toán',
+  'master-data': 'Danh mục',
+  admin: 'Quản trị',
+}
+
+// Map đường dẫn đầy đủ (từ menuItems) -> nhãn tiếng Việt, dùng cho breadcrumb.
+const PATH_LABELS: Record<string, string> = {}
+menuItems.forEach((group) => {
+  group.items?.forEach((item) => {
+    if (item.url) PATH_LABELS[item.url] = item.text ?? item.url
+  })
+})
+
+function buildBreadcrumbItems(pathname: string): BreadcrumbItemModel[] {
+  if (pathname === '/') {
+    return [{ text: 'Trang chủ' }]
+  }
+  const segments = pathname.split('/').filter(Boolean)
+  const items: BreadcrumbItemModel[] = [{ text: 'Trang chủ', url: '/' }]
+  let acc = ''
+  segments.forEach((seg, idx) => {
+    acc += `/${seg}`
+    const isLast = idx === segments.length - 1
+    let label = PATH_LABELS[acc]
+    if (!label) {
+      if (idx === 0) {
+        label = MODULE_LABELS[seg] ?? seg
+      } else if (seg === 'new') {
+        label = 'Tạo mới'
+      } else if (/^\d+$/.test(seg)) {
+        label = `Chi tiết #${seg}`
+      } else {
+        label = seg
+      }
+    }
+    items.push(isLast ? { text: label } : { text: label, url: acc })
+  })
+  return items
+}
+
+// Danh sách điều hướng dùng cho Awesomebar (Ctrl+K) — suy ra từ menuItems.
+const NAVIGABLE_ITEMS: { label: string; path: string; group: string }[] = []
+menuItems.forEach((group) => {
+  if (group.url) {
+    NAVIGABLE_ITEMS.push({ label: group.text ?? '', path: group.url, group: 'Chung' })
+  }
+  group.items?.forEach((item) => {
+    if (item.url) {
+      NAVIGABLE_ITEMS.push({ label: item.text ?? '', path: item.url, group: group.text ?? '' })
+    }
+  })
+})
+
+const AWESOMEBAR_OPTIONS = NAVIGABLE_ITEMS.map((item) => ({
+  value: item.path,
+  label: `${item.label} · ${item.group}`,
+}))
+
+const quickCreateItems: MenuProps['items'] = [
+  { key: '/sales/quotations/new', label: 'Báo giá' },
+  { key: '/purchasing/requests/new', label: 'Yêu cầu mua hàng' },
+  { key: '/purchasing/orders/new', label: 'Đơn hàng mua' },
+  { key: '/inventory/docs/new', label: 'Phiếu kho (Nhập / Xuất / Chuyển)' },
+  { key: '/purchasing/supplier-returns/new', label: 'Trả hàng NCC' },
+]
+
+const userMenuItems: MenuProps['items'] = [
+  { key: 'profile', icon: <IdcardOutlined />, label: 'Hồ sơ' },
+  { key: 'change-password', icon: <LockOutlined />, label: 'Đổi mật khẩu' },
+  { type: 'divider' },
+  { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', danger: true },
+]
+
 export default function AppLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { message } = AntApp.useApp()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+  const [awesomebarOpen, setAwesomebarOpen] = useState(false)
+  const [awesomebarQuery, setAwesomebarQuery] = useState('')
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? '1' : '0')
+    } catch {
+      // ignore (vd. trình duyệt ở chế độ ẩn danh)
+    }
+  }, [collapsed])
+
+  // Nhóm menu chứa route hiện tại — dùng để highlight + tự mở submenu.
+  const activeGroupText = useMemo(
+    () => menuItems.find((g) => g.items?.some((i) => i.url && location.pathname.startsWith(i.url)))?.text,
+    [location.pathname],
+  )
+  const [openGroup, setOpenGroup] = useState<string | undefined>(activeGroupText)
+
+  useEffect(() => {
+    if (activeGroupText) {
+      setOpenGroup(activeGroupText)
+    }
+  }, [activeGroupText])
+
+  const breadcrumbItems = useMemo(() => buildBreadcrumbItems(location.pathname), [location.pathname])
+
+  // Ctrl+K / Cmd+K mở Awesomebar
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setAwesomebarOpen((prev) => !prev)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
   }
 
-  const handleMenuSelect = (args: MenuEventArgs) => {
+  const handleGroupClick = (text: string) => {
+    if (collapsed) {
+      setCollapsed(false)
+    }
+    setOpenGroup((prev) => (prev === text ? undefined : text))
+  }
+
+  const handleBreadcrumbClick = (args: BreadcrumbClickEventArgs) => {
+    args.cancel = true
     if (args.item.url) {
       navigate(args.item.url)
     }
   }
 
+  const handleQuickCreateClick: MenuProps['onClick'] = ({ key }) => {
+    navigate(key)
+  }
+
+  const handleUserMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'logout') {
+      handleLogout()
+    } else {
+      message.info('Chức năng đang phát triển')
+    }
+  }
+
+  const closeAwesomebar = () => {
+    setAwesomebarOpen(false)
+    setAwesomebarQuery('')
+  }
+
+  const handleAwesomebarSelect = (value: string) => {
+    navigate(value)
+    closeAwesomebar()
+  }
+
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       {/* Sidebar */}
-      <SidebarComponent width="250px" style={{ backgroundColor: 'var(--bg-sidebar)' }}>
-        <div
-          style={{
-            height: '64px',
-            margin: 'calc(var(--space) * 1.5) calc(var(--space) * 2)',
-            color: 'var(--text-sidebar-strong)',
-            fontWeight: 600,
-            fontSize: '20px',
-            textAlign: 'center',
-            lineHeight: '64px',
-            borderBottom: '1px solid var(--border-sidebar)',
-          }}
-        >
-          ERP
+      <SidebarComponent
+        width="250px"
+        dockSize="64px"
+        enableDock
+        isOpen={!collapsed}
+        style={{ backgroundColor: 'var(--bg-sidebar)' }}
+      >
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-logo">SE</div>
+          {!collapsed && <span className="sidebar-brand-text">Smart ERP</span>}
         </div>
-        <div style={{ padding: '0 16px' }}>
-          <MenuComponent
-            items={menuItems}
-            select={handleMenuSelect}
-            orientation="Vertical"
-            cssClass="sidebar-menu"
-            fields={{ text: 'text', iconCss: 'iconCss', url: 'url' }}
-            style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-            }}
-          />
-        </div>
+
+        <nav className="sidebar-nav">
+          {menuItems.map((group) =>
+            group.url ? (
+              <NavLink
+                key={group.text}
+                to={group.url}
+                end
+                className={({ isActive }) => `sidebar-nav-link${isActive ? ' active' : ''}`}
+                title={collapsed ? group.text : undefined}
+              >
+                <span className={group.iconCss} />
+                {!collapsed && <span className="sidebar-nav-text">{group.text}</span>}
+              </NavLink>
+            ) : (
+              <div key={group.text} className="sidebar-nav-group">
+                <div
+                  className={`sidebar-nav-link sidebar-nav-group-header${
+                    group.text === activeGroupText ? ' active' : ''
+                  }`}
+                  onClick={() => handleGroupClick(group.text ?? '')}
+                  title={collapsed ? group.text : undefined}
+                >
+                  <span className={group.iconCss} />
+                  {!collapsed && (
+                    <>
+                      <span className="sidebar-nav-text">{group.text}</span>
+                      <span
+                        className={`e-icons e-chevron-down sidebar-nav-chevron${
+                          openGroup === group.text ? ' open' : ''
+                        }`}
+                      />
+                    </>
+                  )}
+                </div>
+                {!collapsed && openGroup === group.text && (
+                  <div className="sidebar-nav-submenu">
+                    {group.items?.map((item) => (
+                      <NavLink
+                        key={item.url}
+                        to={item.url ?? '#'}
+                        className={({ isActive }) => `sidebar-nav-sublink${isActive ? ' active' : ''}`}
+                      >
+                        {item.text}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ),
+          )}
+        </nav>
       </SidebarComponent>
 
       {/* Main Content */}
@@ -170,20 +376,39 @@ export default function AppLayout() {
             padding: '0 calc(var(--space) * 3)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-end',
             gap: 'calc(var(--space) * 2)',
             borderBottom: '1px solid var(--border)',
           }}
         >
-          <span style={{ color: 'var(--text-2)', fontSize: '14px' }}>{user?.username ?? '...'}</span>
-          <ButtonComponent
-            cssClass="e-outline"
-            onClick={handleLogout}
-            iconCss="e-icons e-sign-out"
-            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space)' }}
-          >
-            Đăng xuất
-          </ButtonComponent>
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label="Thu gọn/Mở rộng sidebar"
+          />
+
+          <BreadcrumbComponent items={breadcrumbItems} itemClick={handleBreadcrumbClick} />
+
+          <div style={{ flex: 1 }} />
+
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm kiếm (Ctrl+K)"
+            readOnly
+            onClick={() => setAwesomebarOpen(true)}
+            style={{ width: 240, cursor: 'pointer' }}
+          />
+
+          <Dropdown menu={{ items: quickCreateItems, onClick: handleQuickCreateClick }} trigger={['click']}>
+            <Button icon={<PlusOutlined />}>Tạo nhanh</Button>
+          </Dropdown>
+
+          <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} trigger={['click']} placement="bottomRight">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space)', cursor: 'pointer' }}>
+              <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: 'var(--brand-600)' }} />
+              <span style={{ color: 'var(--text-2)', fontSize: '14px' }}>{user?.username ?? '...'}</span>
+            </div>
+          </Dropdown>
         </div>
 
         {/* Content */}
@@ -191,6 +416,31 @@ export default function AppLayout() {
           <Outlet />
         </div>
       </div>
+
+      {/* Awesomebar / Command palette (Ctrl+K) */}
+      <Modal
+        open={awesomebarOpen}
+        onCancel={closeAwesomebar}
+        footer={null}
+        closable={false}
+        width={560}
+        style={{ top: 120 }}
+        destroyOnClose
+      >
+        <AutoComplete
+          autoFocus
+          style={{ width: '100%' }}
+          options={AWESOMEBAR_OPTIONS}
+          value={awesomebarQuery}
+          onChange={setAwesomebarQuery}
+          onSelect={handleAwesomebarSelect}
+          filterOption={(inputValue, option) =>
+            (option?.label as string)?.toLowerCase().includes(inputValue.toLowerCase()) ?? false
+          }
+        >
+          <Input size="large" prefix={<SearchOutlined />} placeholder="Tìm màn hình... (VD: Báo giá, Đơn hàng mua)" />
+        </AutoComplete>
+      </Modal>
     </div>
   )
 }
