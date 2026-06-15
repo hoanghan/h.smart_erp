@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ClockCircleOutlined, CommentOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons'
 import { Card, List, Tag, Typography } from 'antd'
 
@@ -5,7 +6,7 @@ interface TimelineItem {
   timestamp: string
   type: 'ACTIVITY' | 'STATUS_CHANGE'
   description: string
-  actor: string | null
+  actor: ReactNode
   metadata: {
     status?: string
     dueDate?: string
@@ -14,11 +15,12 @@ interface TimelineItem {
 
 interface TimelineProps {
   timeline: TimelineItem[]
+  title?: string
 }
 
-export default function Timeline({ timeline }: TimelineProps) {
+export default function Timeline({ timeline, title = 'Timeline' }: TimelineProps) {
   return (
-    <Card title="Timeline" size="small">
+    <Card title={title} size="small">
       <List
         dataSource={timeline}
         renderItem={(item, index) => (

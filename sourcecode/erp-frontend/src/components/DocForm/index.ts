@@ -9,3 +9,14 @@ export type { ContextMenuItem, ContextMenuGroup } from './GridContextMenu'
 
 export { default as BottomToolbar } from './BottomToolbar'
 export type { WorkflowButton } from './BottomToolbar'
+
+export { default as DocFormLayout } from './DocFormLayout'
+
+export { default as DocFormSidebar } from './DocFormSidebar'
+export type { DocFormInfoRow, DocFormTimelineItem } from './DocFormSidebar'
+
+export { default as DocFormAccordion } from './DocFormAccordion'
+export type { DocFormSection } from './DocFormAccordion'
+
+export { useDirtyGuard } from './useDirtyGuard'
+export { useDocFormHotkeys } from './useDocFormHotkeys'
