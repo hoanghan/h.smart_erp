@@ -9,49 +9,118 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Sidebar menu (top-level list): blend Syncfusion menu wrapper into the dark sidebar background.
-   Note: Syncfusion also stamps the cssClass onto the flyout popup (.e-menu-popup below), so
-   the top-level rules must exclude it to avoid making the popup transparent too. */
-.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) {
-  background-color: transparent;
+/* Sidebar branding (logo + "Smart ERP") */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  height: 64px;
+  padding: 0 calc(var(--space) * 2);
+  border-bottom: 1px solid var(--border-sidebar);
+  overflow: hidden;
 }
 
-.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item {
+.sidebar-brand-logo {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  background-color: var(--brand-600);
+  color: var(--text-sidebar-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sidebar-brand-text {
+  color: var(--text-sidebar-strong);
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+/* Sidebar navigation — custom React-rendered menu (thay cho MenuComponent) để
+   tự kiểm soát highlight active theo route + chế độ icon-only khi thu gọn. */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space);
+  overflow-y: auto;
+}
+
+.sidebar-nav-link,
+.sidebar-nav-group-header {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 1.25);
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 1.5);
+  border-radius: var(--radius);
   color: var(--text-sidebar);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item:hover,
-.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item.e-focused,
-.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item.e-selected {
+.sidebar-nav-link:hover,
+.sidebar-nav-group-header:hover {
   color: var(--text-sidebar-strong);
   background-color: var(--bg-sidebar-hover);
 }
 
-/* The bootstrap5 theme hardcodes .e-menu-url to a dark text color (#212529) at the
-   same specificity as the .e-menu-item color above — make it inherit so the item's
-   light/hover/selected color actually shows on the link text. */
-.e-menu-wrapper.sidebar-menu:not(.e-menu-popup) .e-menu-item .e-menu-url {
-  color: inherit;
-}
-
-/* Submenu flyout popup: Syncfusion appends this to <body>, so it can't inherit the
-   sidebar's dark background/text color — give it its own solid theme. */
-.e-menu-wrapper.sidebar-menu.e-menu-popup {
-  background-color: #15324f;
-  border: 1px solid var(--border-sidebar);
-}
-
-.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item {
-  color: var(--text-sidebar);
-}
-
-.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item:hover,
-.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item.e-focused,
-.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item.e-selected {
+.sidebar-nav-link.active,
+.sidebar-nav-group-header.active {
   color: var(--text-sidebar-strong);
   background-color: var(--bg-sidebar-hover);
 }
 
-.e-menu-wrapper.sidebar-menu.e-menu-popup .e-menu-item .e-menu-url {
-  color: inherit;
+.sidebar-nav-link > .e-icons,
+.sidebar-nav-group-header > .e-icons {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.sidebar-nav-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-nav-chevron {
+  flex-shrink: 0;
+  font-size: 11px;
+  transition: transform 0.15s ease;
+}
+
+.sidebar-nav-chevron.open {
+  transform: rotate(180deg);
+}
+
+.sidebar-nav-submenu {
+  display: flex;
+  flex-direction: column;
+  padding-left: calc(var(--space) * 4);
+}
+
+.sidebar-nav-sublink {
+  display: block;
+  padding: calc(var(--space) * 0.75) calc(var(--space) * 1.5);
+  border-radius: var(--radius);
+  color: var(--text-sidebar);
+  text-decoration: none;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-nav-sublink:hover,
+.sidebar-nav-sublink.active {
+  color: var(--text-sidebar-strong);
+  background-color: var(--bg-sidebar-hover);
 }
