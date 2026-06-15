@@ -8,16 +8,17 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import 'antd/dist/reset.css'
 import './syncfusion'
-import '@syncfusion/ej2-base/styles/bootstrap5.css'
-import '@syncfusion/ej2-buttons/styles/bootstrap5.css'
-import '@syncfusion/ej2-calendars/styles/bootstrap5.css'
-import '@syncfusion/ej2-dropdowns/styles/bootstrap5.css'
-import '@syncfusion/ej2-inputs/styles/bootstrap5.css'
-import '@syncfusion/ej2-lists/styles/bootstrap5.css'
-import '@syncfusion/ej2-navigations/styles/bootstrap5.css'
-import '@syncfusion/ej2-popups/styles/bootstrap5.css'
-import '@syncfusion/ej2-splitbuttons/styles/bootstrap5.css'
-import '@syncfusion/ej2-grids/styles/bootstrap5.css'
+import '@syncfusion/ej2-base/styles/tailwind3.css'
+import '@syncfusion/ej2-buttons/styles/tailwind3.css'
+import '@syncfusion/ej2-calendars/styles/tailwind3.css'
+import '@syncfusion/ej2-dropdowns/styles/tailwind3.css'
+import '@syncfusion/ej2-inputs/styles/tailwind3.css'
+import '@syncfusion/ej2-lists/styles/tailwind3.css'
+import '@syncfusion/ej2-navigations/styles/tailwind3.css'
+import '@syncfusion/ej2-popups/styles/tailwind3.css'
+import '@syncfusion/ej2-splitbuttons/styles/tailwind3.css'
+import '@syncfusion/ej2-grids/styles/tailwind3.css'
+import './theme/tokens.css'
 import './index.css'
 import App from './App.tsx'
 
@@ -32,11 +33,19 @@ const queryClient = new QueryClient({
   },
 })
 
+// Đồng bộ token màu/bo góc của antd với src/theme/tokens.css (--brand-600 / --radius)
+const antdTheme = {
+  token: {
+    colorPrimary: '#2563eb',
+    borderRadius: 8,
+  },
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ConfigProvider locale={viVN}>
+        <ConfigProvider locale={viVN} theme={antdTheme}>
           <AntdApp>
             <App />
           </AntdApp>

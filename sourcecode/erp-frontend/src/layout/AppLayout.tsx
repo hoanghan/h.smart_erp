@@ -130,17 +130,17 @@ export default function AppLayout() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       {/* Sidebar */}
-      <SidebarComponent width="250px" style={{ backgroundColor: '#001529' }}>
+      <SidebarComponent width="250px" style={{ backgroundColor: 'var(--bg-sidebar)' }}>
         <div
           style={{
             height: '64px',
-            margin: '12px 16px',
-            color: '#fff',
+            margin: 'calc(var(--space) * 1.5) calc(var(--space) * 2)',
+            color: 'var(--text-sidebar-strong)',
             fontWeight: 600,
             fontSize: '20px',
             textAlign: 'center',
             lineHeight: '64px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            borderBottom: '1px solid var(--border-sidebar)',
           }}
         >
           ERP
@@ -166,28 +166,28 @@ export default function AppLayout() {
         <div
           style={{
             height: '64px',
-            backgroundColor: '#fff',
-            padding: '0 24px',
+            backgroundColor: 'var(--bg-surface)',
+            padding: '0 calc(var(--space) * 3)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
-            gap: '16px',
-            borderBottom: '1px solid #f0f0f0',
+            gap: 'calc(var(--space) * 2)',
+            borderBottom: '1px solid var(--border)',
           }}
         >
-          <span style={{ color: '#333', fontSize: '14px' }}>{user?.username ?? '...'}</span>
+          <span style={{ color: 'var(--text-2)', fontSize: '14px' }}>{user?.username ?? '...'}</span>
           <ButtonComponent
             cssClass="e-outline"
             onClick={handleLogout}
             iconCss="e-icons e-sign-out"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space)' }}
           >
             Đăng xuất
           </ButtonComponent>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, padding: '24px', overflow: 'auto', backgroundColor: '#f0f2f5' }}>
+        <div style={{ flex: 1, padding: 'calc(var(--space) * 3)', overflow: 'auto', backgroundColor: 'var(--bg-app)' }}>
           <Outlet />
         </div>
       </div>

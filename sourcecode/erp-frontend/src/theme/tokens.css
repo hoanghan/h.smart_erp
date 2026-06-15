@@ -1,0 +1,57 @@
+/*
+ * Design tokens — Smart ERP (task UI-01: nền tảng design system)
+ * Phải import SAU các file CSS theme tailwind3 của Syncfusion (main.tsx)
+ * để phần "bridge" dưới đây ghi đè đúng biến --color-sf-primary*.
+ */
+
+:root {
+  /* Brand */
+  --brand-600: #2563eb;
+  --brand-700: #1d4ed8;
+
+  /* Nền */
+  --bg-app: #f6f8fb;
+  --bg-surface: #ffffff;
+
+  /* Chữ & viền */
+  --text-1: #0f172a;
+  --text-2: #475569;
+  --border: #e2e8f0;
+
+  /* Layout */
+  --radius: 8px;
+  --space: 8px;
+
+  /* Trạng thái */
+  --ok: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+
+  /* Sidebar — luôn nền tối, không đổi theo light/dark app */
+  --bg-sidebar: #0f172a;
+  --bg-sidebar-hover: var(--brand-600);
+  --text-sidebar: rgba(255, 255, 255, 0.85);
+  --text-sidebar-strong: #ffffff;
+  --border-sidebar: rgba(255, 255, 255, 0.1);
+
+  /* Bridge sang biến theme Syncfusion (tailwind3) — đồng bộ màu primary với antd */
+  --color-sf-primary: var(--brand-600);
+  --color-sf-primary-bg-color: var(--brand-600);
+  --color-sf-primary-bg-color-hover: var(--brand-700);
+  --color-sf-primary-bg-color-pressed: var(--brand-700);
+  --color-sf-primary-border-color: var(--brand-600);
+  --color-sf-primary-border-color-hover: var(--brand-700);
+  --color-sf-primary-outline: var(--brand-600);
+}
+
+/* Dark mode — cấu trúc sẵn cho sau này, chưa có UI bật/tắt */
+[data-theme='dark'] {
+  --bg-app: #0f172a;
+  --bg-surface: #1e293b;
+  --text-1: #f1f5f9;
+  --text-2: #94a3b8;
+  --border: #334155;
+
+  --bg-sidebar: #020617;
+  --border-sidebar: rgba(255, 255, 255, 0.06);
+}
