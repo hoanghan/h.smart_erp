@@ -1,0 +1,219 @@
+/*
+ * ListView — Smart ERP (task UI-03: chuẩn hóa list view)
+ * Style cho toolbar dính, saved views, đếm trạng thái, bulk action, chip trạng thái.
+ * Dùng token từ src/theme/tokens.css (UI-01).
+ */
+
+.lv-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+}
+
+.lv-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 1.25);
+  padding: calc(var(--space) * 1.25) calc(var(--space) * 1.5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.lv-row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 0.75);
+  flex-wrap: wrap;
+}
+
+.lv-row--between {
+  justify-content: space-between;
+}
+
+/* Saved views (tabs) */
+.lv-view-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-app);
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.lv-view-tab.active {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: #fff;
+  font-weight: 600;
+}
+
+.lv-view-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.lv-view-remove:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.lv-view-add {
+  padding: 4px 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.lv-view-add:hover {
+  border-color: var(--brand-600);
+  color: var(--brand-600);
+}
+
+/* Status count bar */
+.lv-status-bar {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 0.5);
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.lv-status-item {
+  padding: 2px 10px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: none;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.lv-status-item.active {
+  background: var(--bg-app);
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+.lv-status-sep {
+  color: var(--border);
+}
+
+/* Density toggle */
+.lv-density {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.lv-density button {
+  padding: 4px 10px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg-app);
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.lv-density button:last-child {
+  border-right: none;
+}
+
+.lv-density button.active {
+  background: var(--brand-600);
+  color: #fff;
+}
+
+/* Bulk action bar */
+.lv-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 0.75);
+  padding: 6px 12px;
+  border: 1px solid var(--brand-600);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--brand-600) 8%, var(--bg-surface));
+  font-size: 13px;
+  color: var(--text-1);
+}
+
+.lv-bulk-bar button {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  color: var(--text-1);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.lv-bulk-bar button:hover {
+  border-color: var(--brand-600);
+  color: var(--brand-600);
+}
+
+.lv-bulk-bar button.lv-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.lv-bulk-bar button.lv-danger:hover {
+  background: color-mix(in srgb, var(--danger) 8%, var(--bg-surface));
+}
+
+/* Status chip — dùng trong column template */
+.lv-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.lv-chip--ok {
+  color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, var(--bg-surface));
+}
+
+.lv-chip--warn {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 14%, var(--bg-surface));
+}
+
+.lv-chip--danger {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, var(--bg-surface));
+}
+
+.lv-chip--info {
+  color: var(--brand-700);
+  background: color-mix(in srgb, var(--brand-600) 12%, var(--bg-surface));
+}
+
+.lv-chip--neutral {
+  color: var(--text-2);
+  background: var(--bg-app);
+}
