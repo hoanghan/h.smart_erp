@@ -18,11 +18,12 @@ export const WF_DEFINITIONS: Record<string, WfTransition[]> = {
     { action: 'amend', from: ['CANCELLED'], to: 'DRAFT' },
   ],
   'sales-orders': [
-    { action: 'request-approval', from: ['DRAFT'], to: 'APPROVAL_REQUESTED' },
-    { action: 'approve', from: ['APPROVAL_REQUESTED'], to: 'APPROVED' },
-    { action: 'complete', from: ['APPROVED', 'NOT_DELIVERED', 'DELIVERED'], to: 'COMPLETED' },
-    { action: 'reprocess', from: ['APPROVED', 'NOT_DELIVERED'], to: 'DRAFT' },
-    { action: 'cancel', from: ['DRAFT', 'APPROVAL_REQUESTED', 'APPROVED'], to: 'CANCELLED', requireReason: true },
+    { action: 'approve', from: ['DRAFT'], to: 'TO_DELIVER_AND_BILL' },
+    { action: 'hold', from: ['TO_DELIVER_AND_BILL', 'TO_DELIVER', 'TO_BILL'], to: 'ON_HOLD', requireReason: true },
+    { action: 'resume', from: ['ON_HOLD'], to: 'TO_DELIVER_AND_BILL' },
+    { action: 'close', from: ['TO_DELIVER_AND_BILL', 'TO_DELIVER', 'TO_BILL'], to: 'CLOSED', requireReason: true },
+    { action: 'reopen', from: ['CLOSED'], to: 'TO_DELIVER_AND_BILL' },
+    { action: 'cancel', from: ['DRAFT', 'TO_DELIVER_AND_BILL'], to: 'CANCELLED', requireReason: true },
   ],
   'purchase-requests': [
     { action: 'approve', from: ['DRAFT'], to: 'APPROVED' },
@@ -64,12 +65,17 @@ export const ACTION_LABELS: Record<string, string> = {
   'set-as-lost': 'Đánh dấu mất báo giá',
   extend: 'Gia hạn',
   amend: 'Tạo bản sửa đổi',
+  hold: 'Tạm giữ',
+  resume: 'Tiếp tục',
+  close: 'Đóng đơn',
+  reopen: 'Mở lại đơn',
+  'make-invoice': 'Xuất hóa đơn',
 }
 
 /** Hành động chính (nút primary, màu nhấn). */
-export const PRIMARY_ACTIONS = new Set(['approve', 'complete', 'request-approval', 'request', 'confirm', 'submit', 'make-sales-order', 'extend', 'amend'])
+export const PRIMARY_ACTIONS = new Set(['approve', 'complete', 'request-approval', 'request', 'confirm', 'submit', 'make-sales-order', 'extend', 'amend', 'resume', 'reopen'])
 /** Hành động nguy hiểm (nút đỏ). */
-export const DANGER_ACTIONS = new Set(['cancel', 'set-as-lost'])
+export const DANGER_ACTIONS = new Set(['cancel', 'set-as-lost', 'hold', 'close'])
 
 export const QUOTATION_STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Nháp',
@@ -82,11 +88,12 @@ export const QUOTATION_STATUS_LABELS: Record<string, string> = {
 
 export const SALES_ORDER_STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Nháp',
-  APPROVAL_REQUESTED: 'Chờ duyệt',
-  APPROVED: 'Đã duyệt',
-  NOT_DELIVERED: 'Chưa giao hàng',
-  DELIVERED: 'Đã giao hàng',
+  TO_DELIVER_AND_BILL: 'Chờ giao & xuất HĐ',
+  TO_DELIVER: 'Chờ giao hàng',
+  TO_BILL: 'Chờ xuất hóa đơn',
   COMPLETED: 'Hoàn tất',
+  ON_HOLD: 'Tạm giữ',
+  CLOSED: 'Đã đóng',
   CANCELLED: 'Đã hủy',
 }
 
@@ -143,6 +150,11 @@ const STATUS_COLORS: Record<string, string> = {
   CONFIRMED: 'orange',
   COMPLETED: 'green',
   CANCELLED: 'red',
+  TO_DELIVER_AND_BILL: 'blue',
+  TO_DELIVER: 'orange',
+  TO_BILL: 'gold',
+  ON_HOLD: 'orange',
+  CLOSED: 'default',
 }
 
 /** Màu Tag theo nhóm trạng thái: xám (nháp), xanh dương (chờ duyệt), xanh lá (đã duyệt), đỏ (hủy/từ chối/thất bại). */

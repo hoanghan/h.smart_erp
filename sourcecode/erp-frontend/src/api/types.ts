@@ -284,6 +284,32 @@ export interface SalesOrderLineOut {
   amount: number;
   isGift: boolean;
   note: string | null;
+  deliveredQty: number;
+  billedQty: number;
+  deliveryDate: string | null;
+}
+
+export interface SalesOrderLineUpdate {
+  deliveryDate: string | null;
+}
+
+// ---------- Make invoice (sales order v2) ----------
+export interface MakeInvoiceLineIn {
+  lineId: number;
+  qty: number;
+}
+export interface MakeInvoiceRequest {
+  lines: MakeInvoiceLineIn[];
+}
+
+// ---------- Credit limit ----------
+export interface CreditLimitExceededOut {
+  code: string;
+  message: string;
+  creditLimit: number;
+  currentDebt: number;
+  thisOrderAmount: number;
+  canBypass: boolean;
 }
 
 export interface SalesOrderCreate {
@@ -413,6 +439,7 @@ export interface PricingResolveResult {
 
 export interface PricingRuleOut {
   id: number;
+  ruleSource: string;
   schemeId: number | null;
   priority: number;
   productId: number | null;
@@ -428,6 +455,22 @@ export interface PricingRuleOut {
   validFrom: string | null;
   validTo: string | null;
   isActive: boolean;
+}
+
+export interface PricingRuleCreate {
+  productId?: number | null;
+  productGroupId?: number | null;
+  partnerId?: number | null;
+  minQty?: number;
+  maxQty?: number | null;
+  discountPct?: number | null;
+  rate?: number | null;
+  freeProductId?: number | null;
+  freeQty?: number | null;
+  freeRate?: number;
+  validFrom?: string | null;
+  validTo?: string | null;
+  priority?: number;
 }
 
 export interface CouponCodeOut {
@@ -713,10 +756,14 @@ export interface StockDocOut {
 
 // ---------- Inventory: Tá»“n kho ----------
 export interface StockBalanceOut {
+  id: number;
   productId: number;
   warehouseId: number;
   lotId: number | null;
   qtyOnHand: number;
+  reservedQty: number;
+  orderedQty: number;
+  projectedQty: number;
   updatedAt: string;
 }
 

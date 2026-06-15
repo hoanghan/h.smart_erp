@@ -1,19 +1,23 @@
-import { useEffect } from 'react'
-import { App as AntApp, Button, Form, InputNumber, Popconfirm, Switch, Table, Tag, Typography } from 'antd'
+import { useEffect, useState } from 'react'
+import { App as AntApp, Button, DatePicker, Form, InputNumber, Modal, Popconfirm, Progress, Switch, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
+import { DeleteOutlined, FileTextOutlined, PlusOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import axios from 'axios'
+import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
-import type { ApiErrorBody, SalesOrderLineIn, SalesOrderLineOut } from '../../api/types'
+import type { ApiErrorBody, MakeInvoiceLineIn, MakeInvoiceRequest, SalesOrderLineIn, SalesOrderLineOut, SalesOrderLineUpdate } from '../../api/types'
 import LookupLabel from '../../components/LookupLabel'
 import LookupSelect from '../../components/LookupSelect'
 import { formatNumberVN } from '../../utils/format'
+
+const INVOICEABLE_STATUSES = ['TO_DELIVER_AND_BILL', 'TO_DELIVER', 'TO_BILL']
 
 interface SalesOrderLinesTabProps {
   orderId: number
   lines: SalesOrderLineOut[]
   locked: boolean
+  status: string
   totalAmount: number | null
   totalVat: number | null
   queryKey: QueryKey
@@ -21,10 +25,12 @@ interface SalesOrderLinesTabProps {
 }
 
 /** Tab "Hàng hóa" của đơn hàng bán — Đơn giá bán nền đỏ nhạt khi < giá vốn/giá sàn. */
-export default function SalesOrderLinesTab({ orderId, lines, locked, totalAmount, totalVat, queryKey, onShowStock }: SalesOrderLinesTabProps) {
+export default function SalesOrderLinesTab({ orderId, lines, locked, status, totalAmount, totalVat, queryKey, onShowStock }: SalesOrderLinesTabProps) {
   const { message } = AntApp.useApp()
   const queryClient = useQueryClient()
   const [form] = Form.useForm()
+  const [makeInvoiceOpen, setMakeInvoiceOpen] = useState(false)
+  const [invoiceQtys, setInvoiceQtys] = useState<Record<number, number>>({})
 
   const showError = (err: unknown, fallback: string) => {
     const body = axios.isAxiosError<ApiErrorBody>(err) ? err.response?.data : undefined
@@ -48,6 +54,26 @@ export default function SalesOrderLinesTab({ orderId, lines, locked, totalAmount
       queryClient.invalidateQueries({ queryKey })
     },
     onError: (err) => showError(err, 'Không thể xóa dòng'),
+  })
+
+  const updateLineMutation = useMutation({
+    mutationFn: ({ lineId, body }: { lineId: number; body: SalesOrderLineUpdate }) =>
+      apiClient.put(`/sales/orders/${orderId}/lines/${lineId}`, body),
+    onSuccess: () => {
+      message.success('Đã lưu ngày giao')
+      queryClient.invalidateQueries({ queryKey })
+    },
+    onError: (err) => showError(err, 'Không thể lưu ngày giao'),
+  })
+
+  const makeInvoiceMutation = useMutation({
+    mutationFn: (body: MakeInvoiceRequest) => apiClient.post(`/sales/orders/${orderId}/actions/make-invoice`, body),
+    onSuccess: () => {
+      message.success('Đã xuất hóa đơn')
+      queryClient.invalidateQueries({ queryKey })
+      setMakeInvoiceOpen(false)
+    },
+    onError: (err) => showError(err, 'Không thể xuất hóa đơn'),
   })
 
   const handleAdd = async () => {
@@ -77,6 +103,24 @@ export default function SalesOrderLinesTab({ orderId, lines, locked, totalAmount
   // Red price warning: unitPrice < listPrice (reference price)
   const isPriceBelowRef = (record: SalesOrderLineOut) =>
     record.listPrice != null && record.unitPrice < record.listPrice
+
+  const invoiceableLines = lines.filter((l) => l.deliveredQty - l.billedQty > 0)
+  const canMakeInvoice = INVOICEABLE_STATUSES.includes(status) && invoiceableLines.length > 0
+
+  const handleOpenMakeInvoice = () => {
+    const init: Record<number, number> = {}
+    for (const l of invoiceableLines) init[l.id] = l.deliveredQty - l.billedQty
+    setInvoiceQtys(init)
+    setMakeInvoiceOpen(true)
+  }
+
+  const handleMakeInvoice = () => {
+    const invoiceLines: MakeInvoiceLineIn[] = invoiceableLines
+      .map((l) => ({ lineId: l.id, qty: invoiceQtys[l.id] ?? 0 }))
+      .filter((l) => l.qty > 0)
+    if (invoiceLines.length === 0) return
+    makeInvoiceMutation.mutate({ lines: invoiceLines })
+  }
 
   const columns: ColumnsType<SalesOrderLineOut> = [
     {
@@ -111,6 +155,30 @@ export default function SalesOrderLinesTab({ orderId, lines, locked, totalAmount
       title: 'Hàng KM', dataIndex: 'isGift', key: 'isGift', width: 80,
       render: (v: boolean) => (v ? <Tag color="gold">KM</Tag> : null),
     },
+    {
+      title: 'Đã giao', key: 'deliveredQty', align: 'center', width: 110,
+      render: (_, record) => (
+        <Progress percent={record.quantity > 0 ? Math.round((record.deliveredQty / record.quantity) * 100) : 0} size="small" />
+      ),
+    },
+    {
+      title: 'Đã hóa đơn', key: 'billedQty', align: 'center', width: 110,
+      render: (_, record) => (
+        <Progress percent={record.quantity > 0 ? Math.round((record.billedQty / record.quantity) * 100) : 0} size="small" />
+      ),
+    },
+    {
+      title: 'Ngày giao', dataIndex: 'deliveryDate', key: 'deliveryDate', width: 130,
+      render: (v: string | null, record) => (
+        <DatePicker
+          size="small"
+          style={{ width: '100%' }}
+          format="DD/MM/YYYY"
+          value={v ? dayjs(v) : null}
+          onChange={(d) => updateLineMutation.mutate({ lineId: record.id, body: { deliveryDate: d ? d.format('YYYY-MM-DD') : null } })}
+        />
+      ),
+    },
     { title: 'Ghi chú', dataIndex: 'note', key: 'note', width: 150 },
   ]
 
@@ -127,6 +195,13 @@ export default function SalesOrderLinesTab({ orderId, lines, locked, totalAmount
 
   return (
     <div>
+      {canMakeInvoice && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <Button type="primary" icon={<FileTextOutlined />} onClick={handleOpenMakeInvoice}>
+            Xuất hóa đơn
+          </Button>
+        </div>
+      )}
       <Table<SalesOrderLineOut>
         rowKey="id"
         columns={columns}
@@ -188,6 +263,48 @@ export default function SalesOrderLinesTab({ orderId, lines, locked, totalAmount
           </Form.Item>
         </Form>
       )}
+
+      <Modal
+        title="Xuất hóa đơn"
+        open={makeInvoiceOpen}
+        onCancel={() => setMakeInvoiceOpen(false)}
+        onOk={handleMakeInvoice}
+        okText="Xuất hóa đơn"
+        cancelText="Hủy"
+        confirmLoading={makeInvoiceMutation.isPending}
+        width={600}
+      >
+        <Table<SalesOrderLineOut>
+          rowKey="id"
+          size="small"
+          pagination={false}
+          bordered
+          dataSource={invoiceableLines}
+          columns={[
+            {
+              title: 'Mã hàng', dataIndex: 'productId', key: 'productId',
+              render: (v: number) => <LookupLabel resource="products" id={v} />,
+            },
+            {
+              title: 'Còn lại', key: 'remaining', align: 'right', width: 100,
+              render: (_, r) => formatNumberVN(r.deliveredQty - r.billedQty),
+            },
+            {
+              title: 'SL xuất HĐ', key: 'qty', align: 'right', width: 130,
+              render: (_, r) => (
+                <InputNumber
+                  size="small"
+                  min={0}
+                  max={r.deliveredQty - r.billedQty}
+                  value={invoiceQtys[r.id] ?? 0}
+                  onChange={(v) => setInvoiceQtys((prev) => ({ ...prev, [r.id]: v ?? 0 }))}
+                  style={{ width: '100%' }}
+                />
+              ),
+            },
+          ]}
+        />
+      </Modal>
     </div>
   )
 }
