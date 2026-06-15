@@ -28,11 +28,5 @@ export default function App() {
     )
   }
 
-  return (
-    <>
-      <AppRouter />
-      <ToastProvider />
-      <ConfirmDialogProvider />
-    </>
-  )
+  return <AppRouter />
 }
