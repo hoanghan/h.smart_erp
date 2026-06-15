@@ -2,6 +2,7 @@ using Erp.Api.Core;
 using Erp.Api.Data;
 using Erp.Api.Dtos;
 using Erp.Api.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -111,6 +112,51 @@ public class EmployeesController(ErpDbContext db, RbacService rbac)
 {
     protected override string Resource => "employees";
     protected override string[] SearchFields => new[] { "Code", "FullName" };
+}
+
+/// <summary>Tra cứu tài khoản (AppUser.Id) — dùng cho creatorId/approverId, khác với Employee.Id ở /md/employees.</summary>
+[ApiController]
+[Authorize]
+[Route("api/v1/md/users")]
+public class UsersLookupController(ErpDbContext db) : ControllerBase
+{
+    private async Task<UserLookupOut> ToDto(AppUser u)
+    {
+        string? fullName = u.EmployeeId.HasValue
+            ? await db.Employees.AsNoTracking().Where(e => e.Id == u.EmployeeId).Select(e => e.FullName).FirstOrDefaultAsync()
+            : null;
+        return new UserLookupOut(u.Id, u.Username, fullName ?? u.Username);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> List([FromQuery] string? q, [FromQuery] int page = 1, [FromQuery] int size = 50)
+    {
+        var query = db.AppUsers.AsNoTracking().AsQueryable();
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var pattern = $"%{q.Trim()}%";
+            query = query.Where(u => EF.Functions.ILike(u.Username, pattern));
+        }
+        var total = await query.LongCountAsync();
+        var users = await query.OrderBy(u => u.Id)
+            .Skip((Math.Max(1, page) - 1) * size).Take(Math.Clamp(size, 1, 200)).ToListAsync();
+        var employeeIds = users.Where(u => u.EmployeeId.HasValue).Select(u => u.EmployeeId!.Value).ToList();
+        var names = await db.Employees.AsNoTracking()
+            .Where(e => employeeIds.Contains(e.Id)).ToDictionaryAsync(e => e.Id, e => e.FullName);
+        var items = users.Select(u => new UserLookupOut(
+            u.Id, u.Username,
+            u.EmployeeId.HasValue && names.TryGetValue(u.EmployeeId.Value, out var n) ? n : u.Username)).ToList();
+        return Ok(new PageResult<UserLookupOut>(items, total, page, size));
+    }
+
+    [HttpGet("{id:long}")]
+    public async Task<IActionResult> Get(long id)
+    {
+        var u = await db.AppUsers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        return u is null
+            ? NotFound(new ApiError("NOT_FOUND", $"User {id} không tồn tại"))
+            : Ok(await ToDto(u));
+    }
 }
 
 [Route("api/v1/md/cost-types")]

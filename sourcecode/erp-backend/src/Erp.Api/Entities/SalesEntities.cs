@@ -69,6 +69,7 @@ public class SalesOrder : IHasAudit, IApprovable
 {
     public long Id { get; set; }
     public string DocNo { get; set; } = null!;
+    public string? ContractNo { get; set; }
     public DateOnly DocDate { get; set; }
     public long? QuotationId { get; set; }
     public long PartnerId { get; set; }

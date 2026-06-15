@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { App as AntApp, DatePicker, Drawer, Input, InputNumber, Modal, Select, Spin, Table, Tag } from 'antd'
+import { App as AntApp, DatePicker, Descriptions, Drawer, Input, InputNumber, Modal, Select, Spin, Table, Tag } from 'antd'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { apiClient } from '../../api/client'
 import type {
   ApiErrorBody, ExtendQuotationRequest, LookupItem, MakeSalesOrderLineIn, MakeSalesOrderResult,
-  PageResult, QuotationOut, QuotationUpdate, SetAsLostRequest,
+  PageResult, QuotationOut, QuotationUpdate, SetAsLostRequest, StockBalanceOut,
 } from '../../api/types'
 import {
   ACTION_LABELS, DANGER_ACTIONS, PRIMARY_ACTIONS, QUOTATION_STATUS_LABELS, WF_DEFINITIONS, statusColor,
@@ -270,8 +270,8 @@ export default function QuotationDetailPage() {
     if (!data) return []
     return [
       { label: 'Ngày lập', value: formatDateVN(data.docDate) },
-      { label: 'Người lập', value: <LookupLabel resource="employees" id={data.creatorId} labelField="fullName" /> },
-      { label: 'Người duyệt', value: <LookupLabel resource="employees" id={data.approverId} labelField="fullName" /> },
+      { label: 'Người lập', value: <LookupLabel resource="users" id={data.creatorId} labelField="fullName" /> },
+      { label: 'Người duyệt', value: <LookupLabel resource="users" id={data.approverId} labelField="fullName" /> },
       { label: 'Ngày duyệt', value: formatDateVN(data.approvedAt) },
       { label: 'Hiệu lực đến', value: formatDateVN(data.validTill) },
     ]
@@ -285,7 +285,7 @@ export default function QuotationDetailPage() {
         timestamp: data.docDate,
         type: 'ACTIVITY',
         description: 'Tạo báo giá',
-        actor: <LookupLabel resource="employees" id={data.creatorId} labelField="fullName" />,
+        actor: <LookupLabel resource="users" id={data.creatorId} labelField="fullName" />,
         metadata: {},
       },
     ]
@@ -294,7 +294,7 @@ export default function QuotationDetailPage() {
         timestamp: data.approvedAt,
         type: 'STATUS_CHANGE',
         description: `Duyệt báo giá — ${QUOTATION_STATUS_LABELS[data.status] ?? data.status}`,
-        actor: <LookupLabel resource="employees" id={data.approverId} labelField="fullName" />,
+        actor: <LookupLabel resource="users" id={data.approverId} labelField="fullName" />,
         metadata: { status: data.status },
       })
     }
@@ -309,6 +309,22 @@ export default function QuotationDetailPage() {
     }
     return items.reverse()
   }, [data])
+
+  // Thông tin tồn kho (không lọc theo kho — QuotationOut không có warehouseId)
+  const { data: stockBalances } = useQuery({
+    queryKey: ['stock-balance', selectedProductId],
+    queryFn: async () => (await apiClient.get<StockBalanceOut[]>('/inventory/stock-balance', {
+      params: { productId: selectedProductId },
+    })).data,
+    enabled: showStockDrawer && !!selectedProductId,
+  })
+
+  const stockSummary = useMemo(() => (stockBalances ?? []).reduce((acc, r) => ({
+    qtyOnHand: acc.qtyOnHand + r.qtyOnHand,
+    reservedQty: acc.reservedQty + r.reservedQty,
+    orderedQty: acc.orderedQty + r.orderedQty,
+    projectedQty: acc.projectedQty + r.projectedQty,
+  }), { qtyOnHand: 0, reservedQty: 0, orderedQty: 0, projectedQty: 0 }), [stockBalances])
 
   const anyActionLoading = workflowMutation.isPending || makeSalesOrderMutation.isPending
     || setAsLostMutation.isPending || extendMutation.isPending || amendMutation.isPending
@@ -471,8 +487,8 @@ export default function QuotationDetailPage() {
           field: <Input size="small" value={formValues.competitor as string ?? ''}
             onChange={(e) => setField('competitor', e.target.value)} disabled={locked} />,
         },
-        { label: 'Người lập', field: <LookupLabel resource="employees" id={data.creatorId} labelField="fullName" /> },
-        { label: 'Người duyệt', field: <LookupLabel resource="employees" id={data.approverId} labelField="fullName" /> },
+        { label: 'Người lập', field: <LookupLabel resource="users" id={data.creatorId} labelField="fullName" /> },
+        { label: 'Người duyệt', field: <LookupLabel resource="users" id={data.approverId} labelField="fullName" /> },
       ],
     },
     {
@@ -667,9 +683,16 @@ export default function QuotationDetailPage() {
       </Drawer>
 
       {/* Drawer Thông tin tồn kho */}
-      <Drawer title="Thông tin tồn kho" open={showStockDrawer} onClose={() => setShowStockDrawer(false)} width={500}>
-        <p>Sản phẩm ID: {selectedProductId}</p>
-        <p style={{ color: '#999' }}>Cần API endpoint tồn kho.</p>
+      <Drawer title="Thông tin tồn kho" open={showStockDrawer} onClose={() => setShowStockDrawer(false)} width={400}>
+        {selectedProductId && (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Sản phẩm"><LookupLabel resource="products" id={selectedProductId} /></Descriptions.Item>
+            <Descriptions.Item label="Tồn kho">{formatNumberVN(stockSummary.qtyOnHand)}</Descriptions.Item>
+            <Descriptions.Item label="Đã đặt trước">{formatNumberVN(stockSummary.reservedQty)}</Descriptions.Item>
+            <Descriptions.Item label="Đang về">{formatNumberVN(stockSummary.orderedQty)}</Descriptions.Item>
+            <Descriptions.Item label="Khả dụng dự kiến">{formatNumberVN(stockSummary.projectedQty)}</Descriptions.Item>
+          </Descriptions>
+        )}
       </Drawer>
     </div>
   )

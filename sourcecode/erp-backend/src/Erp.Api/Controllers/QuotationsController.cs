@@ -251,6 +251,7 @@ public class QuotationsController(
         var order = new SalesOrder
         {
             DocNo = await numbering.NextAsync("SALES_ORDER"),
+            CreatorId = RbacService.GetUserId(User),
             DocDate = today,
             QuotationId = q.Id,
             PartnerId = q.PartnerId,

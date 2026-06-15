@@ -314,6 +314,7 @@ export interface CreditLimitExceededOut {
 
 export interface SalesOrderCreate {
   partnerId: number;
+  contractNo?: string | null;
   orderForm?: string;
   salesChannel?: string | null;
   salesRegion?: string | null;
@@ -332,6 +333,7 @@ export type SalesOrderUpdate = Omit<SalesOrderCreate, 'lines'>;
 export interface SalesOrderOut {
   id: number;
   docNo: string;
+  contractNo: string | null;
   docDate: string;
   quotationId: number | null;
   partnerId: number;
@@ -343,6 +345,7 @@ export interface SalesOrderOut {
   paymentMethodId: number | null;
   deliveryMethodId: number | null;
   salespersonId: number | null;
+  creatorId: number | null;
   approverId: number | null;
   approvedAt: string | null;
   totalAmount: number | null;

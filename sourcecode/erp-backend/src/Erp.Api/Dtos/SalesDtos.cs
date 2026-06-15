@@ -77,6 +77,7 @@ public record SalesOrderLineUpdate(DateOnly? DeliveryDate);
 
 public record SalesOrderCreate(
     long PartnerId,
+    string? ContractNo = null,
     string OrderForm = "NORMAL",
     string? SalesChannel = null,
     string? SalesRegion = null,
@@ -90,15 +91,15 @@ public record SalesOrderCreate(
     List<SalesOrderLineIn>? Lines = null);
 
 public record SalesOrderUpdate(
-    long? PartnerId, string? OrderForm, string? SalesChannel, string? SalesRegion,
+    long? PartnerId, string? ContractNo, string? OrderForm, string? SalesChannel, string? SalesRegion,
     long? WarehouseId, DateOnly? DeliveryDatePlan, long? PaymentMethodId,
     long? DeliveryMethodId, long? DeliveryAddrId, long? SalespersonId, string? Note);
 
 public record SalesOrderOut(
-    long Id, string DocNo, DateOnly DocDate, long? QuotationId, long PartnerId,
+    long Id, string DocNo, string? ContractNo, DateOnly DocDate, long? QuotationId, long PartnerId,
     string OrderForm, string? SalesChannel, string? SalesRegion, long? WarehouseId,
     DateOnly? DeliveryDatePlan, long? PaymentMethodId, long? DeliveryMethodId,
-    long? SalespersonId, long? ApproverId, DateTimeOffset? ApprovedAt,
+    long? SalespersonId, long? CreatorId, long? ApproverId, DateTimeOffset? ApprovedAt,
     decimal? TotalAmount, decimal? TotalVat, string? Note, string Status,
     List<SalesOrderLineOut> Lines);
 
