@@ -18,10 +18,10 @@ public class SalesOrdersController(
     private const string Resource = "sales-orders";
 
     private static SalesOrderOut ToDto(SalesOrder o) => new(
-        o.Id, o.DocNo, o.DocDate, o.QuotationId, o.PartnerId, o.OrderForm,
+        o.Id, o.DocNo, o.ContractNo, o.DocDate, o.QuotationId, o.PartnerId, o.OrderForm,
         o.SalesChannel, o.SalesRegion, o.WarehouseId, o.DeliveryDatePlan,
         o.PaymentMethodId, o.DeliveryMethodId,
-        o.SalespersonId, o.ApproverId, o.ApprovedAt, o.TotalAmount, o.TotalVat,
+        o.SalespersonId, o.CreatorId, o.ApproverId, o.ApprovedAt, o.TotalAmount, o.TotalVat,
         o.Note, o.Status,
         o.Lines.Select(l => new SalesOrderLineOut(
             l.Id, l.ProductId, l.Quantity, l.KitQty, l.UnitPrice, l.ListPrice,
@@ -80,6 +80,8 @@ public class SalesOrdersController(
         var o = new SalesOrder
         {
             DocNo = await numbering.NextAsync("SALES_ORDER"),
+            ContractNo = body.ContractNo,
+            CreatorId = RbacService.GetUserId(User),
             DocDate = today,
             PartnerId = body.PartnerId,
             OrderForm = body.OrderForm,

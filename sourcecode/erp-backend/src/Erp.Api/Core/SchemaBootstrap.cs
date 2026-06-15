@@ -1239,6 +1239,12 @@ public static class SchemaBootstrap
                 CHECK (status IN ('DRAFT','TO_DELIVER_AND_BILL','TO_DELIVER','TO_BILL','COMPLETED','ON_HOLD','CLOSED','CANCELLED'));
             """);
 
+        // Task 34 B2: SalesOrder - add ContractNo (So hop dong)
+        await db.Database.ExecuteSqlRawAsync("""
+            ALTER TABLE sales.sales_order
+                ADD COLUMN IF NOT EXISTS contract_no VARCHAR(100);
+            """);
+
         // Sinh pricing_rule cho cac scheme chua co rule (moi migrate hoac tao truoc khi PromotionsController chay)
         /* var schemesNeedingRules = await db.Promotions
             .Include(s => s.Items).Include(s => s.PriceSlabs).Include(s => s.ProductSlabs)
