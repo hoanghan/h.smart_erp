@@ -25,7 +25,8 @@ public class SalesOrdersController(
         o.Note, o.Status,
         o.Lines.Select(l => new SalesOrderLineOut(
             l.Id, l.ProductId, l.Quantity, l.KitQty, l.UnitPrice, l.ListPrice,
-            l.VatPct, l.Amount, l.IsGift, l.Note)).ToList());
+            l.VatPct, l.Amount, l.IsGift, l.Note,
+            l.DeliveredQty, l.BilledQty, l.DeliveryDate)).ToList());
 
     private async Task<bool> Denied(string action) =>
         !await rbac.HasPermissionAsync(User, "DOCUMENT", Resource, action);
@@ -121,7 +122,7 @@ public class SalesOrdersController(
         if (await Denied("UPDATE")) return Forbidden("UPDATE");
         var o = await db.SalesOrders.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {id} không tồn tại"));
-        if (o.Status is not ("DRAFT" or "APPROVAL_REQUESTED"))
+        if (o.Status != "DRAFT")
             return Conflict(new ApiError("WF_LOCKED",
                 $"Đơn ở trạng thái {o.Status} — cần 'Xử lý lại đơn hàng' trước khi sửa"));
         Mapper.Apply(body, o, skipNulls: true);
@@ -136,7 +137,7 @@ public class SalesOrdersController(
         if (await Denied("UPDATE")) return Forbidden("UPDATE");
         var o = await db.SalesOrders.FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {id} không tồn tại"));
-        if (o.Status is not ("DRAFT" or "APPROVAL_REQUESTED"))
+        if (o.Status != "DRAFT")
             return Conflict(new ApiError("WF_LOCKED", $"Đơn ở trạng thái {o.Status}, không sửa được"));
         var today = DateOnly.FromDateTime(DateTime.Today);
         var listPrice = body.ListPrice ?? await FindListPriceAsync(body.ProductId, today);
@@ -163,7 +164,22 @@ public class SalesOrdersController(
         await RecalcTotals(o);
         return StatusCode(201, new SalesOrderLineOut(
             line.Id, line.ProductId, line.Quantity, line.KitQty, line.UnitPrice,
-            line.ListPrice, line.VatPct, line.Amount, line.IsGift, line.Note));
+            line.ListPrice, line.VatPct, line.Amount, line.IsGift, line.Note,
+            line.DeliveredQty, line.BilledQty, line.DeliveryDate));
+    }
+
+    [HttpPut("{id:long}/lines/{lineId:long}")]
+    public async Task<IActionResult> UpdateLine(long id, long lineId, [FromBody] SalesOrderLineUpdate body)
+    {
+        if (await Denied("UPDATE")) return Forbidden("UPDATE");
+        var line = await db.SalesOrderLines.FirstOrDefaultAsync(x => x.Id == lineId && x.OrderId == id);
+        if (line is null) return NotFound(new ApiError("NOT_FOUND", "Dòng không tồn tại"));
+        line.DeliveryDate = body.DeliveryDate;
+        await db.SaveChangesAsync();
+        return Ok(new SalesOrderLineOut(
+            line.Id, line.ProductId, line.Quantity, line.KitQty, line.UnitPrice,
+            line.ListPrice, line.VatPct, line.Amount, line.IsGift, line.Note,
+            line.DeliveredQty, line.BilledQty, line.DeliveryDate));
     }
 
     [HttpDelete("{id:long}/lines/{lineId:long}")]
@@ -172,6 +188,8 @@ public class SalesOrdersController(
         if (await Denied("UPDATE")) return Forbidden("UPDATE");
         var o = await db.SalesOrders.FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {id} không tồn tại"));
+        if (o.Status != "DRAFT")
+            return Conflict(new ApiError("WF_LOCKED", $"Đơn ở trạng thái {o.Status}, không sửa được"));
         var line = await db.SalesOrderLines.FirstOrDefaultAsync(x => x.Id == lineId && x.OrderId == id);
         if (line is null) return NotFound(new ApiError("NOT_FOUND", "Dòng không tồn tại"));
         db.SalesOrderLines.Remove(line);
@@ -285,26 +303,16 @@ public class SalesOrdersController(
     [HttpPost("{id:long}/actions/create-delivery-request")]
     public async Task<IActionResult> CreateDeliveryRequest(long id, [FromBody] CreateStockDocRequest? body)
     {
-        var o = await db.SalesOrders.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == id);
+        if (await Denied("UPDATE")) return Forbidden("UPDATE");
+        var o = await db.SalesOrders.FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {id} không tồn tại"));
+        if (o.Status is not ("TO_DELIVER_AND_BILL" or "TO_DELIVER"))
+            return Conflict(new ApiError("WF_LOCKED", $"Đơn ở trạng thái {o.Status}, không tạo phiếu giao được"));
 
         var warehouseId = body?.WarehouseId ?? o.WarehouseId;
         if (warehouseId is null)
             return BadRequest(new ApiError("VALIDATION", "Thiếu kho xuất (warehouseId)"));
 
-        string newStatus;
-        try
-        {
-            newStatus = await wf.TransitionAsync(User, Resource, id, o.Status, "create-delivery-request", null);
-        }
-        catch (WorkflowException e)
-        {
-            return e.Code == "WF_NO_PERMISSION"
-                ? StatusCode(403, new ApiError(e.Code, e.Message))
-                : Conflict(new ApiError(e.Code, e.Message));
-        }
-
-        await using var tx = await db.Database.BeginTransactionAsync();
         var doc = new StockDoc
         {
             DocNo = await numbering.NextAsync("STOCK_ISSUE"),
@@ -318,10 +326,82 @@ public class SalesOrdersController(
             CreatedBy = RbacService.GetUserId(User),
         };
         db.StockDocs.Add(doc);
-        o.Status = newStatus;
         await db.SaveChangesAsync();
-        await tx.CommitAsync();
         return StatusCode(201, InventoryMapper.ToDto(doc));
+    }
+
+    // ----- Xuất hóa đơn (make-invoice) -----
+    [HttpPost("{id:long}/actions/make-invoice")]
+    public async Task<IActionResult> MakeInvoice(long id, [FromBody] MakeInvoiceRequest body)
+    {
+        if (await Denied("UPDATE")) return Forbidden("UPDATE");
+        var o = await db.SalesOrders.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == id);
+        if (o is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {id} không tồn tại"));
+        if (o.Status is not ("TO_DELIVER_AND_BILL" or "TO_DELIVER" or "TO_BILL"))
+            return Conflict(new ApiError("WF_LOCKED", $"Đơn ở trạng thái {o.Status}, không xuất hóa đơn được"));
+        if (body.Lines.Count == 0)
+            return BadRequest(new ApiError("VALIDATION", "Cần chọn ít nhất 1 dòng để xuất hóa đơn"));
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var voucherLines = new List<VoucherLine>();
+        decimal totalAmount = 0, totalVat = 0;
+
+        foreach (var li in body.Lines)
+        {
+            var line = o.Lines.FirstOrDefault(x => x.Id == li.LineId);
+            if (line is null) return BadRequest(new ApiError("VALIDATION", $"Dòng {li.LineId} không tồn tại trong đơn"));
+            var remaining = line.DeliveredQty - line.BilledQty;
+            if (li.Qty <= 0 || li.Qty > remaining)
+                return BadRequest(new ApiError("VALIDATION",
+                    $"SL hóa đơn dòng {li.LineId} phải > 0 và <= {remaining} (đã giao chưa xuất HĐ)"));
+
+            var amount = li.Qty * line.UnitPrice;
+            var vatAmount = amount * (line.VatPct ?? 0) / 100m;
+            totalAmount += amount;
+            totalVat += vatAmount;
+            voucherLines.Add(new VoucherLine
+            {
+                ProductId = line.ProductId, Description = line.Note,
+                Quantity = li.Qty, UnitPrice = line.UnitPrice,
+                Amount = amount, VatPct = line.VatPct, VatAmount = vatAmount,
+            });
+            line.BilledQty += li.Qty;
+        }
+
+        var partner = await db.Partners.FindAsync(o.PartnerId);
+        var voucher = new Voucher
+        {
+            VoucherType = "HOA_DON_BAN",
+            DocNo = await numbering.NextAsync("FINANCE_VOUCHER"),
+            DocDate = today,
+            PartnerId = o.PartnerId,
+            CurrencyCode = "VND",
+            ExchangeRate = 1,
+            TotalAmount = totalAmount,
+            TotalVat = totalVat,
+            Description = $"Hóa đơn bán hàng từ ĐH {o.DocNo}",
+            Status = "DRAFT",
+            CreatedBy = RbacService.GetUserId(User),
+            DueDate = partner?.CreditDays > 0 ? today.AddDays(partner.CreditDays.Value) : (DateOnly?)null,
+            Lines = voucherLines,
+        };
+        db.Vouchers.Add(voucher);
+
+        SalesOrderStatusHelper.Recompute(o);
+        await db.SaveChangesAsync();
+        return StatusCode(201, voucher.ToDto());
+    }
+
+    /// <summary>So sánh tổng nợ hiện tại (vouchers HOA_DON_BAN chưa hủy) + giá trị đơn này với hạn mức tín dụng của KH.</summary>
+    private async Task<(bool Exceeded, decimal Limit, decimal Debt, decimal ThisAmount)> CheckCreditLimitAsync(SalesOrder o)
+    {
+        var partner = await db.Partners.FindAsync(o.PartnerId);
+        if (partner?.CreditLimit is not > 0) return (false, 0, 0, 0);
+        var debt = await db.Vouchers.AsNoTracking()
+            .Where(v => v.VoucherType == "HOA_DON_BAN" && v.PartnerId == o.PartnerId && v.Status != "CANCELLED")
+            .SumAsync(v => v.OutstandingAmount ?? ((v.TotalAmount ?? 0) + (v.TotalVat ?? 0)));
+        var thisAmount = (o.TotalAmount ?? 0) + (o.TotalVat ?? 0);
+        return (debt + thisAmount > partner.CreditLimit.Value, partner.CreditLimit.Value, debt, thisAmount);
     }
 
     // ----- Workflow actions -----
@@ -330,6 +410,19 @@ public class SalesOrdersController(
     {
         var o = await db.SalesOrders.Include(x => x.Lines).FirstOrDefaultAsync(x => x.Id == id);
         if (o is null) return NotFound(new ApiError("NOT_FOUND", $"Đơn hàng {id} không tồn tại"));
+
+        if (actionName == "approve")
+        {
+            var (exceeded, limit, debt, thisAmount) = await CheckCreditLimitAsync(o);
+            if (exceeded)
+            {
+                var canBypass = await rbac.HasPermissionAsync(User, "DOCUMENT", Resource, "BYPASS_CREDIT_LIMIT");
+                if (body?.Bypass != true || !canBypass)
+                    return StatusCode(409, new CreditLimitExceededOut(
+                        "CREDIT_LIMIT_EXCEEDED", "Đơn hàng vượt hạn mức tín dụng của khách hàng",
+                        limit, debt, thisAmount, canBypass));
+            }
+        }
 
         try
         {
@@ -342,7 +435,9 @@ public class SalesOrdersController(
                 : Conflict(new ApiError(e.Code, e.Message));
         }
 
-        if (o.Status == "APPROVED")
+        SalesOrderStatusHelper.Recompute(o);
+
+        if (actionName == "approve")
         {
             o.ApproverId = RbacService.GetUserId(User);
             o.ApprovedAt = DateTimeOffset.UtcNow;

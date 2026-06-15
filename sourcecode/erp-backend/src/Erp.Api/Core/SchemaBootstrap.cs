@@ -1201,6 +1201,44 @@ public static class SchemaBootstrap
             ON CONFLICT (statement, item_code) DO NOTHING;
             """);
 
+        // ===== Task 33: Sales Order v2 (delivered/billed per-line, status TO_DELIVER_AND_BILL/TO_DELIVER/TO_BILL/COMPLETED) =====
+        await db.Database.ExecuteSqlRawAsync("""
+            ALTER TABLE sales.sales_order_line
+                ADD COLUMN IF NOT EXISTS delivered_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS billed_qty NUMERIC(18,4) NOT NULL DEFAULT 0,
+                ADD COLUMN IF NOT EXISTS delivery_date DATE;
+            """);
+
+        // Bo CHECK constraint cu cua sales_order.status truoc khi remap du lieu sang model v2
+        await db.Database.ExecuteSqlRawAsync("""
+            ALTER TABLE sales.sales_order DROP CONSTRAINT IF EXISTS sales_order_status_check;
+            """);
+
+        // Backfill delivered/billed cho don da giao/hoan tat truoc khi doi sang status model v2
+        await db.Database.ExecuteSqlRawAsync("""
+            UPDATE sales.sales_order_line l SET delivered_qty = l.quantity
+            FROM sales.sales_order o
+            WHERE l.order_id = o.id AND o.status IN ('DELIVERED','COMPLETED') AND l.delivered_qty = 0;
+            """);
+        await db.Database.ExecuteSqlRawAsync("""
+            UPDATE sales.sales_order_line l SET billed_qty = l.quantity
+            FROM sales.sales_order o
+            WHERE l.order_id = o.id AND o.status = 'COMPLETED' AND l.billed_qty = 0;
+            """);
+
+        // Map status cu -> model v2 (DRAFT/TO_DELIVER_AND_BILL/TO_DELIVER/TO_BILL/COMPLETED/ON_HOLD/CLOSED/CANCELLED)
+        await db.Database.ExecuteSqlRawAsync("""
+            UPDATE sales.sales_order SET status = 'DRAFT' WHERE status = 'APPROVAL_REQUESTED';
+            UPDATE sales.sales_order SET status = 'TO_DELIVER_AND_BILL' WHERE status IN ('APPROVED','NOT_DELIVERED');
+            UPDATE sales.sales_order SET status = 'TO_BILL' WHERE status = 'DELIVERED';
+            """);
+
+        // Them lai CHECK constraint voi danh sach status model v2
+        await db.Database.ExecuteSqlRawAsync("""
+            ALTER TABLE sales.sales_order ADD CONSTRAINT sales_order_status_check
+                CHECK (status IN ('DRAFT','TO_DELIVER_AND_BILL','TO_DELIVER','TO_BILL','COMPLETED','ON_HOLD','CLOSED','CANCELLED'));
+            """);
+
         // Sinh pricing_rule cho cac scheme chua co rule (moi migrate hoac tao truoc khi PromotionsController chay)
         /* var schemesNeedingRules = await db.Promotions
             .Include(s => s.Items).Include(s => s.PriceSlabs).Include(s => s.ProductSlabs)

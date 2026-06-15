@@ -191,7 +191,7 @@ public class AdminController(ErpDbContext db, RbacService rbac) : ControllerBase
         {
             ["FUNCTION"] = new[] { "VIEW", "CREATE", "UPDATE", "DELETE" },
             ["CATALOG"] = new[] { "VIEW", "CREATE", "UPDATE", "DELETE", "IMPORT", "EXPORT" },
-            ["DOCUMENT"] = new[] { "VIEW", "CREATE", "UPDATE", "DELETE", "APPROVE", "POST", "UNLOCK", "IMPORT", "EXPORT" },
+            ["DOCUMENT"] = new[] { "VIEW", "CREATE", "UPDATE", "DELETE", "APPROVE", "POST", "UNLOCK", "IMPORT", "EXPORT", "BYPASS_CREDIT_LIMIT" },
             ["OPERATION"] = new[] { "VIEW", "CREATE", "UPDATE", "DELETE", "APPROVE", "POST" },
             ["REPORT"] = new[] { "VIEW", "EXPORT" },
         };
@@ -254,12 +254,12 @@ public class AdminController(ErpDbContext db, RbacService rbac) : ControllerBase
                 ["OPERATION"] = "Nghiệp vụ",
                 ["REPORT"] = "Báo cáo",
             },
-            actions = new[] { "VIEW", "CREATE", "UPDATE", "DELETE", "APPROVE", "POST", "UNLOCK", "IMPORT", "EXPORT" },
+            actions = new[] { "VIEW", "CREATE", "UPDATE", "DELETE", "APPROVE", "POST", "UNLOCK", "IMPORT", "EXPORT", "BYPASS_CREDIT_LIMIT" },
             actionLabels = new Dictionary<string, string>
             {
                 ["VIEW"] = "Xem", ["CREATE"] = "Thêm", ["UPDATE"] = "Sửa", ["DELETE"] = "Xóa",
                 ["APPROVE"] = "Duyệt", ["POST"] = "Ghi sổ", ["UNLOCK"] = "Mở khóa",
-                ["IMPORT"] = "Nhập", ["EXPORT"] = "Xuất",
+                ["IMPORT"] = "Nhập", ["EXPORT"] = "Xuất", ["BYPASS_CREDIT_LIMIT"] = "Duyệt vượt hạn mức",
             },
             availableActions,
             subjects,

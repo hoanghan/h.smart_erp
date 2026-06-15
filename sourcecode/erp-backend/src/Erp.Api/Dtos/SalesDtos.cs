@@ -70,7 +70,10 @@ public record SalesOrderLineIn(
 
 public record SalesOrderLineOut(
     long Id, long ProductId, decimal Quantity, decimal? KitQty, decimal UnitPrice,
-    decimal? ListPrice, decimal? VatPct, decimal Amount, bool IsGift, string? Note);
+    decimal? ListPrice, decimal? VatPct, decimal Amount, bool IsGift, string? Note,
+    decimal DeliveredQty, decimal BilledQty, DateOnly? DeliveryDate);
+
+public record SalesOrderLineUpdate(DateOnly? DeliveryDate);
 
 public record SalesOrderCreate(
     long PartnerId,
@@ -100,10 +103,18 @@ public record SalesOrderOut(
     List<SalesOrderLineOut> Lines);
 
 // ---------- Workflow ----------
-public record WfActionRequest(string? Reason = null);
+public record WfActionRequest(string? Reason = null, bool? Bypass = null);
 
 public record ConvertToOrderRequest(
     string? SalesRegion = null, long? WarehouseId = null, string? SalesChannel = null);
+
+// ---------- Make invoice (sales order v2) ----------
+public record MakeInvoiceLineIn(long LineId, decimal Qty);
+public record MakeInvoiceRequest(List<MakeInvoiceLineIn> Lines);
+
+// ---------- Credit limit ----------
+public record CreditLimitExceededOut(
+    string Code, string Message, decimal CreditLimit, decimal CurrentDebt, decimal ThisOrderAmount, bool CanBypass);
 
 // ---------- Price list ----------
 public record PriceListItemIn(long ProductId, decimal Price);
@@ -234,10 +245,16 @@ public record PricingFreeItem(long ProductId, decimal Qty);
 public record PricingResolveResult(decimal Rate, decimal DiscountPct, List<PricingFreeItem> FreeItems, List<long> AppliedRules);
 
 public record PricingRuleOut(
-    long Id, long? SchemeId, int Priority, long? ProductId, long? ProductGroupId, long? PartnerId,
+    long Id, string RuleSource, long? SchemeId, int Priority, long? ProductId, long? ProductGroupId, long? PartnerId,
     decimal MinQty, decimal? MaxQty, decimal? DiscountPct, decimal? Rate,
     long? FreeProductId, decimal? FreeQty, decimal FreeRate,
     DateOnly? ValidFrom, DateOnly? ValidTo, bool IsActive);
+
+public record PricingRuleCreate(
+    long? ProductId = null, long? ProductGroupId = null, long? PartnerId = null,
+    decimal MinQty = 0, decimal? MaxQty = null, decimal? DiscountPct = null, decimal? Rate = null,
+    long? FreeProductId = null, decimal? FreeQty = null, decimal FreeRate = 0,
+    DateOnly? ValidFrom = null, DateOnly? ValidTo = null, int Priority = 0);
 
 // ---------- Coupon code ----------
 public record CouponCodeOut(

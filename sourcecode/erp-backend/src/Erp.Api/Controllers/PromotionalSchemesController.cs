@@ -210,8 +210,41 @@ public class PricingController(ErpDbContext db, RbacService rbac, PricingService
         if (schemeId.HasValue) q = q.Where(r => r.SchemeId == schemeId);
         var rules = await q.OrderBy(r => r.Id).ToListAsync();
         return Ok(rules.Select(r => new PricingRuleOut(
-            r.Id, r.SchemeId, r.Priority, r.ProductId, r.ProductGroupId, r.PartnerId,
+            r.Id, r.RuleSource, r.SchemeId, r.Priority, r.ProductId, r.ProductGroupId, r.PartnerId,
             r.MinQty, r.MaxQty, r.DiscountPct, r.Rate, r.FreeProductId, r.FreeQty, r.FreeRate,
             r.ValidFrom, r.ValidTo, r.IsActive)).ToList());
+    }
+
+    /// <summary>Thêm rule giá thủ công (không gắn scheme) — dùng cho chiết khấu riêng theo KH/sản phẩm.</summary>
+    [HttpPost("rules")]
+    public async Task<IActionResult> CreateRule([FromBody] PricingRuleCreate body)
+    {
+        if (!await rbac.HasPermissionAsync(User, "DOCUMENT", Resource, "CREATE"))
+            return StatusCode(403, new ApiError("WF_NO_PERMISSION", $"Thiếu quyền CREATE trên DOCUMENT:{Resource}"));
+
+        var rule = new PricingRule
+        {
+            RuleSource = "MANUAL",
+            Priority = body.Priority,
+            ProductId = body.ProductId,
+            ProductGroupId = body.ProductGroupId,
+            PartnerId = body.PartnerId,
+            MinQty = body.MinQty,
+            MaxQty = body.MaxQty,
+            DiscountPct = body.DiscountPct,
+            Rate = body.Rate,
+            FreeProductId = body.FreeProductId,
+            FreeQty = body.FreeQty,
+            FreeRate = body.FreeRate,
+            ValidFrom = body.ValidFrom,
+            ValidTo = body.ValidTo,
+            IsActive = true,
+        };
+        db.PricingRules.Add(rule);
+        await db.SaveChangesAsync();
+        return StatusCode(201, new PricingRuleOut(
+            rule.Id, rule.RuleSource, rule.SchemeId, rule.Priority, rule.ProductId, rule.ProductGroupId, rule.PartnerId,
+            rule.MinQty, rule.MaxQty, rule.DiscountPct, rule.Rate, rule.FreeProductId, rule.FreeQty, rule.FreeRate,
+            rule.ValidFrom, rule.ValidTo, rule.IsActive));
     }
 }

@@ -107,6 +107,9 @@ public class SalesOrderLine
     public decimal Amount { get; set; }      // computed bởi DB
     public bool IsGift { get; set; }
     public string? Note { get; set; }
+    public decimal DeliveredQty { get; set; } = 0;
+    public decimal BilledQty { get; set; } = 0;
+    public DateOnly? DeliveryDate { get; set; }
 }
 
 /// <summary>sales.price_list — Bảng giá.</summary>
