@@ -87,6 +87,9 @@ public record EmployeeUpdate(
     string? Code, string? FullName, long? DepartmentId,
     string? Phone, string? Email, bool? IsActive);
 
+// ---------- User lookup (cho creatorId/approverId — AppUser.Id, không phải Employee.Id) ----------
+public record UserLookupOut(long Id, string Code, string Name);
+
 // ---------- Payment Terms Template ----------
 public record PaymentTermsTemplateLineOut(long Id, decimal Pct, int DaysAfter, string? Note);
 public record PaymentTermsTemplateOut(
