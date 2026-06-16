@@ -10,11 +10,14 @@ export interface WfTransition {
 
 export const WF_DEFINITIONS: Record<string, WfTransition[]> = {
   quotations: [
-    { action: 'submit', from: ['DRAFT'], to: 'OPEN' },
+    // Luồng duyệt 2 bước (creator-approver): người tạo gửi duyệt → người duyệt Duyệt/Từ chối.
+    { action: 'submit', from: ['DRAFT'], to: 'APPROVAL_REQUESTED' },
+    { action: 'approve', from: ['APPROVAL_REQUESTED'], to: 'OPEN' },
+    { action: 'reject', from: ['APPROVAL_REQUESTED'], to: 'DRAFT', requireReason: true },
     { action: 'make-sales-order', from: ['OPEN'], to: 'ORDERED' },
     { action: 'set-as-lost', from: ['OPEN'], to: 'LOST' },
     { action: 'extend', from: ['EXPIRED'], to: 'OPEN' },
-    { action: 'cancel', from: ['DRAFT', 'OPEN'], to: 'CANCELLED', requireReason: true },
+    { action: 'cancel', from: ['DRAFT', 'APPROVAL_REQUESTED', 'OPEN'], to: 'CANCELLED', requireReason: true },
     { action: 'amend', from: ['CANCELLED'], to: 'DRAFT' },
   ],
   'sales-orders': [
@@ -55,12 +58,13 @@ export const WF_DEFINITIONS: Record<string, WfTransition[]> = {
 export const ACTION_LABELS: Record<string, string> = {
   'request-approval': 'Yêu cầu duyệt',
   approve: 'Duyệt',
+  reject: 'Từ chối',
   cancel: 'Hủy',
   complete: 'Hoàn tất',
   reprocess: 'Xử lý lại đơn hàng',
   request: 'Yêu cầu',
   confirm: 'Xác nhận',
-  submit: 'Gửi báo giá',
+  submit: 'Gửi duyệt',
   'make-sales-order': 'Tạo đơn hàng',
   'set-as-lost': 'Đánh dấu mất báo giá',
   extend: 'Gia hạn',
@@ -75,10 +79,11 @@ export const ACTION_LABELS: Record<string, string> = {
 /** Hành động chính (nút primary, màu nhấn). */
 export const PRIMARY_ACTIONS = new Set(['approve', 'complete', 'request-approval', 'request', 'confirm', 'submit', 'make-sales-order', 'extend', 'amend', 'resume', 'reopen'])
 /** Hành động nguy hiểm (nút đỏ). */
-export const DANGER_ACTIONS = new Set(['cancel', 'set-as-lost', 'hold', 'close'])
+export const DANGER_ACTIONS = new Set(['cancel', 'set-as-lost', 'hold', 'close', 'reject'])
 
 export const QUOTATION_STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Nháp',
+  APPROVAL_REQUESTED: 'Chờ duyệt',
   OPEN: 'Đang chào giá',
   ORDERED: 'Đã lên đơn',
   LOST: 'Mất báo giá',

@@ -23,11 +23,14 @@ public class WorkflowService(ErpDbContext db, RbacService rbac)
         // Quotation kiểu ERPNext Selling: Draft → Open → Ordered / Lost / Expired / Cancelled
         ["quotations"] = new[]
         {
-            new WfTransition("submit",           new[] { "DRAFT" }, "OPEN", "APPROVE"),
+            // Luồng duyệt 2 bước (creator-approver): người tạo gửi duyệt → người duyệt Duyệt/Từ chối.
+            new WfTransition("submit",           new[] { "DRAFT" }, "APPROVAL_REQUESTED", "UPDATE"),
+            new WfTransition("approve",          new[] { "APPROVAL_REQUESTED" }, "OPEN", "APPROVE"),
+            new WfTransition("reject",           new[] { "APPROVAL_REQUESTED" }, "DRAFT", "APPROVE", RequireReason: true),
             new WfTransition("make-sales-order", new[] { "OPEN" }, "ORDERED", "UPDATE"),
             new WfTransition("set-as-lost",      new[] { "OPEN" }, "LOST", "UPDATE"),
             new WfTransition("extend",           new[] { "EXPIRED" }, "OPEN", "UPDATE"),
-            new WfTransition("cancel",           new[] { "DRAFT", "OPEN" }, "CANCELLED", "UPDATE", RequireReason: true),
+            new WfTransition("cancel",           new[] { "DRAFT", "APPROVAL_REQUESTED", "OPEN" }, "CANCELLED", "UPDATE", RequireReason: true),
         },
         // SalesOrder kiểu ERPNext: Draft → To Deliver and Bill → To Deliver/To Bill → Completed,
         // trạng thái 3 cái sau được SalesOrderStatusHelper.Recompute tính lại theo delivered/billed per-line.

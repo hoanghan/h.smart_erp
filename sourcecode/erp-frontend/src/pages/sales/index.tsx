@@ -1,8 +1,7 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import SalesWorkspace from './SalesWorkspace'
 import QuotationsListPage from './QuotationsList'
-import QuotationDetailPage from './QuotationDetail'
-import QuotationNewPage from './QuotationNew'
+import QuotationForm from './QuotationForm'
 import SalesOrdersListPage from './SalesOrdersList'
 import SalesOrderDetailPage from './SalesOrderDetail'
 import PromotionalSchemesListPage from './PromotionalSchemesList'
@@ -16,8 +15,8 @@ export default function SalesPage() {
     <Routes>
       <Route index element={<SalesWorkspace />} />
       <Route path="quotations" element={<QuotationsListPage />} />
-      <Route path="quotations/new" element={<QuotationNewPage />} />
-      <Route path="quotations/:id" element={<QuotationDetailPage />} />
+      <Route path="quotations/new" element={<QuotationForm mode="create" />} />
+      <Route path="quotations/:id" element={<QuotationForm mode="edit" />} />
       <Route path="orders" element={<SalesOrdersListPage />} />
       <Route path="orders/:id" element={<SalesOrderDetailPage />} />
       <Route path="promotional-schemes" element={<PromotionalSchemesListPage />} />

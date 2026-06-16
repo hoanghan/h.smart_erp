@@ -205,6 +205,20 @@ public class QuotationsController(
         }
 
         if (body?.Reason is not null) q.StatusReason = body.Reason;
+
+        // Ghi nhận người duyệt / thời điểm duyệt (creator-approver)
+        if (actionName == "approve")
+        {
+            q.ApproverId = RbacService.GetUserId(User);
+            q.ApprovedAt = DateTimeOffset.UtcNow;
+        }
+        else if (actionName == "reject")
+        {
+            // Từ chối → trả về Nháp, xóa dấu duyệt cũ nếu có
+            q.ApproverId = null;
+            q.ApprovedAt = null;
+        }
+
         await db.SaveChangesAsync();
         return Ok(ToDto(q));
     }
