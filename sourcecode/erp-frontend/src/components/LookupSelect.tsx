@@ -19,6 +19,7 @@ interface LookupSelectProps {
   excludeId?: number
   disabled?: boolean
   autoFocus?: boolean
+  style?: React.CSSProperties
 }
 
 function labelOf(item: LookupItem, labelField: 'name' | 'fullName' | 'shortName'): string {
@@ -38,6 +39,7 @@ export default function LookupSelect({
   excludeId,
   disabled,
   autoFocus,
+  style,
 }: LookupSelectProps) {
   const base = endpoint ?? `/md/${resource}`
   const [options, setOptions] = useState<{ value: number; label: string }[]>([])
@@ -105,6 +107,7 @@ export default function LookupSelect({
       onChange={handleChange}
       autoFocus={autoFocus}
       defaultOpen={autoFocus}
+      style={style}
     />
   )
 }

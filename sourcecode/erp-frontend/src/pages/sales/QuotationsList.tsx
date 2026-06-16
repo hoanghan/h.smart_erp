@@ -65,9 +65,14 @@ export default function QuotationsListPage() {
               onChange={setStatus}
               options={Object.entries(QUOTATION_STATUS_LABELS).map(([value, label]) => ({ value, label }))}
             />
-            <div style={{ width: 240 }}>
-              <LookupSelect resource="partners" labelField="shortName" placeholder="Khách hàng" value={partnerId} onChange={setPartnerId} />
-            </div>
+            <LookupSelect
+              resource="partners"
+              labelField="shortName"
+              placeholder="Khách hàng"
+              value={partnerId}
+              onChange={setPartnerId}
+              style={{ minWidth: 240 }}
+            />
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/sales/quotations/new')}>
               Tạo mới
             </Button>
