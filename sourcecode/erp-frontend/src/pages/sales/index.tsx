@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import SalesWorkspace from './SalesWorkspace'
 import QuotationsListPage from './QuotationsList'
 import QuotationDetailPage from './QuotationDetail'
 import QuotationNewPage from './QuotationNew'
@@ -13,6 +14,7 @@ import PriceCheckPage from './PriceCheckPage'
 export default function SalesPage() {
   return (
     <Routes>
+      <Route index element={<SalesWorkspace />} />
       <Route path="quotations" element={<QuotationsListPage />} />
       <Route path="quotations/new" element={<QuotationNewPage />} />
       <Route path="quotations/:id" element={<QuotationDetailPage />} />
@@ -23,7 +25,6 @@ export default function SalesPage() {
       <Route path="pricing-rules" element={<PricingRulesPage />} />
       <Route path="coupons" element={<CouponsPage />} />
       <Route path="price-check" element={<PriceCheckPage />} />
-      <Route index element={<Navigate to="quotations" replace />} />
     </Routes>
   )
 }

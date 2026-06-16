@@ -61,6 +61,22 @@
   font-size: 12px;
 }
 
+/* Ép mọi ô input lấp đầy cột grid (1fr) -> tất cả input dài bằng nhau.
+   Một số control (Input, Select, LookupSelect) mặc định không kéo full
+   nên trông dài ngắn lệch nhau; ép width:100% để canh đều. */
+.docform-grid-row .docform-field {
+  width: 100%;
+}
+
+.docform-grid-row .docform-field .ant-input,
+.docform-grid-row .docform-field .ant-input-affix-wrapper,
+.docform-grid-row .docform-field .ant-input-number,
+.docform-grid-row .docform-field .ant-picker,
+.docform-grid-row .docform-field .ant-select {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
 /* Span 2 cột (label+field) */
 .docform-span-2 {
   grid-column: span 2;

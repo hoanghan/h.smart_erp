@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { Spin } from 'antd'
 import { useAuthStore } from './stores/auth'
 import AppRouter from './router'
+import { ToastProvider } from './components/Toast'
+import { ConfirmDialogProvider } from './components/ConfirmDialog'
 
 export default function App() {
   const bootstrap = useAuthStore((s) => s.bootstrap)
