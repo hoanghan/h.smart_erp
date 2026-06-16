@@ -1,5 +1,4 @@
 import { DialogComponent } from '@syncfusion/ej2-react-popups'
-import { ButtonComponent } from '@syncfusion/ej2-react-buttons'
 import { useRef } from 'react'
 
 let dialogRef: DialogComponent | null = null

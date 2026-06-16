@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import InventoryWorkspace from './InventoryWorkspace'
 import ReceiptsListPage from './ReceiptsList'
 import IssuesListPage from './IssuesList'

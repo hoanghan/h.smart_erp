@@ -1,4 +1,4 @@
-import { Button, Dropdown, Space } from 'antd'
+import { Button, Dropdown, Space, Tooltip } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   PlusOutlined,
@@ -24,6 +24,10 @@ export interface WorkflowButton {
   onClick: () => void
   type?: 'primary' | 'default' | 'danger'
   loading?: boolean
+  /** Vô hiệu hóa riêng nút này (vd thiếu quyền duyệt) */
+  disabled?: boolean
+  /** Tooltip giải thích khi nút bị mờ */
+  tooltip?: string
 }
 
 interface BottomToolbarProps {
@@ -150,19 +154,24 @@ export default function BottomToolbar({
           </Button>
         </Dropdown>
 
-        {workflowButtons.map((btn, i) => (
-          <Button
-            key={i}
-            size="small"
-            type={btn.type === 'primary' ? 'primary' : 'default'}
-            danger={btn.type === 'danger'}
-            onClick={btn.onClick}
-            loading={btn.loading}
-            disabled={disabled}
-          >
-            {btn.label}
-          </Button>
-        ))}
+        {workflowButtons.map((btn, i) => {
+          const button = (
+            <Button
+              key={i}
+              size="small"
+              type={btn.type === 'primary' ? 'primary' : 'default'}
+              danger={btn.type === 'danger'}
+              onClick={btn.onClick}
+              loading={btn.loading}
+              disabled={disabled || btn.disabled}
+            >
+              {btn.label}
+            </Button>
+          )
+          return btn.tooltip
+            ? <Tooltip key={i} title={btn.tooltip}>{button}</Tooltip>
+            : button
+        })}
 
         {onClose && (
           <Button size="small" icon={<CloseOutlined />} onClick={onClose} title="Đóng">

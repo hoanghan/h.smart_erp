@@ -29,6 +29,15 @@ interface QuotationLinesTabProps {
   onExtend: () => void
   onAmend: () => void
   onReload: () => void
+  /** Mở dialog Import hàng hóa từ Excel */
+  onImport?: () => void
+  /**
+   * Chế độ nháp (tạo mới — chưa có quotationId): không gọi API per-dòng,
+   * thao tác trực tiếp trên mảng draftLines và báo lên cha qua onDraftChange.
+   */
+  draftMode?: boolean
+  draftLines?: QuotationLineIn[]
+  onDraftChange?: (lines: QuotationLineIn[]) => void
 }
 
 /** Tab "Hàng hóa" của báo giá: bảng dòng hàng (sửa nhanh rate/discountPct/qty) + context menu workflow. */
@@ -36,6 +45,7 @@ export default function QuotationLinesTab({
   quotationId, lines, locked, queryKey, status,
   onExportExcel, onWorkflowAction, onShowHistory, onShowStock,
   onMakeSalesOrder, onSetAsLost, onExtend, onAmend, onReload,
+  onImport, draftMode = false, draftLines = [], onDraftChange,
 }: QuotationLinesTabProps) {
   const { message } = AntApp.useApp()
   const queryClient = useQueryClient()
@@ -74,7 +84,7 @@ export default function QuotationLinesTab({
 
   const handleAdd = async () => {
     const values = await form.validateFields()
-    addMutation.mutate({
+    const line: QuotationLineIn = {
       productId: values.productId,
       quantity: values.quantity,
       projectHouse: values.projectHouse || null,
@@ -82,7 +92,13 @@ export default function QuotationLinesTab({
       discountPct: values.discountPct ?? null,
       vatPct: values.vatPct,
       note: values.note || null,
-    })
+    }
+    if (draftMode) {
+      onDraftChange?.([...draftLines, line])
+      form.resetFields()
+    } else {
+      addMutation.mutate(line)
+    }
   }
 
   // Ctrl+I — Thêm dòng cuối
@@ -99,16 +115,49 @@ export default function QuotationLinesTab({
   }, [locked, handleAdd])
 
   const handleCellChange = (rowIndex: number, dataIndex: string, value: unknown) => {
+    if (draftMode) {
+      const next = draftLines.map((l, i) => (i === rowIndex ? { ...l, [dataIndex]: value } : l))
+      onDraftChange?.(next)
+      return
+    }
     const line = lines[rowIndex]
     if (!line) return
     const body: QuotationLineUpdate = { [dataIndex]: value } as QuotationLineUpdate
     updateMutation.mutate({ lineId: line.id, body })
   }
 
+  const handleDeleteLast = () => {
+    if (draftMode) {
+      if (draftLines.length > 0) onDraftChange?.(draftLines.slice(0, -1))
+      return
+    }
+    if (lines.length > 0) deleteMutation.mutate(lines[lines.length - 1].id)
+  }
+
+  // Dòng hiển thị: ở chế độ nháp, dựng từ draftLines (tính amount tạm, chưa có id/orderedQty từ server).
+  const displayRows: LineRow[] = draftMode
+    ? draftLines.map((l, i) => {
+        const rate = l.rate ?? 0
+        const disc = l.discountPct ?? 0
+        return {
+          id: i,
+          productId: l.productId,
+          projectHouse: l.projectHouse ?? null,
+          quantity: l.quantity,
+          vatPct: l.vatPct ?? null,
+          rate: l.rate ?? null,
+          discountPct: l.discountPct ?? null,
+          amount: l.quantity * rate * (1 - disc / 100),
+          orderedQty: 0,
+          note: l.note ?? null,
+        } as LineRow
+      })
+    : (lines as unknown as LineRow[])
+
   const totals = {
-    quantity: lines.reduce((s, l) => s + l.quantity, 0),
-    amount: lines.reduce((s, l) => s + l.amount, 0),
-    orderedQty: lines.reduce((s, l) => s + l.orderedQty, 0),
+    quantity: displayRows.reduce((s, l) => s + (l.quantity as number), 0),
+    amount: displayRows.reduce((s, l) => s + (l.amount as number), 0),
+    orderedQty: displayRows.reduce((s, l) => s + (l.orderedQty as number), 0),
   }
 
   const columns: EditColumn<LineRow>[] = [
@@ -138,35 +187,34 @@ export default function QuotationLinesTab({
       items: [
         { label: 'Thêm', shortcut: 'Ctrl+Alt+I', onClick: handleAdd, disabled: locked },
         { label: 'Thêm dòng cuối', shortcut: 'Ctrl+I', onClick: handleAdd, disabled: locked },
-        {
-          label: 'Xóa', onClick: () => {
-            if (lines.length > 0) deleteMutation.mutate(lines[lines.length - 1].id)
-          }, disabled: locked,
-        },
-        { label: 'Đọc lại dữ liệu', shortcut: 'Ctrl+F5', onClick: onReload },
-        { label: 'Lịch sử thao tác', onClick: onShowHistory },
+        { label: 'Xóa', onClick: handleDeleteLast, disabled: locked },
+        ...(draftMode ? [] : [
+          { label: 'Đọc lại dữ liệu', shortcut: 'Ctrl+F5', onClick: onReload },
+          { label: 'Lịch sử thao tác', onClick: onShowHistory },
+        ]),
       ],
     },
     {
       items: [
-        { label: 'Kết xuất Excel', onClick: onExportExcel },
+        { label: 'Import hàng hóa', onClick: () => onImport?.(), disabled: locked || !onImport },
+        ...(draftMode ? [] : [{ label: 'Kết xuất Excel', onClick: onExportExcel }]),
       ],
     },
-    {
+    // Nhóm hành động workflow chỉ áp dụng khi đã lưu (có quotationId)
+    ...(draftMode ? [] : [{
       items: [
-        { label: 'Gửi báo giá', onClick: () => onWorkflowAction('submit'), disabled: !canSubmit },
+        { label: 'Gửi duyệt', onClick: () => onWorkflowAction('submit'), disabled: !canSubmit },
         { label: 'Tạo đơn hàng', onClick: onMakeSalesOrder, disabled: !canMakeSalesOrder },
         { label: 'Đánh dấu mất báo giá', onClick: onSetAsLost, disabled: !canSetAsLost, danger: true },
         { label: 'Gia hạn báo giá', onClick: onExtend, disabled: !canExtend },
         { label: 'Hủy báo giá', onClick: () => onWorkflowAction('cancel', true), disabled: !canCancel, danger: true },
         { label: 'Tạo bản sửa đổi', onClick: onAmend, disabled: !canAmend },
       ],
-    },
-    {
+    }, {
       items: [
         { label: 'Thông tin tồn kho', onClick: () => { if (lines.length > 0) onShowStock(lines[0].productId) }, disabled: lines.length === 0 },
       ],
-    },
+    }]),
   ]
 
   return (
@@ -174,7 +222,7 @@ export default function QuotationLinesTab({
       <div>
         <EditableGrid<LineRow>
           columns={columns}
-          data={lines as unknown as LineRow[]}
+          data={displayRows}
           rowKey="id"
           locked={locked}
           onCellChange={handleCellChange}
