@@ -619,13 +619,13 @@ public static class SchemaBootstrap
             UPDATE sales.quotation SET status = 'OPEN' WHERE status IN ('APPROVED','ORDER_PENDING');
             UPDATE sales.quotation SET status = 'LOST' WHERE status = 'FAILED';
             UPDATE sales.quotation SET status = 'CANCELLED' WHERE status = 'REJECTED';
-            UPDATE sales.quotation SET status = 'DRAFT' WHERE status IN ('NEW','PRICE_REQUESTED','PRICING','APPROVAL_REQUESTED');
+            UPDATE sales.quotation SET status = 'DRAFT' WHERE status IN ('NEW','PRICE_REQUESTED','PRICING');
             """);
 
         // Them lai check constraint voi bo trang thai moi (ERPNext Selling)
         await db.Database.ExecuteSqlRawAsync("""
             ALTER TABLE sales.quotation ADD CONSTRAINT quotation_status_check
-                CHECK (status IN ('DRAFT','OPEN','ORDERED','LOST','EXPIRED','CANCELLED'));
+                CHECK (status IN ('DRAFT','APPROVAL_REQUESTED','OPEN','ORDERED','LOST','EXPIRED','CANCELLED'));
             """);
 
         // sales.lost_reason + CRUD /md/lost-reasons
